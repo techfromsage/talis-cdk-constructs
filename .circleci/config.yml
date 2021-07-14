@@ -1,0 +1,31 @@
+version: 2.1
+
+executors:
+  default_executor:
+    working_directory: ~/talis-cdk-constructs
+    docker:
+      - image: cimg/node:14.17.3
+        auth:
+          username: $DOCKER_USERNAME
+          password: $DOCKER_PASSWORD
+
+orbs:
+  node: circleci/node@4.5.1
+
+jobs:
+  build:
+    executor: default_executor
+    steps:
+      - checkout
+      - node/install-packages
+      - run:
+          name: Build code
+          command: npm run build
+      - run:
+          name: Run tests
+          command: npm test
+
+workflows:
+  build:
+    jobs:
+      - build
