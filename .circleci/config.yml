@@ -18,7 +18,7 @@ jobs:
     steps:
       - add_ssh_keys:
           fingerprints:
-            - "0b:38:6d:19:b1:30:d5:54:a9:07:29:e1:14:cc:ca:11"
+            - "ee:b4:00:e6:23:5b:55:bb:fd:07:bc:73:9e:f7:89:9c" # shared.aspire@talis.com 'talis-cdk-constructs Deploy Key'
       - checkout
       - node/install-packages
       - run:
