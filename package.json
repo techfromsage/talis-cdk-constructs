@@ -10,7 +10,11 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
-    "test": "jest"
+    "test": "jest",
+    "lint:prettier": "prettier --check .",
+    "lint": "npm run lint:prettier",
+    "format:prettier": "prettier --write .",
+    "format": "npm run format:prettier"
   },
   "devDependencies": {
     "@aws-cdk/assert": "1.109.0",
