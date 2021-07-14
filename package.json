@@ -10,13 +10,23 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
-    "test": "jest"
+    "test": "jest",
+    "lint:prettier": "prettier --check .",
+    "lint:eslint": "eslint . --ext .js,.ts",
+    "lint": "npm run lint:prettier && npm run lint:eslint",
+    "format:prettier": "prettier --write .",
+    "format": "npm run format:prettier"
   },
   "devDependencies": {
     "@aws-cdk/assert": "1.109.0",
     "@types/jest": "^26.0.10",
     "@types/node": "10.17.27",
+    "@typescript-eslint/eslint-plugin": "^4.28.3",
+    "@typescript-eslint/parser": "^4.28.3",
+    "eslint": "^7.30.0",
+    "eslint-config-prettier": "^8.3.0",
     "jest": "^26.4.2",
+    "prettier": "^2.3.2",
     "ts-jest": "^26.2.0",
     "typescript": "~3.9.7"
   },
