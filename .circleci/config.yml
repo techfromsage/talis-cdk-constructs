@@ -16,6 +16,9 @@ jobs:
   build:
     executor: default_executor
     steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "0b:38:6d:19:b1:30:d5:54:a9:07:29:e1:14:cc:ca:11"
       - checkout
       - node/install-packages
       - run:
@@ -35,6 +38,9 @@ jobs:
       - run:
           name: Run tests
           command: npm test
+      - run:
+          name: Semantic Release
+          command: npx semantic-release
 
 workflows:
   build:
