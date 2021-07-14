@@ -1,5 +1,6 @@
 import * as cdk from "@aws-cdk/core";
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface TalisCdkConstructsProps {
   // Define construct properties here
 }
