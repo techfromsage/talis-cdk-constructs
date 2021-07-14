@@ -15,10 +15,13 @@
     "lint:eslint": "eslint . --ext .js,.ts",
     "lint": "npm run lint:prettier && npm run lint:eslint",
     "format:prettier": "prettier --write .",
-    "format": "npm run format:prettier"
+    "format": "npm run format:prettier",
+    "prepare": "npm run build"
   },
   "devDependencies": {
     "@aws-cdk/assert": "1.113.0",
+    "@commitlint/cli": "^12.1.4",
+    "@commitlint/config-conventional": "^12.1.4",
     "@types/jest": "^26.0.10",
     "@types/node": "10.17.27",
     "@typescript-eslint/eslint-plugin": "^4.28.3",
@@ -27,6 +30,7 @@
     "eslint-config-prettier": "^8.3.0",
     "jest": "^26.4.2",
     "prettier": "^2.3.2",
+    "semantic-release": "^17.4.4",
     "ts-jest": "^26.2.0",
     "typescript": "~3.9.7"
   },
