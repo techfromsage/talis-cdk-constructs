@@ -1,12 +1,23 @@
-# Welcome to your CDK TypeScript Construct Library project!
+# Talis CDK constructs
 
-You should explore the contents of this project. It demonstrates a CDK Construct Library that includes a construct (`TalisCdkConstructs`)
-which contains an Amazon SQS queue that is subscribed to an Amazon SNS topic.
+A Talis library of AWS CDK constructs, implemented in Typescript.
 
-The construct defines an interface (`TalisCdkConstructsProps`) to configure the visibility timeout of the queue.
+## Contributing
+
+This project follows [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/), and enforces this choice during the build and release cycle.
+
+Builds are conducted by CircleCI, and upon successful build of the `main` branch, [`semantic-release`](https://semantic-release.gitbook.io/semantic-release/) will generate a new release, an appropriate version (based on commits), and release-notes to cover the content of the commit log.
+
+## Available constructs
+
+- CDN Site Hosting constructs
+  - `CdnSiteHostingConstruct` for static-site or single-page application hosting in S3 via CloudFront.
+  - `CdnSiteHostingWithDnsConstruct` for static-site or single-page application hosting in S3 via CloudFront, with DNS record provisioning
 
 ## Useful commands
 
 - `npm run build` compile typescript to js
 - `npm run watch` watch for changes and compile
 - `npm run test` perform the jest unit tests
+- `npm run lint` will check code quality and style guidelines (using ESlint and Prettier)
+- `npm run format` will format the code (using Prettier)
