@@ -19,6 +19,8 @@
   },
   "devDependencies": {
     "@aws-cdk/assert": "1.113.0",
+    "@commitlint/cli": "^12.1.4",
+    "@commitlint/config-conventional": "^12.1.4",
     "@types/jest": "^26.0.10",
     "@types/node": "10.17.27",
     "@typescript-eslint/eslint-plugin": "^4.28.3",
