@@ -19,6 +19,9 @@ jobs:
       - checkout
       - node/install-packages
       - run:
+          name: Lint code before building, to lint only source files
+          command: npm run lint
+      - run:
           name: Build code
           command: npm run build
       - run:
