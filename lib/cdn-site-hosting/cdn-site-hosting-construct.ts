@@ -88,15 +88,22 @@ export class CdnSiteHostingConstruct extends cdk.Construct {
       // multiple sources with granular cache and invalidation control
       props.sourcesWithDeploymentOptions.forEach(
         ({ sources, distributionPathsToInvalidate, cacheControl }, index) => {
+          const isInvalidationRequired =
+            distributionPathsToInvalidate &&
+            distributionPathsToInvalidate.length > 0;
           new s3deploy.BucketDeployment(
             this,
-            `DeployWithInvalidationControl[${index}]`,
+            `DeployWithInvalidationControl-${index}`,
             {
               cacheControl,
               sources: sources,
               destinationBucket: this.s3Bucket,
-              distribution: this.cloudfrontWebDistribution,
-              distributionPaths: distributionPathsToInvalidate,
+              distribution: isInvalidationRequired
+                ? this.cloudfrontWebDistribution
+                : undefined,
+              distributionPaths: isInvalidationRequired
+                ? distributionPathsToInvalidate
+                : undefined,
             }
           );
         }
@@ -107,7 +114,7 @@ export class CdnSiteHostingConstruct extends cdk.Construct {
         sources: props.sources,
         destinationBucket: this.s3Bucket,
         distribution: this.cloudfrontWebDistribution,
-        distributionPaths: ['/*']
+        distributionPaths: ["/*"],
       });
     }
   }
