@@ -85,6 +85,9 @@ export class CdnSiteHostingConstruct extends cdk.Construct {
 
     // Deploy site contents to S3 bucket
     if (props.sourcesWithDeploymentOptions) {
+      const isSingleDeploymentStep =
+        props.sourcesWithDeploymentOptions.length === 1;
+
       // multiple sources with granular cache and invalidation control
       props.sourcesWithDeploymentOptions.forEach(
         (
@@ -95,29 +98,25 @@ export class CdnSiteHostingConstruct extends cdk.Construct {
             distributionPathsToInvalidate &&
             distributionPathsToInvalidate.length > 0;
 
-          const suffix = name ? name : `${index}`;
+          const nameOrIndex = name ? name : `${index}`;
 
-          new s3deploy.BucketDeployment(
-            this,
-            `DeployWithInvalidationControl-${suffix}`,
-            {
-              cacheControl,
-              sources: sources,
-              prune: false,
-              destinationBucket: this.s3Bucket,
-              distribution: isInvalidationRequired
-                ? this.cloudfrontWebDistribution
-                : undefined,
-              distributionPaths: isInvalidationRequired
-                ? distributionPathsToInvalidate
-                : undefined,
-            }
-          );
+          new s3deploy.BucketDeployment(this, `CustomDeploy${nameOrIndex}`, {
+            cacheControl,
+            sources: sources,
+            prune: isSingleDeploymentStep,
+            destinationBucket: this.s3Bucket,
+            distribution: isInvalidationRequired
+              ? this.cloudfrontWebDistribution
+              : undefined,
+            distributionPaths: isInvalidationRequired
+              ? distributionPathsToInvalidate
+              : undefined,
+          });
         }
       );
     } else if (props.sources) {
       // multiple sources, with default cache-control and wholesale invalidation
-      new s3deploy.BucketDeployment(this, "DeployWithFullInvalidation", {
+      new s3deploy.BucketDeployment(this, "DeployAndInvalidate", {
         sources: props.sources,
         destinationBucket: this.s3Bucket,
         distribution: this.cloudfrontWebDistribution,
