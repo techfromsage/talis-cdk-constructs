@@ -87,16 +87,23 @@ export class CdnSiteHostingConstruct extends cdk.Construct {
     if (props.sourcesWithDeploymentOptions) {
       // multiple sources with granular cache and invalidation control
       props.sourcesWithDeploymentOptions.forEach(
-        ({ sources, distributionPathsToInvalidate, cacheControl }, index) => {
+        (
+          { name, sources, distributionPathsToInvalidate, cacheControl },
+          index
+        ) => {
           const isInvalidationRequired =
             distributionPathsToInvalidate &&
             distributionPathsToInvalidate.length > 0;
+
+          const suffix = name ? name : `${index}`;
+
           new s3deploy.BucketDeployment(
             this,
-            `DeployWithInvalidationControl-${index}`,
+            `DeployWithInvalidationControl-${suffix}`,
             {
               cacheControl,
               sources: sources,
+              prune: false,
               destinationBucket: this.s3Bucket,
               distribution: isInvalidationRequired
                 ? this.cloudfrontWebDistribution
