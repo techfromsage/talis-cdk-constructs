@@ -19,7 +19,7 @@
     "prepare": "npm run build"
   },
   "devDependencies": {
-    "@aws-cdk/assert": "1.113.0",
+    "@aws-cdk/assert": "^1.113.0",
     "@commitlint/cli": "^12.1.4",
     "@commitlint/config-conventional": "^12.1.4",
     "@types/jest": "^26.0.10",
@@ -35,7 +35,7 @@
     "typescript": "~3.9.7"
   },
   "peerDependencies": {
-    "@aws-cdk/core": "1.113.0"
+    "@aws-cdk/core": "^1.113.0"
   },
   "dependencies": {
     "@aws-cdk/aws-certificatemanager": "^1.113.0",
@@ -44,6 +44,6 @@
     "@aws-cdk/aws-route53-targets": "^1.113.0",
     "@aws-cdk/aws-s3": "^1.113.0",
     "@aws-cdk/aws-s3-deployment": "^1.113.0",
-    "@aws-cdk/core": "1.113.0"
+    "@aws-cdk/core": "^1.113.0"
   }
 }
