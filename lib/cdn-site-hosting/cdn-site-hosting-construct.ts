@@ -4,11 +4,16 @@ import * as cloudfront from "@aws-cdk/aws-cloudfront";
 import * as s3 from "@aws-cdk/aws-s3";
 import * as s3deploy from "@aws-cdk/aws-s3-deployment";
 import { getSiteDomain } from "./utils";
-import { CommonCdnSiteHostingProps } from "./cdn-site-hosting-props";
+import { RemovalPolicy } from "@aws-cdk/core";
 
-export interface CdnSiteHostingConstructProps
-  extends CommonCdnSiteHostingProps {
+export interface CdnSiteHostingConstructProps {
   certificateArn: string;
+  domainName: string;
+  removalPolicy: cdk.RemovalPolicy;
+  siteSubDomain: string;
+  sources: s3deploy.ISource[];
+  websiteErrorDocument: string;
+  websiteIndexDocument: string;
 }
 
 /**
@@ -30,8 +35,6 @@ export class CdnSiteHostingConstruct extends cdk.Construct {
     props: CdnSiteHostingConstructProps
   ) {
     super(scope, id);
-
-    validateProps(props);
 
     const siteDomain = getSiteDomain(props);
 
@@ -56,7 +59,7 @@ export class CdnSiteHostingConstruct extends cdk.Construct {
       websiteErrorDocument: props.websiteErrorDocument,
       publicReadAccess: true,
       removalPolicy: props.removalPolicy,
-      autoDeleteObjects: props.removalPolicy === cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: props.removalPolicy === RemovalPolicy.DESTROY,
     });
     new cdk.CfnOutput(this, "Bucket", { value: this.s3Bucket.bucketName });
 
@@ -84,73 +87,11 @@ export class CdnSiteHostingConstruct extends cdk.Construct {
     });
 
     // Deploy site contents to S3 bucket
-    if (props.sourcesWithDeploymentOptions) {
-      const isSingleDeploymentStep =
-        props.sourcesWithDeploymentOptions.length === 1;
-
-      // multiple sources with granular cache and invalidation control
-      props.sourcesWithDeploymentOptions.forEach(
-        (
-          { name, sources, distributionPathsToInvalidate, cacheControl },
-          index
-        ) => {
-          const isInvalidationRequired =
-            distributionPathsToInvalidate &&
-            distributionPathsToInvalidate.length > 0;
-
-          const nameOrIndex = name ? name : `${index}`;
-
-          new s3deploy.BucketDeployment(this, `CustomDeploy${nameOrIndex}`, {
-            cacheControl,
-            sources: sources,
-            prune: isSingleDeploymentStep,
-            destinationBucket: this.s3Bucket,
-            distribution: isInvalidationRequired
-              ? this.cloudfrontWebDistribution
-              : undefined,
-            distributionPaths: isInvalidationRequired
-              ? distributionPathsToInvalidate
-              : undefined,
-          });
-        }
-      );
-    } else if (props.sources) {
-      // multiple sources, with default cache-control and wholesale invalidation
-      new s3deploy.BucketDeployment(this, "DeployAndInvalidate", {
-        sources: props.sources,
-        destinationBucket: this.s3Bucket,
-        distribution: this.cloudfrontWebDistribution,
-        distributionPaths: ["/*"],
-      });
-    }
-  }
-}
-
-function validateProps(props: CdnSiteHostingConstructProps): void {
-  const { sources, sourcesWithDeploymentOptions } = props;
-
-  // validate source specfications
-  if (!sources && !sourcesWithDeploymentOptions) {
-    throw new Error(
-      "Either `sources` or `sourcesWithDeploymentOptions` must be specified"
-    );
-  } else if (sources && sourcesWithDeploymentOptions) {
-    throw new Error(
-      "Either `sources` or `sourcesWithDeploymentOptions` may be specified, but not both."
-    );
-  } else if (
-    sourcesWithDeploymentOptions &&
-    sourcesWithDeploymentOptions.length === 0
-  ) {
-    throw new Error(
-      "If specified, `sourcesWithDeploymentOptions` cannot be empty"
-    );
-  } else if (
-    sourcesWithDeploymentOptions &&
-    sourcesWithDeploymentOptions.some(({ sources }) => sources.length === 0)
-  ) {
-    throw new Error("`sourcesWithDeploymentOptions.sources` cannot be empty");
-  } else if (sources && sources.length === 0) {
-    throw new Error("If specified, `sources` cannot be empty");
+    new s3deploy.BucketDeployment(this, "DeployWithInvalidation", {
+      sources: props.sources,
+      destinationBucket: this.s3Bucket,
+      distribution: this.cloudfrontWebDistribution,
+      distributionPaths: ["/*"],
+    });
   }
 }

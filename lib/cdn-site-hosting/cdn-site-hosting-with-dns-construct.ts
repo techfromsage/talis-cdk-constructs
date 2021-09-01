@@ -2,11 +2,18 @@ import * as cdk from "@aws-cdk/core";
 import * as certificatemanager from "@aws-cdk/aws-certificatemanager";
 import * as route53 from "@aws-cdk/aws-route53";
 import * as targets from "@aws-cdk/aws-route53-targets/lib";
+import * as s3deploy from "@aws-cdk/aws-s3-deployment";
 import { CdnSiteHostingConstruct } from "./cdn-site-hosting-construct";
 import { getSiteDomain } from "./utils";
-import { CommonCdnSiteHostingProps } from "./cdn-site-hosting-props";
 
-export type CdnSiteHostingWithDnsConstructProps = CommonCdnSiteHostingProps;
+export interface CdnSiteHostingWithDnsConstructProps {
+  domainName: string;
+  removalPolicy: cdk.RemovalPolicy;
+  siteSubDomain: string;
+  sources: s3deploy.ISource[];
+  websiteErrorDocument: string;
+  websiteIndexDocument: string;
+}
 
 /**
  * Establishes infrastructure to host a static-site or single-page-application in S3 via CloudFront,
