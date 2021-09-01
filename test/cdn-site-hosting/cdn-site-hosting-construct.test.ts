@@ -7,10 +7,7 @@ import {
 import * as cdk from "@aws-cdk/core";
 import { Environment, RemovalPolicy, Stack } from "@aws-cdk/core";
 import * as s3deploy from "@aws-cdk/aws-s3-deployment";
-import {
-  CdnSiteHostingConstruct,
-  CdnSiteHostingConstructProps,
-} from "../../lib/cdn-site-hosting";
+import { CdnSiteHostingConstruct } from "../../lib/cdn-site-hosting";
 
 // hosted-zone requires an environment be attached to the Stack
 const testEnv: Environment = {
@@ -26,12 +23,11 @@ const fakeFqdn = `${fakeSiteSubDomain}.${fakeDomain}`;
 describe("CdnSiteHostingConstruct", () => {
   describe("With a provisioned Stack", () => {
     let stack: Stack;
-    let construct: CdnSiteHostingConstruct;
 
     beforeAll(() => {
       const app = new cdk.App();
       stack = new cdk.Stack(app, "TestStack", { env: testEnv });
-      construct = new CdnSiteHostingConstruct(stack, "MyTestConstruct", {
+      new CdnSiteHostingConstruct(stack, "MyTestConstruct", {
         certificateArn: fakeCertificateArn,
         siteSubDomain: fakeSiteSubDomain,
         domainName: fakeDomain,

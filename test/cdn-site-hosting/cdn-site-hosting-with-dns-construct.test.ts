@@ -14,7 +14,6 @@ const testEnv: Environment = {
   region: "eu-west-1",
   account: "abcdefg12345",
 };
-const fakeCertificateArn = `arn:aws:acm:${testEnv.region}:${testEnv.account}:certificate/123456789012-1234-1234-1234-12345678`;
 
 const fakeSiteSubDomain = "test";
 const fakeDomain = "example.com";
@@ -23,12 +22,11 @@ const fakeFqdn = `${fakeSiteSubDomain}.${fakeDomain}`;
 describe("CdnSiteHostingWithDnsConstruct", () => {
   describe("With a provisioned Stack", () => {
     let stack: Stack;
-    let construct: CdnSiteHostingWithDnsConstruct;
 
     beforeAll(() => {
       const app = new cdk.App();
       stack = new cdk.Stack(app, "TestStack", { env: testEnv });
-      construct = new CdnSiteHostingWithDnsConstruct(stack, "MyTestConstruct", {
+      new CdnSiteHostingWithDnsConstruct(stack, "MyTestConstruct", {
         siteSubDomain: fakeSiteSubDomain,
         domainName: fakeDomain,
         removalPolicy: RemovalPolicy.DESTROY,
