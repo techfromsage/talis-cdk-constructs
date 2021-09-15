@@ -80,7 +80,6 @@ export class CdnSiteHostingConstruct extends cdk.Construct {
         errorConfigurations: [
           {
             errorCode: 404,
-            errorCachingMinTtl: 10,
             responseCode: 200,
             responsePagePath: "/index.html",
           },
