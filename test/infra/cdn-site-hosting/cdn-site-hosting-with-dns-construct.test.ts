@@ -51,7 +51,6 @@ describe("CdnSiteHostingWithDnsConstruct", () => {
         haveResource("AWS::S3::Bucket", {
           BucketName: fakeFqdn,
           WebsiteConfiguration: {
-            ErrorDocument: "error.html",
             IndexDocument: "index.html",
           },
         })
