@@ -12,6 +12,7 @@ export interface CommonCdnSiteHostingProps {
   domainName: string;
   removalPolicy: cdk.RemovalPolicy;
   siteSubDomain: string;
+  isRoutedSpa?: boolean;
   sources?: s3deploy.ISource[];
   sourcesWithDeploymentOptions?: SourcesWithDeploymentOptions[];
   websiteErrorDocument: string;

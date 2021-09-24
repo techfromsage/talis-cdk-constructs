@@ -53,7 +53,9 @@ export class CdnSiteHostingConstruct extends cdk.Construct {
     this.s3Bucket = new s3.Bucket(this, "SiteBucket", {
       bucketName: siteDomain,
       websiteIndexDocument: props.websiteIndexDocument,
-      websiteErrorDocument: props.websiteErrorDocument,
+      websiteErrorDocument: props.isRoutedSpa
+        ? props.websiteErrorDocument
+        : undefined,
       publicReadAccess: true,
       removalPolicy: props.removalPolicy,
       autoDeleteObjects: props.removalPolicy === cdk.RemovalPolicy.DESTROY,
@@ -77,13 +79,15 @@ export class CdnSiteHostingConstruct extends cdk.Construct {
             behaviors: [{ isDefaultBehavior: true }],
           },
         ],
-        errorConfigurations: [
-          {
-            errorCode: 404,
-            responseCode: 200,
-            responsePagePath: "/index.html",
-          },
-        ],
+        errorConfigurations: props.isRoutedSpa
+          ? [
+              {
+                errorCode: 404,
+                responseCode: 200,
+                responsePagePath: "/index.html",
+              },
+            ]
+          : undefined,
       }
     );
     new cdk.CfnOutput(this, "DistributionId", {
