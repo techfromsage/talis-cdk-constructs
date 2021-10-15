@@ -85,7 +85,7 @@ export class LambdaWorker extends cdk.Construct {
 
     // Add alerting
 
-    /* const alarmAction = new cloudwatchActions.SnsAction(props.alarmTopic); */
+    const alarmAction = new cloudwatchActions.SnsAction(props.alarmTopic);
 
     // Add an alarm on any messages appearing on the DLQ
     const dlqMessagesVisableMetric = lambdaDLQ.metric("ApproximateNumberOfMessagesVisible");
@@ -100,8 +100,8 @@ export class LambdaWorker extends cdk.Construct {
       threshold: 1,
       comparisonOperator: cloudwatch.ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
     });
-    /* dlqMessagesVisable.addAlarmAction(alarmAction); */
-    /* dlqMessagesVisable.addOkAction(alarmAction); */
+    dlqMessagesVisable.addAlarmAction(alarmAction);
+    dlqMessagesVisable.addOkAction(alarmAction);
     // TODO: Treat missing data = ignore
   }
 }

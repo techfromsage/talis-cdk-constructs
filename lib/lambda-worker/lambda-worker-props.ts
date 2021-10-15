@@ -32,7 +32,7 @@ export interface LambdaWorkerProps {
   }
 
   // SNS Topic all alarm actions should be sent to
-  /* alarmTopic: sns.ITopic; */
+  alarmTopic: sns.ITopic;
 
   // Optionally specify a topic to subscribe the lambda's
   // SQS queue to.

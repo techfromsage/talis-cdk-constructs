@@ -21,6 +21,8 @@ export class SimpleLambdaWorkerStack extends cdk.Stack {
     // "File" topic is created which all workers subscribe to.
     const topic = new sns.Topic(this, `${prefix}SimpleLambdaWorker-topic`, {topicName: 'development-ml-SimpleLambdaWorker-topic'});
 
+    // LambdaWorker requires an existing SNS topic to publish alarms to.
+    const alarmTopic = new sns.Topic(this, `${prefix}SimpleLambdaWorker-alarm`, {topicName: 'development-ml-SimpleLambdaWorker-alarm'});
 
     // Create the Lambda
     const worker = new LambdaWorker(this, `${prefix}SimpleLambdaWorker`, {
@@ -37,6 +39,7 @@ export class SimpleLambdaWorkerStack extends cdk.Stack {
       queueProps: {
         maxReceiveCount: 3,
       },
+      alarmTopic: alarmTopic,
       topic: topic,
     });
   }
