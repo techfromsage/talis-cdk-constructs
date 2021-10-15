@@ -46,4 +46,6 @@ export interface LambdaWorkerProps {
 
   // Optionally specify a topic to subscribe the lambda's SQS queue to.
   topic?: sns.Topic;
+  
+  filterPolicy?: {};
 }

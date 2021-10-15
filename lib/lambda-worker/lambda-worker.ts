@@ -21,18 +21,28 @@ export class LambdaWorker extends cdk.Construct {
     super(scope, id);
 
     // Lambda settings
-    const memorySize = props.lambdaProps.memorySize && props.lambdaProps.memorySize > MINIMUM_MEMORY_SIZE ? props.lambdaProps.memorySize : MINIMUM_MEMORY_SIZE;
+    const memorySize = props.lambdaProps.memorySize && props.lambdaProps.memorySize > MINIMUM_MEMORY_SIZE ?
+      props.lambdaProps.memorySize : MINIMUM_MEMORY_SIZE;
+
     const lambdaTimeout = props.lambdaProps.timeout && props.lambdaProps.timeout.toSeconds() > MINIMUM_LAMBDA_TIMEOUT.toSeconds() ?
       props.lambdaProps.timeout : MINIMUM_LAMBDA_TIMEOUT;
 
     // Queue settings
     const maxReceiveCount = props.queueProps.maxReceiveCount ? props.queueProps.maxReceiveCount : DEFAULT_MAX_RECEIVE_COUNT;
-// TODO Work in seconds
-    const queueTimeout = cdk.Duration.minutes(maxReceiveCount * lambdaTimeout.toMinutes());
+
+    const queueTimeout = cdk.Duration.seconds(maxReceiveCount * lambdaTimeout.toSeconds());
+
     const approximateAgeOfOldestMessageThreshold = props.queueProps.approximateAgeOfOldestMessageThreshold ?
       props.queueProps.approximateAgeOfOldestMessageThreshold : DEFAULT_APPROX_AGE_OLDEST_MESSAGE_THRESHOLD;
+
     const approximateNumberOfMessagesVisibleThreshold = props.queueProps.approximateNumberOfMessagesVisibleThreshold ?
       props.queueProps.approximateNumberOfMessagesVisibleThreshold : DEFAULT_APPROX_NUM_MESSAGES_VISIBLE_THRESHOLD;
+
+    // Topic Subscription Settings
+    let subscriptionProps = {};
+    if (props.filterPolicy) {
+      subscriptionProps = { filterPolicy: props.filterPolicy };
+    }
 
     // Create both the main queue and the dead letter queue
     const lambdaDLQ = new sqs.Queue(
@@ -43,6 +53,7 @@ export class LambdaWorker extends cdk.Construct {
         visibilityTimeout: queueTimeout,
       },
     );
+
     const lambdaQueue = new sqs.Queue(
       this,
       `${props.name}-queue`,
@@ -56,7 +67,7 @@ export class LambdaWorker extends cdk.Construct {
     // If we have specified a topic, then subscribe
     // the main queue to the topic.
     if (props.topic) {
-      props.topic.addSubscription(new subs.SqsSubscription(lambdaQueue));
+      props.topic.addSubscription(new subs.SqsSubscription(lambdaQueue, subscriptionProps));
     }
 
     // Create the lambda

@@ -22,6 +22,7 @@ export class SimpleLambdaWorkerStack extends cdk.Stack {
     const topic = new sns.Topic(this, `${prefix}SimpleLambdaWorker-topic`, {topicName: 'development-ml-SimpleLambdaWorker-topic'});
 
     // LambdaWorker requires an existing SNS topic to publish alarms to.
+// TODO : can we pull in this alarm which is defined in terraform?
     const alarmTopic = new sns.Topic(this, `${prefix}SimpleLambdaWorker-alarm`, {topicName: 'development-ml-SimpleLambdaWorker-alarm'});
 
     // Create the Lambda
@@ -40,7 +41,24 @@ export class SimpleLambdaWorkerStack extends cdk.Stack {
         maxReceiveCount: 3,
       },
       alarmTopic: alarmTopic,
+
+      // Subscribing to a topic is optional
       topic: topic,
+      // Without a filterPolicy the subscription will receive all messages
+      // An optional filterPolicy can be aplied so only specific messages are received
+      // This example is a real example from Depot's Pub/Sub architecture where we want messages containing:
+      // { action: "COMPELTED", output_type: "DOCUMENT", mime_type: "application/pdf"
+      filterPolicy: {
+        action: sns.SubscriptionFilter.stringFilter({
+            allowlist: ['COMPLETED'],
+        }),
+        output_type: sns.SubscriptionFilter.stringFilter({
+            allowlist: ['DOCUMENT'],
+        }),
+        mime_type: sns.SubscriptionFilter.stringFilter({
+            allowlist: ['application/pdf'],
+        }),
+      }
     });
   }
 }
