@@ -22,7 +22,8 @@ export class SimpleLambdaWorkerStack extends cdk.Stack {
     const topic = new sns.Topic(this, `${prefix}SimpleLambdaWorker-topic`, {topicName: 'development-ml-SimpleLambdaWorker-topic'});
 
     // LambdaWorker requires an existing SNS topic to publish alarms to.
-// TODO : can we pull in this alarm which is defined in terraform?
+    // TODO : A real app would not create this topic which is already created by terraform.
+    // Can we pull in this alarm which is defined in terraform as an example of how to do that
     const alarmTopic = new sns.Topic(this, `${prefix}SimpleLambdaWorker-alarm`, {topicName: 'development-ml-SimpleLambdaWorker-alarm'});
 
     // Create the Lambda
