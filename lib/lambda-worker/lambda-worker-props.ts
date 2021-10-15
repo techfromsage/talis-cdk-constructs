@@ -8,12 +8,13 @@ export interface LambdaWorkerProps {
   name: string;
 
   // Lambda Properties
+  // Documented here https://docs.aws.amazon.com/cdk/api/latest/docs/@aws-cdk_aws-lambda-nodejs.NodejsFunctionProps.html
   lambdaProps: {
     description?: string,
     handler: string,
     entry: string,
     environment?: {},
-    memorySize: number,
+    memorySize: number, // LambdaWorker will set a minimum memory size of 1024
     reservedConcurrentExecutions?: number,
     retryAtempts?: number,
     role?: iam.IRole,
@@ -29,6 +30,9 @@ export interface LambdaWorkerProps {
     // going to the DLQ. This will default to 5
     maxReceiveCount?: number;
   }
+
+  // SNS Topic all alarm actions should be sent to
+  /* alarmTopic: sns.ITopic; */
 
   // Optionally specify a topic to subscribe the lambda's
   // SQS queue to.

@@ -1,5 +1,6 @@
 import * as cdk from '@aws-cdk/core';
 import * as cloudwatch from '@aws-cdk/aws-cloudwatch';
+import * as cloudwatchActions from '@aws-cdk/aws-cloudwatch-actions';
 import * as eventSource from '@aws-cdk/aws-lambda-event-sources';
 import * as lambda from '@aws-cdk/aws-lambda';
 import * as lambdaNodeJs from '@aws-cdk/aws-lambda-nodejs';
@@ -17,11 +18,12 @@ export class LambdaWorker extends cdk.Construct {
   constructor(scope: cdk.Construct, id: string, props: LambdaWorkerProps) {
     super(scope, id);
 
-    // Validate and set values to be used to create lambda
+    // Lambda settings
     const memorySize = props.lambdaProps.memorySize && props.lambdaProps.memorySize > MINIMUM_MEMORY_SIZE ? props.lambdaProps.memorySize : MINIMUM_MEMORY_SIZE;
-    const lambdaTimeout = props.lambdaProps.timeout && props.lambdaProps.timeout.toSeconds() > MINIMUM_LAMBDA_TIMEOUT.toSeconds() ? props.lambdaProps.timeout : MINIMUM_LAMBDA_TIMEOUT;
+    const lambdaTimeout = props.lambdaProps.timeout && props.lambdaProps.timeout.toSeconds() > MINIMUM_LAMBDA_TIMEOUT.toSeconds() ?
+      props.lambdaProps.timeout : MINIMUM_LAMBDA_TIMEOUT;
 
-    // Validate and set values to be used to create queues
+    // Queue settings
     const maxReceiveCount = props.queueProps.maxReceiveCount ? props.queueProps.maxReceiveCount : DEFAULT_MAX_RECEIVE_COUNT;
     const queueTimeout = cdk.Duration.minutes(maxReceiveCount * lambdaTimeout.toMinutes());
 
@@ -55,6 +57,7 @@ export class LambdaWorker extends cdk.Construct {
       functionName: `${props.name}`,
 
       // Pass through props from lambda props object
+      // Documented here https://docs.aws.amazon.com/cdk/api/latest/docs/@aws-cdk_aws-lambda-nodejs.NodejsFunctionProps.html
       entry: props.lambdaProps.entry,
       handler: props.lambdaProps.handler,
       description: props.lambdaProps.description,
@@ -82,9 +85,11 @@ export class LambdaWorker extends cdk.Construct {
 
     // Add alerting
 
+    /* const alarmAction = new cloudwatchActions.SnsAction(props.alarmTopic); */
+
     // Add an alarm on any messages appearing on the DLQ
     const dlqMessagesVisableMetric = lambdaDLQ.metric("ApproximateNumberOfMessagesVisible");
-    /* const dlqMessagesVisable = */ new cloudwatch.Alarm(this, `${props.name}-dlq-messages-visable-alarm`, {
+    const dlqMessagesVisable = new cloudwatch.Alarm(this, `${props.name}-dlq-messages-visable-alarm`, {
       alarmName: `${props.name}-dlq-messages-visable-alarm`,
       alarmDescription: `Alert when the lambda worker fails to process a message and the message appears on the DLQ`,
       actionsEnabled: true,
@@ -95,5 +100,8 @@ export class LambdaWorker extends cdk.Construct {
       threshold: 1,
       comparisonOperator: cloudwatch.ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
     });
+    /* dlqMessagesVisable.addAlarmAction(alarmAction); */
+    /* dlqMessagesVisable.addOkAction(alarmAction); */
+    // TODO: Treat missing data = ignore
   }
 }
