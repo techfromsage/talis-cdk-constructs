@@ -13,7 +13,8 @@ export interface LambdaWorkerProps {
     description?: string,
     handler: string,
     entry: string,
-    environment?: {},
+    environment?: { },
+    /* environment?: { [string]: string }, */
     memorySize: number, // LambdaWorker will set a minimum memory size of 1024
     reservedConcurrentExecutions?: number,
     retryAtempts?: number,

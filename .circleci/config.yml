@@ -13,6 +13,10 @@ orbs:
   node: circleci/node@4.5.1
 
 jobs:
+  echo_build_number:
+    machine: true
+    steps:
+      - echo_build_number
   build:
     executor: default_executor
     steps:
@@ -26,19 +30,21 @@ jobs:
           command: |
             echo 'export COMMIT_MESSAGE=$(git log -1 --pretty=format:"%s")' >> $BASH_ENV
             source $BASH_ENV
-      # TODO: Move this to a master build step - not for branch builds
-      # - run:
-      #     name: Lint commit message
-      #     command: echo "$COMMIT_MESSAGE" | npx commitlint
-      - run:
-          name: Lint code before building, to lint only source files
-          command: npm run lint
       - run:
           name: Build code
           command: npm run build
       - run:
           name: Run tests
           command: npm test
+  master-build:
+    executor: default_executor
+    steps:
+      - run:
+          name: Lint commit message
+          command: echo "$COMMIT_MESSAGE" | npx commitlint
+      - run:
+          name: Lint code to lint only source files
+          command: npm run lint
       - run:
           name: Semantic Release
           command: npx semantic-release
@@ -46,4 +52,16 @@ jobs:
 workflows:
   build:
     jobs:
+      - echo_build_number
+      - be_kind_to_your_colleagues:
+          type: approval
+          filters:
+            branches:
+              ignore:
+                - master
       - build
+      - master-build:
+          filters:
+            branches:
+              ignore:
+                - master

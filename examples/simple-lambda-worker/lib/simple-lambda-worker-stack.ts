@@ -27,7 +27,7 @@ export class SimpleLambdaWorkerStack extends cdk.Stack {
     const alarmTopic = new sns.Topic(this, `${prefix}SimpleLambdaWorker-alarm`, {topicName: 'development-ml-SimpleLambdaWorker-alarm'});
 
     // Create the Lambda
-    const worker = new LambdaWorker(this, `${prefix}SimpleLambdaWorker`, {
+    /* const worker = */ new LambdaWorker(this, `${prefix}SimpleLambdaWorker`, {
       name: `${prefix}SimpleLambdaWorker`,
       lambdaProps: {
         environment: {
