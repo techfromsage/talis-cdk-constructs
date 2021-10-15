@@ -41,6 +41,9 @@ jobs:
           name: Build code
           command: npm run build
       - run:
+          name: Lint code to lint only source files
+          command: npm run lint
+      - run:
           name: Run tests
           command: npm test
   master-build:
@@ -49,9 +52,6 @@ jobs:
       - run:
           name: Lint commit message
           command: echo "$COMMIT_MESSAGE" | npx commitlint
-      - run:
-          name: Lint code to lint only source files
-          command: npm run lint
       - run:
           name: Semantic Release
           command: npx semantic-release
