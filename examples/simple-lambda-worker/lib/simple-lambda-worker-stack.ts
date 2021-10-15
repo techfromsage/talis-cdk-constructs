@@ -29,7 +29,7 @@ export class SimpleLambdaWorkerStack extends cdk.Stack {
       name: `${prefix}SimpleLambdaWorker`,
       lambdaProps: {
         environment: {
-          EXAMPLE_ENV_VAR: 'some value',
+          EXAMPLE_ENV_VAR: 'example value',
         },
         entry: 'src/lambda/simple-worker.js',
         handler: 'simpleLambdaWorker',

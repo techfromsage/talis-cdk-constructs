@@ -29,12 +29,21 @@ export interface LambdaWorkerProps {
     // The maximum number of times a message is re-tried before
     // going to the DLQ. This will default to 5
     maxReceiveCount?: number;
+
+    // The threshold for age of oldest message alarm
+    // i.e. An alarm will be triggered when messages have not been processed
+    // within this duration.
+    // This will default to 1 hour.
+    approximateAgeOfOldestMessageThreshold?: cdk.Duration;
+    
+    // The threshold for the alarm on the ApproximateNumberOfMessagesVisible metric
+    // i.e. An alarm will be triggered if more than this number of messages is on the queue
+    approximateNumberOfMessagesVisibleThreshold? : number;
   }
 
   // SNS Topic all alarm actions should be sent to
   alarmTopic: sns.ITopic;
 
-  // Optionally specify a topic to subscribe the lambda's
-  // SQS queue to.
+  // Optionally specify a topic to subscribe the lambda's SQS queue to.
   topic?: sns.Topic;
 }

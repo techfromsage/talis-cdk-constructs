@@ -10,6 +10,8 @@ import * as subs from '@aws-cdk/aws-sns-subscriptions';
 import { LambdaWorkerProps } from "./lambda-worker-props";
 
 const DEFAULT_MAX_RECEIVE_COUNT = 5;
+const DEFAULT_APPROX_AGE_OLDEST_MESSAGE_THRESHOLD = cdk.Duration.hours(1);
+const DEFAULT_APPROX_NUM_MESSAGES_VISIBLE_THRESHOLD = 1000;
 const MINIMUM_MEMORY_SIZE = 1024;
 const MINIMUM_LAMBDA_TIMEOUT = cdk.Duration.seconds(30);
 
@@ -25,7 +27,12 @@ export class LambdaWorker extends cdk.Construct {
 
     // Queue settings
     const maxReceiveCount = props.queueProps.maxReceiveCount ? props.queueProps.maxReceiveCount : DEFAULT_MAX_RECEIVE_COUNT;
+// TODO Work in seconds
     const queueTimeout = cdk.Duration.minutes(maxReceiveCount * lambdaTimeout.toMinutes());
+    const approximateAgeOfOldestMessageThreshold = props.queueProps.approximateAgeOfOldestMessageThreshold ?
+      props.queueProps.approximateAgeOfOldestMessageThreshold : DEFAULT_APPROX_AGE_OLDEST_MESSAGE_THRESHOLD;
+    const approximateNumberOfMessagesVisibleThreshold = props.queueProps.approximateNumberOfMessagesVisibleThreshold ?
+      props.queueProps.approximateNumberOfMessagesVisibleThreshold : DEFAULT_APPROX_NUM_MESSAGES_VISIBLE_THRESHOLD;
 
     // Create both the main queue and the dead letter queue
     const lambdaDLQ = new sqs.Queue(
@@ -88,20 +95,59 @@ export class LambdaWorker extends cdk.Construct {
     const alarmAction = new cloudwatchActions.SnsAction(props.alarmTopic);
 
     // Add an alarm on any messages appearing on the DLQ
-    const dlqMessagesVisableMetric = lambdaDLQ.metric("ApproximateNumberOfMessagesVisible");
+    const approximateNumberOfMessagesVisibleMetric = lambdaDLQ.metric("ApproximateNumberOfMessagesVisible");
     const dlqMessagesVisable = new cloudwatch.Alarm(this, `${props.name}-dlq-messages-visable-alarm`, {
       alarmName: `${props.name}-dlq-messages-visable-alarm`,
-      alarmDescription: `Alert when the lambda worker fails to process a message and the message appears on the DLQ`,
+      alarmDescription: `Alarm when the lambda worker fails to process a message and the message appears on the DLQ`,
       actionsEnabled: true,
-      metric: dlqMessagesVisableMetric,
+      metric: approximateNumberOfMessagesVisibleMetric,
       statistic: 'sum',
       period:  cdk.Duration.minutes(1),
       evaluationPeriods: 1,
       threshold: 1,
       comparisonOperator: cloudwatch.ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+      // Set treatMissingData to IGNORE
+      // Stops alarms with minimal data having false alarms when they transition to this state
+      treatMissingData: cloudwatch.TreatMissingData.IGNORE,
     });
     dlqMessagesVisable.addAlarmAction(alarmAction);
     dlqMessagesVisable.addOkAction(alarmAction);
-    // TODO: Treat missing data = ignore
+
+    // Add an alarm for the age of the oldest message on the LambdaWorkers main trigger queue
+    const approximateAgeOfOldestMessageMetric = lambdaDLQ.metric("ApproximateAgeOfOldestMessage");
+    const queueMessagesAge = new cloudwatch.Alarm(this, `${props.name}-queue-message-age-alarm`, {
+      alarmName: `${props.name}-queue-message-age-alarm`,
+      alarmDescription: `Alarm when the lambda workers main trigger queue has messages older than ${approximateAgeOfOldestMessageThreshold.toSeconds()} seconds`,
+      actionsEnabled: true,
+      metric: approximateAgeOfOldestMessageMetric,
+      statistic: 'average',
+      period:  cdk.Duration.minutes(1),
+      evaluationPeriods: 1,
+      threshold: approximateAgeOfOldestMessageThreshold.toSeconds(),
+      comparisonOperator: cloudwatch.ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+      // Set treatMissingData to IGNORE
+      // Stops alarms with minimal data having false alarms when they transition to this state
+      treatMissingData: cloudwatch.TreatMissingData.IGNORE,
+    });
+    queueMessagesAge.addAlarmAction(alarmAction);
+    queueMessagesAge.addOkAction(alarmAction);
+
+    // Add an alarm for more than "approximateNumberOfMessagesVisible" messages on the queue
+    const queueMessagesVisable = new cloudwatch.Alarm(this, `${props.name}-queue-messages-visable-alarm`, {
+      alarmName: `${props.name}-queue-messages-visable-alarm`,
+      alarmDescription: `Alarm when the lambda workers main trigger queue has more than ${approximateNumberOfMessagesVisibleThreshold} messages on the queue`,
+      actionsEnabled: true,
+      metric: approximateNumberOfMessagesVisibleMetric,
+      statistic: 'sum',
+      period:  cdk.Duration.minutes(1),
+      evaluationPeriods: 1,
+      threshold: approximateNumberOfMessagesVisibleThreshold,
+      comparisonOperator: cloudwatch.ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+      // Set treatMissingData to IGNORE
+      // Stops alarms with minimal data having false alarms when they transition to this state
+      treatMissingData: cloudwatch.TreatMissingData.IGNORE,
+    });
+    queueMessagesVisable.addAlarmAction(alarmAction);
+    queueMessagesVisable.addOkAction(alarmAction);
   }
 }
