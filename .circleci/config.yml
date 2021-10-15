@@ -1,4 +1,11 @@
 version: 2.1
+commands:
+  echo_build_number:
+    description: "Echo the build number"
+    steps:
+      - run:
+          name: 'Echo the build number'
+          command: 'echo ${CIRCLE_BUILD_NUM}'
 
 executors:
   default_executor:
