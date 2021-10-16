@@ -17,7 +17,7 @@ Builds are conducted by CircleCI, and upon successful build of the `main` branch
 - `LambdaWorker` 
   - A serverless background job.
   - Possible replacement for Resque Workers / Jobs
-  - Details [here](/example/simple-lambda-worker/README.md).
+  - Details [here](/examples/simple-lambda-worker/README.md).
 
 ## Useful commands
 
