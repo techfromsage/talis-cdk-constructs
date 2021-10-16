@@ -19,7 +19,7 @@ The LambdaWorker:
 
 ## Construct Diagram
 
-// TODO: Diagram
+![LambdaWorker Construct diagram](LambdaWorker.drawio.png)
 
 ## This Example
 
