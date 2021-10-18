@@ -37,10 +37,6 @@ After you have finished with the example, remove your stack in AWS using:
 
 - `cdk destroy`
 
-## Executing the SimpleLambdaWorker
-
-// TODO: Show commands used to execute the lambda
-
 ## Useful commands
 
 - `npm run build` compile typescript to js

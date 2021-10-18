@@ -1,7 +1,6 @@
 import {
   expect as expectCDK,
   countResources,
-  haveResource,
   haveResourceLike,
 } from "@aws-cdk/assert";
 import * as cdk from "@aws-cdk/core";
@@ -256,6 +255,98 @@ describe("LambdaWorker", () => {
             Ref: 'TestTopic339EC197',
           },
           Endpoint: { "Fn::GetAtt": [ "MyTestLambdaWorkerMyTestLambdaWorkerqueue01D6E79E", "Arn" ] },
+        })
+      );
+    });
+  });
+
+  describe("with a lambda timeout shorter than the minimum ", () => {
+    let stack: cdk.Stack;
+
+    beforeAll(() => {
+      const app = new cdk.App();
+      stack = new cdk.Stack(app, "TestStack");
+      const alarmTopic = new sns.Topic(
+        stack,
+        'TestAlarm',
+        { topicName: 'TestAlarm' }
+      );
+
+      new LambdaWorker(stack, "MyTestLambdaWorker", {
+        name: 'MyTestLambdaWorker',
+        lambdaProps: {
+          entry: "examples/simple-lambda-worker/src/lambda/simple-worker.js",
+          handler: "testWorker",
+          memorySize: 2048,
+          timeout: cdk.Duration.seconds(5),
+        },
+        queueProps: {
+        },
+        alarmTopic: alarmTopic,
+      });
+    });
+
+    test("creates a lambda worker with the minimum timeout", () => {
+      expectCDK(stack).to(countResources("AWS::Lambda::Function", 1));
+
+      expectCDK(stack).to(
+        haveResourceLike('AWS::Lambda::Function', {
+          FunctionName: 'MyTestLambdaWorker',
+          MemorySize: 2048,
+          Timeout: 30,
+          Handler: 'index.testWorker',
+          Runtime: 'nodejs14.x',
+          Environment: {
+            Variables: {
+              "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
+            },
+          },
+        })
+      );
+    });
+  });
+
+  describe("with a memory size smaller than the minimum ", () => {
+    let stack: cdk.Stack;
+
+    beforeAll(() => {
+      const app = new cdk.App();
+      stack = new cdk.Stack(app, "TestStack");
+      const alarmTopic = new sns.Topic(
+        stack,
+        'TestAlarm',
+        { topicName: 'TestAlarm' }
+      );
+
+      new LambdaWorker(stack, "MyTestLambdaWorker", {
+        name: 'MyTestLambdaWorker',
+        lambdaProps: {
+          entry: "examples/simple-lambda-worker/src/lambda/simple-worker.js",
+          handler: "testWorker",
+          memorySize: 512,
+          timeout: cdk.Duration.minutes(5),
+        },
+        queueProps: {
+        },
+        alarmTopic: alarmTopic,
+      });
+    });
+
+    test("creates a lambda worker with the minimum memory size", () => {
+      expectCDK(stack).to(countResources("AWS::Lambda::Function", 1));
+
+      expectCDK(stack).to(
+        haveResourceLike('AWS::Lambda::Function', {
+          FunctionName: 'MyTestLambdaWorker',
+          MemorySize: 1024,
+          Timeout: 300,
+          Handler: 'index.testWorker',
+          Runtime: 'nodejs14.x',
+          Environment: {
+            Variables: {
+              "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
+            },
+          },
         })
       );
     });
