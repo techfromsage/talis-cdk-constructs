@@ -149,4 +149,51 @@ describe("LambdaWorker", () => {
       );
     });
   });
+
+  describe("given an optional topic", () => {
+    let stack: cdk.Stack;
+
+    beforeAll(() => {
+      const app = new cdk.App();
+      stack = new cdk.Stack(app, "TestStack");
+      const alarmTopic = new sns.Topic(
+        stack,
+        'TestAlarm',
+        { topicName: 'TestAlarm' }
+      );
+      const topic = new sns.Topic(
+        stack,
+        'TestTopic',
+        { topicName: 'TestTopic' }
+      );
+
+      new LambdaWorker(stack, "MyTestLambdaWorker", {
+        name: 'MyTestLambdaWorker',
+        lambdaProps: {
+          entry: "examples/simple-lambda-worker/src/lambda/simple-worker.js",
+          handler: "testWorker",
+          memorySize: 2048,
+          timeout: cdk.Duration.minutes(5),
+        },
+        queueProps: {
+        },
+        alarmTopic: alarmTopic,
+        topic: topic,
+      });
+    });
+
+    test("subscribes to the topic", () => {
+      expectCDK(stack).to(countResources("AWS::SNS::Subscription", 1));
+
+      expectCDK(stack).to(
+        haveResourceLike('AWS::SNS::Subscription', {
+          Protocol: 'sqs',
+          TopicArn: {
+            Ref: 'TestTopic339EC197',
+          },
+          Endpoint: { "Fn::GetAtt": [ "MyTestLambdaWorkerMyTestLambdaWorkerqueue01D6E79E", "Arn" ] },
+        })
+      );
+    });
+  });
 });
