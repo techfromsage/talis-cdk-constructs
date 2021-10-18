@@ -11,10 +11,11 @@ Builds are conducted by CircleCI, and upon successful build of the `main` branch
 ## Available constructs
 
 - CDN Site Hosting constructs
+
   - `CdnSiteHostingConstruct` for static-site or single-page application hosting in S3 via CloudFront.
   - `CdnSiteHostingWithDnsConstruct` for static-site or single-page application hosting in S3 via CloudFront, with DNS record provisioning
 
-- `LambdaWorker` 
+- `LambdaWorker`
   - A serverless background job.
   - Possible replacement for Resque Workers / Jobs
   - Details [here](/examples/simple-lambda-worker/README.md).
