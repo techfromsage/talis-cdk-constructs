@@ -4,8 +4,7 @@ executors:
   default_executor:
     working_directory: ~/talis-cdk-constructs
     docker:
-      #- image: cimg/node:14.17.3
-      - image: circleci/node:14
+      - image: cimg/node:14.17.3
         auth:
           username: $DOCKER_USERNAME
           password: $DOCKER_PASSWORD
@@ -38,7 +37,7 @@ jobs:
           command: npm run build
       - run:
           name: Build example code
-          command: cd examples/simple-lambda-worker && npm install && npm run build
+          command: cd examples/simple-lambda-worker && npm install && npm run build && cd ../..
       - run:
           name: Run tests
           command: npm test
