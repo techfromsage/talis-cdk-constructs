@@ -39,12 +39,17 @@ describe("LambdaWorker", () => {
       expectCDK(stack).to(countResources("AWS::Lambda::Function", 1));
 
       expectCDK(stack).to(
-        haveResource('AWS::Lambda::Function', {
+        haveResourceLike('AWS::Lambda::Function', {
           FunctionName: 'MyTestLambdaWorker',
           MemorySize: 2048,
           Timeout: 300,
           Handler: 'index.testWorker',
           Runtime: 'nodejs14.x',
+          Environment: {
+            Variables: {
+              "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
+            },
+          },
         })
       );
     });
@@ -145,6 +150,65 @@ describe("LambdaWorker", () => {
           ComparisonOperator: "GreaterThanOrEqualToThreshold",
           TreatMissingData: "ignore",
           OKActions: [ { Ref: "TestAlarm5A9EF6BD" } ],
+        })
+      );
+    });
+  });
+
+  describe("with optional props", () => {
+    let stack: cdk.Stack;
+
+    beforeAll(() => {
+      const app = new cdk.App();
+      stack = new cdk.Stack(app, "TestStack");
+      const alarmTopic = new sns.Topic(
+        stack,
+        'TestAlarm',
+        { topicName: 'TestAlarm' }
+      );
+
+      new LambdaWorker(stack, "MyTestLambdaWorker", {
+        name: 'MyTestLambdaWorker',
+        lambdaProps: {
+          entry: "examples/simple-lambda-worker/src/lambda/simple-worker.js",
+          handler: "testWorker",
+          memorySize: 2048,
+          timeout: cdk.Duration.minutes(5),
+
+          // Optional
+          description: 'Test Description',
+          environment: {
+            TALIS_ENV_VAR: 'some value',
+          },
+          reservedConcurrentExecutions: 10,
+
+        },
+        queueProps: {
+        },
+        alarmTopic: alarmTopic,
+      });
+    });
+
+
+    test("provisions a lambda", () => {
+      expectCDK(stack).to(countResources("AWS::Lambda::Function", 1));
+
+      expectCDK(stack).to(
+        haveResourceLike('AWS::Lambda::Function', {
+          FunctionName: 'MyTestLambdaWorker',
+          MemorySize: 2048,
+          Timeout: 300,
+          Handler: 'index.testWorker',
+          Runtime: 'nodejs14.x',
+          //Optional
+          Description: 'Test Description',
+          Environment: {
+            Variables: {
+              "TALIS_ENV_VAR": "some value",
+              "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
+            },
+          },
+          ReservedConcurrentExecutions: 10,
         })
       );
     });

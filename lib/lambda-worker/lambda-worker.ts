@@ -92,7 +92,7 @@ export class LambdaWorker extends cdk.Construct {
         environment: props.lambdaProps.environment,
         reservedConcurrentExecutions:
           props.lambdaProps.reservedConcurrentExecutions,
-        retryAttempts: props.lambdaProps.retryAtempts,
+        retryAttempts: props.lambdaProps.retryAttempts,
         role: props.lambdaProps.role,
         securityGroup: props.lambdaProps.securityGroup,
         timeout: lambdaTimeout,
