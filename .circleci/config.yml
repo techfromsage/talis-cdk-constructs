@@ -37,7 +37,7 @@ jobs:
           command: npm run build
       - run:
           name: Build example code
-          command: cd examples/simple-lambda-worker && npm install && npm run build && cd ../..
+          command: cd examples/simple-lambda-worker && npm install && npm run build
       - run:
           name: Run tests
           command: npm test
