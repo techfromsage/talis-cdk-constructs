@@ -13,8 +13,7 @@ export interface LambdaWorkerProps {
     description?: string;
     handler: string;
     entry: string;
-    environment?: {};
-    /* environment?: { [string]: string }, */
+    environment?: { [key: string]: string };
     memorySize: number; // LambdaWorker will set a minimum memory size of 1024
     reservedConcurrentExecutions?: number;
     retryAtempts?: number;
@@ -48,5 +47,5 @@ export interface LambdaWorkerProps {
   // Optionally specify a topic to subscribe the lambda's SQS queue to.
   topic?: sns.Topic;
 
-  filterPolicy?: {};
+  filterPolicy?: { [key: string]: sns.SubscriptionFilter };
 }
