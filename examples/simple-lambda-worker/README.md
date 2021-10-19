@@ -22,6 +22,11 @@ Optionionally, the LambdaWorker:
 
 ![LambdaWorker Construct diagram](LambdaWorker.drawio.png)
 
+## Note:
+
+The `talis-cli-tools` `awsdlq` tool can be used to replay messages.
+See the tech team talk on the `awsdlq` [here](https://docs.google.com/presentation/d/1ND9LMPBeMFqqoxCfsh3Z57Gl0N8JnA9XjZGmqYgTo_A).
+
 ## This Example
 
 To build and deploy this example:
