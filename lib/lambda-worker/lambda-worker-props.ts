@@ -50,5 +50,5 @@ export interface LambdaWorkerProps {
     topic?: sns.Topic;
 
     filterPolicy?: { [key: string]: sns.SubscriptionFilter };
-  }
+  };
 }

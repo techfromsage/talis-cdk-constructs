@@ -273,9 +273,8 @@ describe("LambdaWorker", () => {
   });
 
   describe("when the lambda timeout is shorter than the minimum ", () => {
-
     test("throws an exception", () => {
-      let stack: cdk.Stack;
+      const stack: cdk.Stack;
       const app = new cdk.App();
       stack = new cdk.Stack(app, "TestStack");
       const alarmTopic = new sns.Topic(stack, "TestAlarm", {
@@ -294,14 +293,13 @@ describe("LambdaWorker", () => {
           queueProps: {},
           alarmTopic: alarmTopic,
         });
-      }).toThrow('Invalid lambdaProps.timeout value of 5. Minimum value is 30');
+      }).toThrow("Invalid lambdaProps.timeout value of 5. Minimum value is 30");
     });
   });
 
   describe("when memory size is smaller than the minimum ", () => {
-
     test("throws an exception", () => {
-      let stack: cdk.Stack;
+      const stack: cdk.Stack;
       const app = new cdk.App();
       stack = new cdk.Stack(app, "TestStack");
       const alarmTopic = new sns.Topic(stack, "TestAlarm", {
@@ -320,8 +318,9 @@ describe("LambdaWorker", () => {
           queueProps: {},
           alarmTopic: alarmTopic,
         });
-      }).toThrow('Invalid lambdaProps.memorySize value of 512. Minimum value is 1024');
-
+      }).toThrow(
+        "Invalid lambdaProps.memorySize value of 512. Minimum value is 1024"
+      );
     });
   });
 });
