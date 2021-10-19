@@ -20,17 +20,13 @@ export class LambdaWorker extends cdk.Construct {
     super(scope, id);
 
     // Lambda settings
-    const memorySize =
-      props.lambdaProps.memorySize &&
-      props.lambdaProps.memorySize > MINIMUM_MEMORY_SIZE
-        ? props.lambdaProps.memorySize
-        : MINIMUM_MEMORY_SIZE;
+    if (props.lambdaProps.memorySize < MINIMUM_MEMORY_SIZE) {
+      throw new Error(`Invalid lambdaProps.memorySize value of ${props.lambdaProps.memorySize}. Minimum value is ${MINIMUM_MEMORY_SIZE}`)
+    }
 
-    const lambdaTimeout =
-      props.lambdaProps.timeout &&
-      props.lambdaProps.timeout.toSeconds() > MINIMUM_LAMBDA_TIMEOUT.toSeconds()
-        ? props.lambdaProps.timeout
-        : MINIMUM_LAMBDA_TIMEOUT;
+    if (props.lambdaProps.timeout.toSeconds() < MINIMUM_LAMBDA_TIMEOUT.toSeconds()) {
+      throw new Error(`Invalid lambdaProps.timeout value of ${props.lambdaProps.timeout.toSeconds()}. Minimum value is ${MINIMUM_LAMBDA_TIMEOUT.toSeconds()}`)
+    }
 
     // Queue settings
     const maxReceiveCount = props.queueProps && props.queueProps.maxReceiveCount
@@ -38,7 +34,7 @@ export class LambdaWorker extends cdk.Construct {
       : DEFAULT_MAX_RECEIVE_COUNT;
 
     const queueTimeout = cdk.Duration.seconds(
-      maxReceiveCount * lambdaTimeout.toSeconds()
+      maxReceiveCount * props.lambdaProps.timeout.toSeconds()
     );
 
     const approximateAgeOfOldestMessageThreshold = props.queueProps && props.queueProps
@@ -90,17 +86,15 @@ export class LambdaWorker extends cdk.Construct {
         handler: props.lambdaProps.handler,
         description: props.lambdaProps.description,
         environment: props.lambdaProps.environment,
+        memorySize: props.lambdaProps.memorySize,
         reservedConcurrentExecutions:
           props.lambdaProps.reservedConcurrentExecutions,
         retryAttempts: props.lambdaProps.retryAttempts,
         role: props.lambdaProps.role,
         securityGroup: props.lambdaProps.securityGroup,
-        timeout: lambdaTimeout,
+        timeout: props.lambdaProps.timeout,
         vpc: props.lambdaProps.vpc,
         vpcSubnets: props.lambdaProps.vpcSubnets,
-
-        // Optional props which have been validated or set to a default
-        memorySize: memorySize,
 
         // Enforce the following properties
         awsSdkConnectionReuse: true,
