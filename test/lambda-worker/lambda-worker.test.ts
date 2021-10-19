@@ -274,9 +274,8 @@ describe("LambdaWorker", () => {
 
   describe("when the lambda timeout is shorter than the minimum ", () => {
     test("throws an exception", () => {
-      const stack: cdk.Stack;
       const app = new cdk.App();
-      stack = new cdk.Stack(app, "TestStack");
+      const stack = new cdk.Stack(app, "TestStack");
       const alarmTopic = new sns.Topic(stack, "TestAlarm", {
         topicName: "TestAlarm",
       });
@@ -299,9 +298,8 @@ describe("LambdaWorker", () => {
 
   describe("when memory size is smaller than the minimum ", () => {
     test("throws an exception", () => {
-      const stack: cdk.Stack;
       const app = new cdk.App();
-      stack = new cdk.Stack(app, "TestStack");
+      const stack = new cdk.Stack(app, "TestStack");
       const alarmTopic = new sns.Topic(stack, "TestAlarm", {
         topicName: "TestAlarm",
       });
