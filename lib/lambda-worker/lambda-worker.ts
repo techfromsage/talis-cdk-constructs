@@ -33,7 +33,7 @@ export class LambdaWorker extends cdk.Construct {
         : MINIMUM_LAMBDA_TIMEOUT;
 
     // Queue settings
-    const maxReceiveCount = props.queueProps.maxReceiveCount
+    const maxReceiveCount = props.queueProps && props.queueProps.maxReceiveCount
       ? props.queueProps.maxReceiveCount
       : DEFAULT_MAX_RECEIVE_COUNT;
 
@@ -41,21 +41,15 @@ export class LambdaWorker extends cdk.Construct {
       maxReceiveCount * lambdaTimeout.toSeconds()
     );
 
-    const approximateAgeOfOldestMessageThreshold = props.queueProps
+    const approximateAgeOfOldestMessageThreshold = props.queueProps && props.queueProps
       .approximateAgeOfOldestMessageThreshold
       ? props.queueProps.approximateAgeOfOldestMessageThreshold
       : DEFAULT_APPROX_AGE_OLDEST_MESSAGE_THRESHOLD;
 
-    const approximateNumberOfMessagesVisibleThreshold = props.queueProps
+    const approximateNumberOfMessagesVisibleThreshold = props.queueProps && props.queueProps
       .approximateNumberOfMessagesVisibleThreshold
       ? props.queueProps.approximateNumberOfMessagesVisibleThreshold
       : DEFAULT_APPROX_NUM_MESSAGES_VISIBLE_THRESHOLD;
-
-    // Topic Subscription Settings
-    let subscriptionProps = {};
-    if (props.filterPolicy) {
-      subscriptionProps = { filterPolicy: props.filterPolicy };
-    }
 
     // Create both the main queue and the dead letter queue
     const lambdaDLQ = new sqs.Queue(this, `${props.name}-dlq`, {
@@ -71,8 +65,14 @@ export class LambdaWorker extends cdk.Construct {
 
     // If we have specified a topic, then subscribe
     // the main queue to the topic.
-    if (props.topic) {
-      props.topic.addSubscription(
+    if (props.subscription && props.subscription.topic) {
+      // Topic Subscription Settings
+      let subscriptionProps = {};
+      if (props.subscription.filterPolicy) {
+        subscriptionProps = { filterPolicy: props.subscription.filterPolicy };
+      }
+
+      props.subscription.topic.addSubscription(
         new subs.SqsSubscription(lambdaQueue, subscriptionProps)
       );
     }
@@ -80,9 +80,9 @@ export class LambdaWorker extends cdk.Construct {
     // Create the lambda
     const lambdaWorker = new lambdaNodeJs.NodejsFunction(
       this,
-      `${props.name}`,
+      props.name,
       {
-        functionName: `${props.name}`,
+        functionName: props.name,
 
         // Pass through props from lambda props object
         // Documented here https://docs.aws.amazon.com/cdk/api/latest/docs/@aws-cdk_aws-lambda-nodejs.NodejsFunctionProps.html
@@ -127,9 +127,9 @@ export class LambdaWorker extends cdk.Construct {
     );
     const dlqMessagesVisable = new cloudwatch.Alarm(
       this,
-      `${props.name}-dlq-messages-visable-alarm`,
+      `${props.name}-dlq-messages-visible-alarm`,
       {
-        alarmName: `${props.name}-dlq-messages-visable-alarm`,
+        alarmName: `${props.name}-dlq-messages-visible-alarm`,
         alarmDescription: `Alarm when the lambda worker fails to process a message and the message appears on the DLQ`,
         actionsEnabled: true,
         metric: approximateNumberOfMessagesVisibleMetric,
@@ -176,9 +176,9 @@ export class LambdaWorker extends cdk.Construct {
     // Add an alarm for more than "approximateNumberOfMessagesVisible" messages on the queue
     const queueMessagesVisable = new cloudwatch.Alarm(
       this,
-      `${props.name}-queue-messages-visable-alarm`,
+      `${props.name}-queue-messages-visible-alarm`,
       {
-        alarmName: `${props.name}-queue-messages-visable-alarm`,
+        alarmName: `${props.name}-queue-messages-visible-alarm`,
         alarmDescription: `Alarm when the lambda workers main trigger queue has more than ${approximateNumberOfMessagesVisibleThreshold} messages on the queue`,
         actionsEnabled: true,
         metric: approximateNumberOfMessagesVisibleMetric,

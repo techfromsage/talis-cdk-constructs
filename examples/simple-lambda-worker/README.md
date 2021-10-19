@@ -14,7 +14,7 @@ The LambdaWorker:
 
 Optionionally, the LambdaWorker:
 
-- can have it's SQS queue subscribed to an SNS topic.
+- can have its SQS queue subscribed to an SNS topic.
   - For example all Depot workers subscribe to a "File" topic in a Pub/Sub architecture.
 - can have a filterPolicy specified so that it only receives messages from the SNS topic which it is interested in.
 

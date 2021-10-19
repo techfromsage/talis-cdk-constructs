@@ -25,7 +25,7 @@ export interface LambdaWorkerProps {
   };
 
   // Queue Properties
-  queueProps: {
+  queueProps?: {
     // The maximum number of times a message is re-tried before
     // going to the DLQ. This will default to 5
     maxReceiveCount?: number;
@@ -44,8 +44,11 @@ export interface LambdaWorkerProps {
   // SNS Topic all alarm actions should be sent to
   alarmTopic: sns.ITopic;
 
-  // Optionally specify a topic to subscribe the lambda's SQS queue to.
-  topic?: sns.Topic;
+  // Optional subscribe to SNS topic options
+  subscription?: {
+    // Optionally specify a topic to subscribe the lambda's SQS queue to.
+    topic?: sns.Topic;
 
-  filterPolicy?: { [key: string]: sns.SubscriptionFilter };
+    filterPolicy?: { [key: string]: sns.SubscriptionFilter };
+  }
 }

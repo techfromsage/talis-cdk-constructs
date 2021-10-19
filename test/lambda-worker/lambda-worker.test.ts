@@ -50,7 +50,7 @@ describe("LambdaWorker", () => {
       );
     });
 
-    test("provisions sqs queue and dead letter queue", () => {
+    test("provisions SQS queue and dead letter queue", () => {
       expectCDK(stack).to(countResources("AWS::SQS::Queue", 2));
 
       expectCDK(stack).to(
@@ -81,10 +81,10 @@ describe("LambdaWorker", () => {
       expectCDK(stack).to(countResources("AWS::CloudWatch::Alarm", 3));
     });
 
-    test("provisions a message visable alarm on the dead letter queue", () => {
+    test("provisions a message visible alarm on the dead letter queue", () => {
       expectCDK(stack).to(
         haveResourceLike("AWS::CloudWatch::Alarm", {
-          AlarmName: "MyTestLambdaWorker-dlq-messages-visable-alarm",
+          AlarmName: "MyTestLambdaWorker-dlq-messages-visible-alarm",
           AlarmDescription:
             "Alarm when the lambda worker fails to process a message and the message appears on the DLQ",
           Namespace: "AWS/SQS",
@@ -110,10 +110,10 @@ describe("LambdaWorker", () => {
       );
     });
 
-    test("provisions a message visable alarm on the main queue", () => {
+    test("provisions a message visible alarm on the main queue", () => {
       expectCDK(stack).to(
         haveResourceLike("AWS::CloudWatch::Alarm", {
-          AlarmName: "MyTestLambdaWorker-queue-messages-visable-alarm",
+          AlarmName: "MyTestLambdaWorker-queue-messages-visible-alarm",
           AlarmDescription:
             "Alarm when the lambda workers main trigger queue has more than 1000 messages on the queue",
           Namespace: "AWS/SQS",
@@ -246,7 +246,9 @@ describe("LambdaWorker", () => {
         },
         queueProps: {},
         alarmTopic: alarmTopic,
-        topic: topic,
+        subscription: {
+          topic: topic,
+        },
       });
     });
 
