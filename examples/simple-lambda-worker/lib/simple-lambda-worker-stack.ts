@@ -1,3 +1,4 @@
+import * as ec2 from "@aws-cdk/aws-ec2";
 import * as cdk from "@aws-cdk/core";
 import * as sns from "@aws-cdk/aws-sns";
 
@@ -34,6 +35,10 @@ export class SimpleLambdaWorkerStack extends cdk.Stack {
       { topicName: `${prefix}simple-lambda-worker-alarm` }
     );
 
+    const vpc = ec2.Vpc.fromLookup(this, `${prefix}-vpc`, {
+      vpcName: "vpc-0155db5e1ab5c28b6",
+    });
+
     // Create the Lambda
     /* const worker = */ new LambdaWorker(
       this,
@@ -48,6 +53,8 @@ export class SimpleLambdaWorkerStack extends cdk.Stack {
           handler: "simpleLambdaWorker",
           memorySize: 1024,
           timeout: cdk.Duration.minutes(5),
+          vpc: vpc,
+          vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE },
         },
         queueProps: {
           maxReceiveCount: 3,

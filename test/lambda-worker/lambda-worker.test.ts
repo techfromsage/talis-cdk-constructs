@@ -3,6 +3,7 @@ import {
   countResources,
   haveResourceLike,
 } from "@aws-cdk/assert";
+import * as ec2 from "@aws-cdk/aws-ec2";
 import * as cdk from "@aws-cdk/core";
 import * as sns from "@aws-cdk/aws-sns";
 import { LambdaWorker } from "../../lib/lambda-worker";
@@ -18,6 +19,10 @@ describe("LambdaWorker", () => {
         topicName: "TestAlarm",
       });
 
+      const vpc = new ec2.Vpc(stack, "TheVPC", {
+        cidr: "10.0.0.0/16",
+      });
+
       new LambdaWorker(stack, "MyTestLambdaWorker", {
         name: "MyTestLambdaWorker",
         lambdaProps: {
@@ -25,6 +30,8 @@ describe("LambdaWorker", () => {
           handler: "testWorker",
           memorySize: 2048,
           timeout: cdk.Duration.minutes(5),
+          vpc: vpc,
+          vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE },
         },
         queueProps: {},
         alarmTopic: alarmTopic,
@@ -179,6 +186,10 @@ describe("LambdaWorker", () => {
         topicName: "TestAlarm",
       });
 
+      const vpc = new ec2.Vpc(stack, "TheVPC", {
+        cidr: "10.0.0.0/16",
+      });
+
       new LambdaWorker(stack, "MyTestLambdaWorker", {
         name: "MyTestLambdaWorker",
         lambdaProps: {
@@ -186,6 +197,8 @@ describe("LambdaWorker", () => {
           handler: "testWorker",
           memorySize: 2048,
           timeout: cdk.Duration.minutes(5),
+          vpc: vpc,
+          vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE },
 
           // Optional
           description: "Test Description",
@@ -236,6 +249,10 @@ describe("LambdaWorker", () => {
         topicName: "TestTopic",
       });
 
+      const vpc = new ec2.Vpc(stack, "TheVPC", {
+        cidr: "10.0.0.0/16",
+      });
+
       new LambdaWorker(stack, "MyTestLambdaWorker", {
         name: "MyTestLambdaWorker",
         lambdaProps: {
@@ -243,6 +260,8 @@ describe("LambdaWorker", () => {
           handler: "testWorker",
           memorySize: 2048,
           timeout: cdk.Duration.minutes(5),
+          vpc: vpc,
+          vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE },
         },
         queueProps: {},
         alarmTopic: alarmTopic,
@@ -280,6 +299,10 @@ describe("LambdaWorker", () => {
         topicName: "TestAlarm",
       });
 
+      const vpc = new ec2.Vpc(stack, "TheVPC", {
+        cidr: "10.0.0.0/16",
+      });
+
       expect(() => {
         new LambdaWorker(stack, "MyTestLambdaWorker", {
           name: "MyTestLambdaWorker",
@@ -288,6 +311,8 @@ describe("LambdaWorker", () => {
             handler: "testWorker",
             memorySize: 2048,
             timeout: cdk.Duration.seconds(5),
+            vpc: vpc,
+            vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE },
           },
           queueProps: {},
           alarmTopic: alarmTopic,
@@ -304,6 +329,10 @@ describe("LambdaWorker", () => {
         topicName: "TestAlarm",
       });
 
+      const vpc = new ec2.Vpc(stack, "TheVPC", {
+        cidr: "10.0.0.0/16",
+      });
+
       expect(() => {
         new LambdaWorker(stack, "MyTestLambdaWorker", {
           name: "MyTestLambdaWorker",
@@ -312,6 +341,8 @@ describe("LambdaWorker", () => {
             handler: "testWorker",
             memorySize: 512,
             timeout: cdk.Duration.minutes(5),
+            vpc: vpc,
+            vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE },
           },
           queueProps: {},
           alarmTopic: alarmTopic,
