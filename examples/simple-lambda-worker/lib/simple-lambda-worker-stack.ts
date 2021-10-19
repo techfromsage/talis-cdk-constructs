@@ -21,8 +21,8 @@ export class SimpleLambdaWorkerStack extends cdk.Stack {
     //
     // This is useful when using Pub/Sub as depot-serverless does. A single
     // "File" topic is created which all workers subscribe to.
-    const topic = new sns.Topic(this, `${prefix}SimpleLambdaWorker-topic`, {
-      topicName: `${prefix}SimpleLambdaWorker-topic`,
+    const topic = new sns.Topic(this, `${prefix}simple-lambda-worker-topic`, {
+      topicName: `${prefix}simple-lambda-worker-topic`,
     });
 
     // LambdaWorker requires an existing SNS topic to publish alarms to.
@@ -30,13 +30,13 @@ export class SimpleLambdaWorkerStack extends cdk.Stack {
     // Can we pull in this alarm which is defined in terraform as an example of how to do that
     const alarmTopic = new sns.Topic(
       this,
-      `${prefix}SimpleLambdaWorker-alarm`,
-      { topicName: `${prefix}SimpleLambdaWorker-alarm` }
+      `${prefix}simple-lambda-Worker-alarm`,
+      { topicName: `${prefix}simple-lambda-worker-alarm` }
     );
 
     // Create the Lambda
-    /* const worker = */ new LambdaWorker(this, `${prefix}SimpleLambdaWorker`, {
-      name: `${prefix}SimpleLambdaWorker`,
+    /* const worker = */ new LambdaWorker(this, `${prefix}simple-lambda-worker`, {
+      name: `${prefix}simple-lambda-worker`,
       lambdaProps: {
         environment: {
           EXAMPLE_ENV_VAR: "example value",
