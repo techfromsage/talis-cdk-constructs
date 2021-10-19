@@ -37,7 +37,6 @@ After you have finished with the example, remove your stack in AWS using:
 
 - `cdk destroy`
 
-
 ## Useful commands
 
 - `npm run build` compile typescript to js
