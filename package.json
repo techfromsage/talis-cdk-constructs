@@ -16,7 +16,7 @@
     "lint": "npm run lint:prettier && npm run lint:eslint",
     "format:prettier": "prettier --write .",
     "format": "npm run format:prettier",
-    "prepare": "npm run build"
+    "prepare": "husky install && npm run build"
   },
   "devDependencies": {
     "@aws-cdk/assert": "^1.128.0",
@@ -29,6 +29,7 @@
     "esbuild": "^0.13.8",
     "eslint": "^7.30.0",
     "eslint-config-prettier": "^8.3.0",
+    "husky": "^7.0.4",
     "jest": "^26.4.2",
     "prettier": "^2.3.2",
     "semantic-release": "^17.4.4",
