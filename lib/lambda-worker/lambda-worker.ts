@@ -101,6 +101,7 @@ export class LambdaWorker extends cdk.Construct {
       timeout: props.lambdaProps.timeout,
       vpc: props.lambdaProps.vpc,
       vpcSubnets: props.lambdaProps.vpcSubnets,
+      layers: props.lambdaProps.layers,
 
       // Enforce the following properties
       awsSdkConnectionReuse: true,

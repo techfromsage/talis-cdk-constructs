@@ -23,6 +23,8 @@
   },
   "dependencies": {
     "@aws-cdk/core": "1.128.0",
-    "source-map-support": "^0.5.16"
+    "aws-sdk": "^2.1012.0",
+    "source-map-support": "^0.5.16",
+    "wkhtmltopdf": "^0.4.0"
   }
 }

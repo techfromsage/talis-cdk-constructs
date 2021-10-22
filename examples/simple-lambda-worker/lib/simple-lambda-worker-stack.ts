@@ -1,6 +1,7 @@
 import * as ec2 from "@aws-cdk/aws-ec2";
 import * as cdk from "@aws-cdk/core";
 import * as sns from "@aws-cdk/aws-sns";
+import * as lambda from '@aws-cdk/aws-lambda';
 
 import { LambdaWorker } from "../../../lib";
 
@@ -36,8 +37,14 @@ export class SimpleLambdaWorkerStack extends cdk.Stack {
     );
 
     const vpc = ec2.Vpc.fromLookup(this, `${prefix}-vpc`, {
-      vpcName: "vpc-0155db5e1ab5c28b6",
+      vpcId: "vpc-0155db5e1ab5c28b6",
     });
+
+    //Lambda Layer
+    const wkHtmlToPdfLayer = new lambda.LayerVersion(this, `${prefix}-wk-html-to-pdf-layer`, {
+      code: lambda.Code.fromAsset('lib/wkhtmltox-0.12.6-4.amazonlinux2_lambda.zip'),
+      description: 'The wkhtmltopdf layer provided from https://wkhtmltopdf.org/downloads.html'
+    })
 
     // Create the Lambda
     /* const worker = */ new LambdaWorker(
@@ -48,11 +55,13 @@ export class SimpleLambdaWorkerStack extends cdk.Stack {
         lambdaProps: {
           environment: {
             EXAMPLE_ENV_VAR: "example value",
+            FONTCONFIG_PATH: "/opt/fonts",
           },
           entry: "src/lambda/simple-worker.js",
           handler: "simpleLambdaWorker",
+          layers: [wkHtmlToPdfLayer],
           memorySize: 1024,
-          timeout: cdk.Duration.minutes(5),
+          timeout: cdk.Duration.minutes(1),
           vpc: vpc,
           vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE },
         },

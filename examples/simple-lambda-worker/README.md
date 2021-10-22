@@ -12,7 +12,7 @@ The LambdaWorker:
 - triggers an alarm when the queue of jobs exceeds a configuarble maximum threshold
 - triggers an alarm when a message waiting on the queue is older than a configurable maximum
 
-Optionionally, the LambdaWorker:
+Optionally, the LambdaWorker:
 
 - can have its SQS queue subscribed to an SNS topic.
   - For example all Depot workers subscribe to a "File" topic in a Pub/Sub architecture.
