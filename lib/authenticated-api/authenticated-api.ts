@@ -5,8 +5,6 @@ import * as cdk from "@aws-cdk/core";
 import * as lambda from "@aws-cdk/aws-lambda";
 import * as lambdaNodeJs from "@aws-cdk/aws-lambda-nodejs";
 
-
-
 import { AuthenticatedApiProps } from "./authenticated-api-props";
 
 export class AuthenticatedApi extends cdk.Construct {
@@ -59,7 +57,6 @@ export class AuthenticatedApi extends cdk.Construct {
       const routeLambda = new lambdaNodeJs.NodejsFunction(this, `${props.prefix}${routeLambdaProps.name}`, {
         functionName: `${props.prefix}${props.name}-${routeLambdaProps.name}`,
 
-        /* entry: "examples/simple-authenticated-api/src/lambda/route.js", */
         entry: routeLambdaProps.entry,
         handler: routeLambdaProps.handler,
 
@@ -72,12 +69,22 @@ export class AuthenticatedApi extends cdk.Construct {
         handler: routeLambda,
       });
 
-      httpApi.addRoutes({
-        path: routeLambdaProps.path,
-        methods: [ routeLambdaProps.method ],
-        integration,
-        authorizer,
-      });
+      for (const path of routeLambdaProps.paths) {
+        if (routeLambdaProps.requiresAuth) {
+          httpApi.addRoutes({
+            path: path,
+            methods: [ routeLambdaProps.method ],
+            integration,
+            authorizer,
+          });
+        } else {
+          httpApi.addRoutes({
+            path: path,
+            methods: [ routeLambdaProps.method ],
+            integration,
+          });
+        }
+      }
     }
   }
 }

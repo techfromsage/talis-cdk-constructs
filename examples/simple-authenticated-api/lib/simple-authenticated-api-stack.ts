@@ -34,8 +34,8 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
         },
 
         routes: [
-          { name: 'route1', path: '/1/route1', method: HttpMethod.GET, entry: 'src/lambda/route1.js', handler: 'route', },
-          { name: 'route2', path: '/1/route2', method: HttpMethod.GET, entry: 'src/lambda/route2.js', handler: 'route', },
+          { name: 'route1', paths: ['/1/route1'], method: HttpMethod.GET, entry: 'src/lambda/route1.js', handler: 'route', requiresAuth: true },
+          { name: 'route2', paths: ['/1/route2'], method: HttpMethod.GET, entry: 'src/lambda/route2.js', handler: 'route', },
         ]
       }
     );

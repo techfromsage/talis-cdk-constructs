@@ -4,7 +4,7 @@ import * as cdk from '@aws-cdk/core';
 import { SimpleAuthenticatedApiStack } from '../lib/simple-authenticated-api-stack';
 
 const app = new cdk.App();
-new SimpleAuthenticatedApiStack(app, 'SimpleAuthenticatedApiStack', {
+new SimpleAuthenticatedApiStack(app, `${process.env.AWS_PREFIX}SimpleAuthenticatedApiStack`, {
   /* If you don't specify 'env', this stack will be environment-agnostic.
    * Account/Region-dependent features and context lookups will not work,
    * but a single synthesized template can be deployed anywhere. */
