@@ -1,0 +1,13 @@
+name: Lint PR title
+
+on:
+  pull_request:
+    types: ["opened", "edited", "reopened", "synchronize"]
+
+jobs:
+  pr-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: seferov/pr-lint-action@master
+        with:
+          title-regex: "^(feat|fix|docs|build|chore|ci|style|refactor|perf|test)!?: .*"
