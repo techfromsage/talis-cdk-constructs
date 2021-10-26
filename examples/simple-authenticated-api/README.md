@@ -1,8 +1,34 @@
-# Welcome to your CDK TypeScript project!
+# AuthenticatedApi Example: SimpleAuthenticatedApi
 
-This is a blank project for TypeScript development with CDK.
+This is an example of using the AuthenticatedApi to create two example API's one authenticated and one not.
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+The AuthenticatedApi:
+
+- creates an ApiGateway (v2)
+- creates an authorisation lambda which authenticates tokens against persona
+- creates any number of routes, each with a lambda to handle requests.
+- allows authentication to be configured either on all routes or on individual routes
+- triggers an alarm if the response time on any route in the api exceeds a configurable duration
+- triggers an alarm if the duration of a lambda dealing with the api requests exceeds a configurable duration
+
+## Construct Diagram
+
+![Authenticated Api Construct diagram](AuthenticatedApi.drawio.png)
+
+## This Example
+
+To build and deploy this example:
+
+- `export AWS_PREFIX=development-XX-` where XX are your initials
+  - This is used in the name of the stack and resources created, so that they do not clash with anyone elses stack in AWS
+- `source awsenv <profile>` to set your credentials to the shared account
+- `npm install`
+- `npm run build`
+- `cdk deploy`
+
+After you have finished with the example, remove your stack in AWS using:
+
+- `cdk destroy`
 
 ## Useful commands
 
