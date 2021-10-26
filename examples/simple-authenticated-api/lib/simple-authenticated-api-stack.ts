@@ -1,6 +1,6 @@
+import * as apigatewayv2 from  "@aws-cdk/aws-apigatewayv2";
 import * as cdk from "@aws-cdk/core";
-
-import { HttpMethod } from "@aws-cdk/aws-apigatewayv2";
+import * as sns from "@aws-cdk/aws-sns";
 
 import { AuthenticatedApi } from "../../../lib";
 
@@ -16,11 +16,21 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
       ? process.env.AWS_PREFIX
       : "development-xx-";
 
+    // AuthenticatedApi requires an existing SNS topic to publish alarms to.
+    // TODO : A real app would not create this topic which is already created by terraform.
+    // Can we pull in this alarm which is defined in terraform as an example of how to do that
+    const alarmTopic = new sns.Topic(
+      this,
+      `${prefix}simple-lambda-Worker-alarm`,
+      { topicName: `${prefix}simple-lambda-worker-alarm` }
+    );
+
     /* const api = */ new AuthenticatedApi(this, "simple-authenticated-api", {
       prefix,
       name: "simple-authenticated-api",
       description: "A simple example API",
       stageName: "development", // This should be development / staging / production as appropriate
+      alarmTopic,
 
       authenticateAllRoutes: false,
       persona: {
@@ -34,7 +44,7 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
         {
           name: "route1",
           paths: ["/1/route1"],
-          method: HttpMethod.GET,
+          method: apigatewayv2.HttpMethod.GET,
           entry: "src/lambda/route1.js",
           handler: "route",
           requiresAuth: true,
@@ -42,7 +52,7 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
         {
           name: "route2",
           paths: ["/1/route2"],
-          method: HttpMethod.GET,
+          method: apigatewayv2.HttpMethod.GET,
           entry: "src/lambda/route2.js",
           handler: "route",
         },

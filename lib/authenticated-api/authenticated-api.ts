@@ -1,15 +1,22 @@
 import * as apigatewayv2 from "@aws-cdk/aws-apigatewayv2";
 import * as authorizers from "@aws-cdk/aws-apigatewayv2-authorizers";
-import * as integrations from "@aws-cdk/aws-apigatewayv2-integrations";
 import * as cdk from "@aws-cdk/core";
+import * as cloudwatch from "@aws-cdk/aws-cloudwatch";
+import * as cloudwatchActions from "@aws-cdk/aws-cloudwatch-actions";
+import * as integrations from "@aws-cdk/aws-apigatewayv2-integrations";
 import * as lambda from "@aws-cdk/aws-lambda";
 import * as lambdaNodeJs from "@aws-cdk/aws-lambda-nodejs";
 
 import { AuthenticatedApiProps } from "./authenticated-api-props";
 
+const DEFAULT_API_LATENCY_THRESHOLD = cdk.Duration.minutes(1);
+const DEFAULT_LAMBDA_DURATION_THRESHOLD = cdk.Duration.minutes(1);
+
 export class AuthenticatedApi extends cdk.Construct {
   constructor(scope: cdk.Construct, id: string, props: AuthenticatedApiProps) {
     super(scope, id);
+
+    const alarmAction = new cloudwatchActions.SnsAction(props.alarmTopic);
 
     const httpApi = new apigatewayv2.HttpApi(
       this,
@@ -96,6 +103,59 @@ export class AuthenticatedApi extends cdk.Construct {
           });
         }
       }
+
+      // Add Cloudwatch alarms for this route
+
+      // Add an alarm on the duration of the lambda dealing with the HTTP Request
+      const durationThreshold = routeLambdaProps.lamdaDurationAlarmThreshold? routeLambdaProps.lamdaDurationAlarmThreshold : DEFAULT_LAMBDA_DURATION_THRESHOLD;
+      const durationMetric = routeLambda.metric("Duration");
+      const durationAlarm = new cloudwatch.Alarm(
+        this,
+        `${props.name}-${routeLambdaProps.name}-duration-alarm`,
+        {
+          alarmName: `${props.name}-${routeLambdaProps.name}-duration-alarm`,
+          alarmDescription: `Alarm if duration of lambda for route ${props.name}-${routeLambdaProps.name} exceeds duration ${durationThreshold.toMilliseconds()} milliseconds`,
+          actionsEnabled: true,
+          metric: durationMetric,
+          statistic: "sum",
+          period: cdk.Duration.minutes(1),
+          evaluationPeriods: 1,
+          threshold: durationThreshold.toMilliseconds(),
+          comparisonOperator:
+            cloudwatch.ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+          // Set treatMissingData to IGNORE
+          // Stops alarms with minimal data having false alarms when they transition to this state
+          treatMissingData: cloudwatch.TreatMissingData.IGNORE,
+        }
+      );
+      durationAlarm.addAlarmAction(alarmAction);
+      durationAlarm.addOkAction(alarmAction);
     }
+
+    // Add a cloudwatch alarm for the latency of the api - this is all routes within the api
+    const latencyThreshold = props.apiLatencyAlarmThreshold? props.apiLatencyAlarmThreshold : DEFAULT_API_LATENCY_THRESHOLD;
+    const metricLatency = httpApi.metricLatency();//{
+
+    const routeLatencyAlarm = new cloudwatch.Alarm(
+      this,
+      `${props.name}-latency-alarm`,
+      {
+        alarmName: `${props.name}-latency-alarm`,
+        alarmDescription: `Alarm if latency on api ${props.name} exceeds ${latencyThreshold.toMilliseconds()} milliseconds`,
+        actionsEnabled: true,
+        metric: metricLatency,
+        statistic: "sum",
+        period: cdk.Duration.minutes(1),
+        evaluationPeriods: 1,
+        threshold: latencyThreshold.toMilliseconds(),
+        comparisonOperator:
+          cloudwatch.ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+        // Set treatMissingData to IGNORE
+        // Stops alarms with minimal data having false alarms when they transition to this state
+        treatMissingData: cloudwatch.TreatMissingData.IGNORE,
+      }
+    );
+    routeLatencyAlarm.addAlarmAction(alarmAction);
+    routeLatencyAlarm.addOkAction(alarmAction);
   }
 }
