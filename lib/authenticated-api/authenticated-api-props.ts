@@ -1,4 +1,5 @@
 import * as cdk from "@aws-cdk/core";
+import * as ec2 from "@aws-cdk/aws-ec2";
 import * as sns from "@aws-cdk/aws-sns";
 
 import { RouteLambdaProps } from "./route-lambda-props";
@@ -10,6 +11,9 @@ export interface AuthenticatedApiProps {
   stageName: string;
   authenticateAllRoutes: boolean;
   routes: Array<RouteLambdaProps>;
+  securityGroup?: ec2.ISecurityGroup;
+  vpc: ec2.IVpc;
+  vpcSubnets: ec2.SubnetSelection;
 
   // Persona props are all strings - even the port.
   // These are set as environment variables on the Auth Lambda.

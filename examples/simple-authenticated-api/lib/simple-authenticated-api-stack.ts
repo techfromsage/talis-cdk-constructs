@@ -1,4 +1,5 @@
 import * as apigatewayv2 from "@aws-cdk/aws-apigatewayv2";
+import * as ec2 from "@aws-cdk/aws-ec2";
 import * as cdk from "@aws-cdk/core";
 import * as sns from "@aws-cdk/aws-sns";
 
@@ -25,12 +26,18 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
       { topicName: `${prefix}simple-lambda-worker-alarm` }
     );
 
+    const vpc = ec2.Vpc.fromLookup(this, `${prefix}-vpc`, {
+      vpcId: "vpc-0155db5e1ab5c28b6",
+    });
+
     /* const api = */ new AuthenticatedApi(this, "simple-authenticated-api", {
       prefix,
       name: "simple-authenticated-api",
       description: "A simple example API",
       stageName: "development", // This should be development / staging / production as appropriate
       alarmTopic,
+      vpc,
+      vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE },
 
       authenticateAllRoutes: false,
       persona: {
@@ -45,16 +52,22 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
           name: "route1",
           paths: ["/1/route1"],
           method: apigatewayv2.HttpMethod.GET,
-          entry: "src/lambda/route1.js",
-          handler: "route",
+          lambdaProps: {
+            entry: "src/lambda/route1.js",
+            handler: "route",
+            timeout: cdk.Duration.seconds(30),
+          },
           requiresAuth: true,
         },
         {
           name: "route2",
           paths: ["/1/route2"],
           method: apigatewayv2.HttpMethod.GET,
-          entry: "src/lambda/route2.js",
-          handler: "route",
+          lambdaProps: {
+            entry: "src/lambda/route2.js",
+            handler: "route",
+            timeout: cdk.Duration.seconds(30),
+          }
         },
       ],
     });

@@ -57,6 +57,10 @@ export class AuthenticatedApi extends cdk.Construct {
 
         awsSdkConnectionReuse: true,
         runtime: lambda.Runtime.NODEJS_14_X,
+        timeout: cdk.Duration.minutes(2),
+        securityGroup: props.securityGroup,
+        vpc: props.vpc,
+        vpcSubnets: props.vpcSubnets,
       }
     );
 
@@ -66,20 +70,24 @@ export class AuthenticatedApi extends cdk.Construct {
       handler: authLambda,
     });
 
-    for (const routeLambdaProps of props.routes) {
+    for (const routeProps of props.routes) {
       // Create the lambda
       const routeLambda = new lambdaNodeJs.NodejsFunction(
         this,
-        `${props.prefix}${routeLambdaProps.name}`,
+        `${props.prefix}${routeProps.name}`,
         {
-          functionName: `${props.prefix}${props.name}-${routeLambdaProps.name}`,
+          functionName: `${props.prefix}${props.name}-${routeProps.name}`,
 
-          entry: routeLambdaProps.entry,
-          handler: routeLambdaProps.handler,
+          entry: routeProps.lambdaProps.entry,
+          handler: routeProps.lambdaProps.handler,
 
           // Enforce the following properties
           awsSdkConnectionReuse: true,
           runtime: lambda.Runtime.NODEJS_14_X,
+          timeout: routeProps.lambdaProps.timeout,
+          securityGroup: props.securityGroup,
+          vpc: props.vpc,
+          vpcSubnets: props.vpcSubnets,
         }
       );
 
@@ -87,21 +95,21 @@ export class AuthenticatedApi extends cdk.Construct {
         handler: routeLambda,
       });
 
-      for (const path of routeLambdaProps.paths) {
+      for (const path of routeProps.paths) {
         if (
           props.authenticateAllRoutes === true ||
-          routeLambdaProps.requiresAuth
+          routeProps.requiresAuth
         ) {
           httpApi.addRoutes({
             path: path,
-            methods: [routeLambdaProps.method],
+            methods: [routeProps.method],
             integration,
             authorizer,
           });
         } else {
           httpApi.addRoutes({
             path: path,
-            methods: [routeLambdaProps.method],
+            methods: [routeProps.method],
             integration,
           });
         }
@@ -110,19 +118,19 @@ export class AuthenticatedApi extends cdk.Construct {
       // Add Cloudwatch alarms for this route
 
       // Add an alarm on the duration of the lambda dealing with the HTTP Request
-      const durationThreshold = routeLambdaProps.lamdaDurationAlarmThreshold
-        ? routeLambdaProps.lamdaDurationAlarmThreshold
+      const durationThreshold = routeProps.lamdaDurationAlarmThreshold
+        ? routeProps.lamdaDurationAlarmThreshold
         : DEFAULT_LAMBDA_DURATION_THRESHOLD;
       const durationMetric = routeLambda.metric("Duration");
       const durationAlarm = new cloudwatch.Alarm(
         this,
-        `${props.name}-${routeLambdaProps.name}-duration-alarm`,
+        `${props.name}-${routeProps.name}-duration-alarm`,
         {
-          alarmName: `${props.name}-${routeLambdaProps.name}-duration-alarm`,
+          alarmName: `${props.name}-${routeProps.name}-duration-alarm`,
           alarmDescription: `Alarm if duration of lambda for route ${
             props.name
           }-${
-            routeLambdaProps.name
+            routeProps.name
           } exceeds duration ${durationThreshold.toMilliseconds()} milliseconds`,
           actionsEnabled: true,
           metric: durationMetric,
