@@ -7,7 +7,7 @@ import * as ec2 from "@aws-cdk/aws-ec2";
 import * as cdk from "@aws-cdk/core";
 import * as sns from "@aws-cdk/aws-sns";
 import { LambdaWorker } from "../../lib/lambda-worker";
-import { AuthenticatedApi } from "../../lib/authenticated-api";
+/* import { AuthenticatedApi } from "../../lib/authenticated-api"; */
 
 describe("LambdaWorker", () => {
   describe("with only required props", () => {
