@@ -1,6 +1,6 @@
-import * as cdk from '@aws-cdk/core';
+import * as cdk from "@aws-cdk/core";
 
-import { HttpMethod } from '@aws-cdk/aws-apigatewayv2';
+import { HttpMethod } from "@aws-cdk/aws-apigatewayv2";
 
 import { AuthenticatedApi } from "../../../lib";
 
@@ -16,28 +16,37 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
       ? process.env.AWS_PREFIX
       : "development-xx-";
 
-    /* const api = */ new AuthenticatedApi(
-      this,
-      'simple-authenticated-api',
-      {
-        prefix,
-        name: 'simple-authenticated-api',
-        description: 'A simple example API',
-        stageName: 'development', // This should be development / staging / production as appropriate
+    /* const api = */ new AuthenticatedApi(this, "simple-authenticated-api", {
+      prefix,
+      name: "simple-authenticated-api",
+      description: "A simple example API",
+      stageName: "development", // This should be development / staging / production as appropriate
 
-        authenticateAllRoutes: false,
-        persona: {
-          host: 'staging-users.talis.com',
-          scheme: 'https',
-          port: '443',
-          oauth_route: '/oauth/tokens/',
+      authenticateAllRoutes: false,
+      persona: {
+        host: "staging-users.talis.com",
+        scheme: "https",
+        port: "443",
+        oauth_route: "/oauth/tokens/",
+      },
+
+      routes: [
+        {
+          name: "route1",
+          paths: ["/1/route1"],
+          method: HttpMethod.GET,
+          entry: "src/lambda/route1.js",
+          handler: "route",
+          requiresAuth: true,
         },
-
-        routes: [
-          { name: 'route1', paths: ['/1/route1'], method: HttpMethod.GET, entry: 'src/lambda/route1.js', handler: 'route', requiresAuth: true },
-          { name: 'route2', paths: ['/1/route2'], method: HttpMethod.GET, entry: 'src/lambda/route2.js', handler: 'route', },
-        ]
-      }
-    );
+        {
+          name: "route2",
+          paths: ["/1/route2"],
+          method: HttpMethod.GET,
+          entry: "src/lambda/route2.js",
+          handler: "route",
+        },
+      ],
+    });
   }
 }

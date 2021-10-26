@@ -1,6 +1,6 @@
-const _ = require('lodash');
+const _ = require("lodash");
 
-const { persona } = require('talis-node');
+const { persona } = require("talis-node");
 
 class PersonaAuthorizer {
   constructor(event, context) {
@@ -18,15 +18,18 @@ class PersonaAuthorizer {
       persona_oauth_route: process.env.PERSONA_OAUTH_ROUTE,
     };
 
-    console.log('Received event', this.event);
+    console.log("Received event", this.event);
 
     if (this.event.headers.authorization == null) {
-      console.log('Missing auth token');
-      return this.context.fail('Unauthorized');
+      console.log("Missing auth token");
+      return this.context.fail("Unauthorized");
     }
 
     if (this.personaClient == null) {
-      this.personaClient = persona.createClient(`${process.env.PERSONA_CLIENT_NAME} (lambda; NODE_ENV=${process.env.NODE_ENV})`, _.merge(personaConfig, {}));
+      this.personaClient = persona.createClient(
+        `${process.env.PERSONA_CLIENT_NAME} (lambda; NODE_ENV=${process.env.NODE_ENV})`,
+        _.merge(personaConfig, {})
+      );
     }
 
     const parsedMethodArn = this.parseMethodArn(this.event.routeArn);
@@ -36,18 +39,21 @@ class PersonaAuthorizer {
     console.log(`Method has scope: ${scope}`);
 
     let validationOpts = {
-      token: _.replace(this.event.headers.authorization, 'Bearer', '').trim(),
+      token: _.replace(this.event.headers.authorization, "Bearer", "").trim(),
     };
     if (scope != null) {
       validationOpts = _.merge(validationOpts, { scope });
     }
     console.log(`Validation ops: ${JSON.stringify(validationOpts)}`);
 
-    console.log('validating token against request', `/${parsedMethodArn.apiVersion}${parsedMethodArn.resourcePath}`);
+    console.log(
+      "validating token against request",
+      `/${parsedMethodArn.apiVersion}${parsedMethodArn.resourcePath}`
+    );
 
     if (!validationOpts.token || validationOpts.token.length === 0) {
-      console.log('token missing');
-      return this.context.fail('Unauthorized');
+      console.log("token missing");
+      return this.context.fail("Unauthorized");
     }
 
     try {
@@ -55,19 +61,19 @@ class PersonaAuthorizer {
       const success = {
         isAuthorized: true,
         context: {
-          exampleKey: "exampleValue"
-        }
+          exampleKey: "exampleValue",
+        },
       };
       return this.context.succeed(success);
     } catch (error) {
-      console.log('token validation failed', error);
+      console.log("token validation failed", error);
       if (error === persona.errorTypes.INSUFFICIENT_SCOPE) {
         const insuffcientScope = {
           isAuthorized: false,
           context: {
             decsription: "Insufficient Scope",
             exampleKey: "exampleValue",
-          }
+          },
         };
         return this.context.succeed(insuffcientScope);
       }
@@ -75,12 +81,12 @@ class PersonaAuthorizer {
       const failure = {
         isAuthorized: false,
         context: {
-          exampleKey: "exampleValue"
-        }
+          exampleKey: "exampleValue",
+        },
       };
       return this.context.succeed(failure);
     }
-  };
+  }
 
   validateToken(validationOpts) {
     const client = this.personaClient;
@@ -152,21 +158,29 @@ class PersonaAuthorizer {
       RESOURCE_PATH_INDEX,
     ];
 
-    const methodArnParts = methodArn.split(':');
+    const methodArnParts = methodArn.split(":");
     console.log(`Method ARN Parts: ${JSON.stringify(methodArnParts)}`);
     let apiGatewayArn = methodArnParts[API_GATEWAY_ARN_INDEX];
     // If the split created more than the expected number of parts, then the
     // apiGatewayArn must have had one or more :'s in it. Recreate the apiGateway arn.
-    for (let index = METHOD_ARN_INDEXES.length; index < methodArnParts.length; index += 1) {
+    for (
+      let index = METHOD_ARN_INDEXES.length;
+      index < methodArnParts.length;
+      index += 1
+    ) {
       apiGatewayArn += `:${methodArnParts[index]}`;
     }
 
-    const apiGatewayArnParts = apiGatewayArn.split('/');
+    const apiGatewayArnParts = apiGatewayArn.split("/");
 
     // If the split created more than the expected number of parts, then the
     // resource path must have had one or more /'s in it. Recreate the resource path.
-    let resourcePath = '';
-    for (let i = API_GATEWAY_ARN_INDEXES.length; i < apiGatewayArnParts.length; i += 1) {
+    let resourcePath = "";
+    for (
+      let i = API_GATEWAY_ARN_INDEXES.length;
+      i < apiGatewayArnParts.length;
+      i += 1
+    ) {
       resourcePath += `/${apiGatewayArnParts[i]}`;
     }
     return {
@@ -180,7 +194,7 @@ class PersonaAuthorizer {
       },
       awsAccountId: methodArnParts[ACCOUNT_ID_INDEX],
     };
-  };
+  }
 
   getScope(parsedMethodArn) {
     const conf = {
@@ -188,13 +202,13 @@ class PersonaAuthorizer {
         api: {
           1: {
             // TODO: Is this needed ? esXlint-disable-next-line no-useless-escape
-            '^\/route1$': {
+            "^/route1$": {
               GET: {
-                scope: 'analytics:admin',
+                scope: "analytics:admin",
               },
             },
           },
-        }
+        },
       },
     };
 
@@ -209,11 +223,10 @@ class PersonaAuthorizer {
           }
         }
         return null;
-      };
+      }
     }
     return null;
-  };
-
+  }
 }
 
 module.exports.validateToken = async (event, context) => {

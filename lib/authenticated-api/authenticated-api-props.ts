@@ -5,16 +5,16 @@ export interface AuthenticatedApiProps {
   name: string;
   description: string;
   stageName: string;
-  authenticateAllRoutes: boolean,
+  authenticateAllRoutes: boolean;
 
   // Persona props are all strings - even the port.
   // These are set as environment variables on the Auth Lambda.
   persona: {
-    host: string,
-    scheme: string,
-    port: string,
-    oauth_route: string,
-  }
+    host: string;
+    scheme: string;
+    port: string;
+    oauth_route: string;
+  };
 
   routes: Array<RouteLambdaProps>;
 }
