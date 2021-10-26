@@ -8,9 +8,9 @@ new SimpleAuthenticatedApiStack(
   app,
   `${process.env.AWS_PREFIX}SimpleAuthenticatedApiStack`,
   {
-    env: { 
-      account: process.env.CDK_DEFAULT_ACCOUNT, 
-      region: process.env.CDK_DEFAULT_REGION
+    env: {
+      account: process.env.CDK_DEFAULT_ACCOUNT,
+      region: process.env.CDK_DEFAULT_REGION,
     },
   }
 );

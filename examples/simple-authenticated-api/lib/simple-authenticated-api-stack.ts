@@ -67,7 +67,7 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
             entry: "src/lambda/route2.js",
             handler: "route",
             timeout: cdk.Duration.seconds(30),
-          }
+          },
         },
       ],
     });
