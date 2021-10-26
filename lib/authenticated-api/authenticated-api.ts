@@ -107,14 +107,20 @@ export class AuthenticatedApi extends cdk.Construct {
       // Add Cloudwatch alarms for this route
 
       // Add an alarm on the duration of the lambda dealing with the HTTP Request
-      const durationThreshold = routeLambdaProps.lamdaDurationAlarmThreshold? routeLambdaProps.lamdaDurationAlarmThreshold : DEFAULT_LAMBDA_DURATION_THRESHOLD;
+      const durationThreshold = routeLambdaProps.lamdaDurationAlarmThreshold
+        ? routeLambdaProps.lamdaDurationAlarmThreshold
+        : DEFAULT_LAMBDA_DURATION_THRESHOLD;
       const durationMetric = routeLambda.metric("Duration");
       const durationAlarm = new cloudwatch.Alarm(
         this,
         `${props.name}-${routeLambdaProps.name}-duration-alarm`,
         {
           alarmName: `${props.name}-${routeLambdaProps.name}-duration-alarm`,
-          alarmDescription: `Alarm if duration of lambda for route ${props.name}-${routeLambdaProps.name} exceeds duration ${durationThreshold.toMilliseconds()} milliseconds`,
+          alarmDescription: `Alarm if duration of lambda for route ${
+            props.name
+          }-${
+            routeLambdaProps.name
+          } exceeds duration ${durationThreshold.toMilliseconds()} milliseconds`,
           actionsEnabled: true,
           metric: durationMetric,
           statistic: "sum",
@@ -133,15 +139,19 @@ export class AuthenticatedApi extends cdk.Construct {
     }
 
     // Add a cloudwatch alarm for the latency of the api - this is all routes within the api
-    const latencyThreshold = props.apiLatencyAlarmThreshold? props.apiLatencyAlarmThreshold : DEFAULT_API_LATENCY_THRESHOLD;
-    const metricLatency = httpApi.metricLatency();//{
+    const latencyThreshold = props.apiLatencyAlarmThreshold
+      ? props.apiLatencyAlarmThreshold
+      : DEFAULT_API_LATENCY_THRESHOLD;
+    const metricLatency = httpApi.metricLatency(); //{
 
     const routeLatencyAlarm = new cloudwatch.Alarm(
       this,
       `${props.name}-latency-alarm`,
       {
         alarmName: `${props.name}-latency-alarm`,
-        alarmDescription: `Alarm if latency on api ${props.name} exceeds ${latencyThreshold.toMilliseconds()} milliseconds`,
+        alarmDescription: `Alarm if latency on api ${
+          props.name
+        } exceeds ${latencyThreshold.toMilliseconds()} milliseconds`,
         actionsEnabled: true,
         metric: metricLatency,
         statistic: "sum",
