@@ -1,0 +1,21 @@
+name: commitlint for PR title
+on:
+  pull_request:
+    types: ["opened", "edited", "reopened", "synchronize"]
+jobs:
+  commitlint-pr-title:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cache pull-request title
+        run: echo ::set-output name=PR_TITLE::${{ github.event.pull_request.title }}
+        id: pr_title
+      - uses: actions/checkout@v2
+      - name: Read node version from .nvmrc
+        run: echo ::set-output name=NVMRC::$(cat .nvmrc)
+        id: nvm
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "${{ steps.nvm.outputs.NVMRC }}"
+      - run: npm ci --ignore-scripts
+      - name: Apply commitlint to the PR title
+        run: echo "${{ steps.pr_title.outputs.PR_TITLE }}" | npx --no-install commitlint
