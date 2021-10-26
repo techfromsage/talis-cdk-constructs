@@ -88,7 +88,7 @@ export class AuthenticatedApi extends cdk.Construct {
       });
 
       for (const path of routeLambdaProps.paths) {
-        if (routeLambdaProps.requiresAuth) {
+        if (props.authenticateAllRoutes === true || routeLambdaProps.requiresAuth) {
           httpApi.addRoutes({
             path: path,
             methods: [routeLambdaProps.method],
