@@ -1,6 +1,6 @@
-const _ = require("lodash");
+import { _ } from "lodash";
 
-const { persona } = require("talis-node");
+import { persona } from "talis-node";
 
 class PersonaAuthorizer {
   constructor(event, context) {
