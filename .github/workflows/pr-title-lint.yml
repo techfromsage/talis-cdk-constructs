@@ -16,6 +16,6 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: "${{ steps.nvm.outputs.NVMRC }}"
-      - run: npm ci
+      - run: npm ci --ignore-scripts
       - name: Apply commitlint to the PR title
         run: echo "${{ steps.pr_title.outputs.PR_TITLE }}" | npx --no-install commitlint
