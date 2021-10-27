@@ -48,7 +48,7 @@ class PersonaAuthorizer {
 
     console.log(
       "validating token against request",
-      `/${parsedMethodArn.apiVersion}${parsedMethodArn.resourcePath}`
+      `${parsedMethodArn.resourcePath}`
     );
 
     if (!validationOpts.token || validationOpts.token.length === 0) {
@@ -114,7 +114,6 @@ class PersonaAuthorizer {
    * @returns {{
    *   method: string,
    *   resourcePath: string,
-   *   apiVersion: string,
    *   apiOptions: {
    *     region: string,
    *     restApiId: string,
@@ -172,21 +171,22 @@ class PersonaAuthorizer {
     }
 
     const apiGatewayArnParts = apiGatewayArn.split("/");
+    console.log(`api gateway arn parts: ${JSON.stringify(apiGatewayArnParts)}`);
 
     // If the split created more than the expected number of parts, then the
     // resource path must have had one or more /'s in it. Recreate the resource path.
     let resourcePath = "";
     for (
-      let i = API_GATEWAY_ARN_INDEXES.length;
+      let i = API_GATEWAY_ARN_INDEXES.length - 1;
       i < apiGatewayArnParts.length;
       i += 1
     ) {
       resourcePath += `/${apiGatewayArnParts[i]}`;
     }
+    console.log(`resource path: ${JSON.stringify(resourcePath)}`);
     return {
       method: apiGatewayArnParts[METHOD_INDEX],
       resourcePath,
-      apiVersion: apiGatewayArnParts[RESOURCE_PATH_INDEX],
       apiOptions: {
         region: methodArnParts[REGION_INDEX],
         restApiId: apiGatewayArnParts[API_ID_INDEX],
@@ -200,8 +200,7 @@ class PersonaAuthorizer {
     const conf = JSON.parse(process.env.SCOPE_CONFIG);
 
     for (const pathRegEx of Object.keys(conf)) {
-      const versionAndPath = `/${parsedMethodArn.apiVersion}${parsedMethodArn.resourcePath}`;
-      if (versionAndPath.match(pathRegEx)) {
+      if (parsedMethodArn.resourcePath.match(pathRegEx)) {
         return conf[pathRegEx];
       }
     }
