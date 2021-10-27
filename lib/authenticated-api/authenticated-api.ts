@@ -24,6 +24,17 @@ export class AuthenticatedApi extends cdk.Construct {
       `${props.prefix}${props.name}`
     );
 
+    // Routes may contain required scopes. These scopes need to be in the config
+    // of the authorization lambda. Create this config ahead of creating the authorization lambda
+    const scopeConfig : {[k: string]: any} = {};
+    for (const routeProps of props.routes) {
+      if (routeProps.requiredScope) {
+        for (const path of routeProps.paths) {
+          scopeConfig[`^${path}$`] = routeProps.requiredScope;
+        }
+      }
+    }
+
     // Auth Lambda
     const authLambda = new lambdaNodeJs.NodejsFunction(
       this,
@@ -54,6 +65,7 @@ export class AuthenticatedApi extends cdk.Construct {
           PERSONA_SCHEME: props.persona.scheme,
           PERSONA_PORT: props.persona.port,
           PERSONA_OAUTH_ROUTE: props.persona.oauth_route,
+          SCOPE_CONFIG: JSON.stringify(scopeConfig),
         },
 
         awsSdkConnectionReuse: true,

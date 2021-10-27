@@ -6,6 +6,7 @@ export interface RouteLambdaProps {
   paths: Array<string>;
   method: apigatewayv2.HttpMethod;
   requiresAuth?: boolean;
+  requiredScope?: string;
 
   lambdaProps: {
     entry: string;

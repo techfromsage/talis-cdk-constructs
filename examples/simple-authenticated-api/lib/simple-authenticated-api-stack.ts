@@ -58,6 +58,7 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
             timeout: cdk.Duration.seconds(30),
           },
           requiresAuth: true,
+          requiredScope: "analytics:admin",
         },
         {
           name: "route2",

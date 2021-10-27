@@ -197,32 +197,12 @@ class PersonaAuthorizer {
   }
 
   getScope(parsedMethodArn) {
-    const conf = {
-      aws: {
-        api: {
-          1: {
-            // TODO: Is this needed ? esXlint-disable-next-line no-useless-escape
-            "^/route1$": {
-              GET: {
-                scope: "analytics:admin",
-              },
-            },
-          },
-        },
-      },
-    };
+    const conf = JSON.parse(process.env.SCOPE_CONFIG);
 
-    if (conf.aws.api[parsedMethodArn.apiVersion]) {
-      const apiVersion = conf.aws.api[parsedMethodArn.apiVersion];
-      for (const pathRegEx of Object.keys(apiVersion)) {
-        if (parsedMethodArn.resourcePath.match(pathRegEx)) {
-          if (apiVersion[pathRegEx][parsedMethodArn.method]) {
-            if (apiVersion[pathRegEx][parsedMethodArn.method].scope) {
-              return apiVersion[pathRegEx][parsedMethodArn.method].scope;
-            }
-          }
-        }
-        return null;
+    for (const pathRegEx of Object.keys(conf)) {
+      const versionAndPath = `/${parsedMethodArn.apiVersion}${parsedMethodArn.resourcePath}`;
+      if (versionAndPath.match(pathRegEx)) {
+        return conf[pathRegEx];
       }
     }
     return null;
