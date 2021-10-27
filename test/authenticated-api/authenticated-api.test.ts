@@ -53,7 +53,6 @@ describe("AuthenticatedApi", () => {
               handler: "route",
               timeout: cdk.Duration.seconds(30),
             },
-            requiresAuth: true,
           },
           {
             name: "route2",
@@ -64,6 +63,7 @@ describe("AuthenticatedApi", () => {
               handler: "route",
               timeout: cdk.Duration.seconds(30),
             },
+            requiresAuth: false,
           },
         ],
       });

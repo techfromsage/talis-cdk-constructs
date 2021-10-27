@@ -200,9 +200,9 @@ export class AuthenticatedApi extends cdk.Construct {
       return true;
     }
 
-    // If we have set the requiresAuth prop for this route - then use the prop.
-    if (routeProps.requiresAuth) {
-      return routeProps.requiresAuth;
+    // If we have set the requiresAuth to false - then the route should not be authenticated
+    if (routeProps.requiresAuth === false) {
+      return false;
     }
 
     // By default the route shoud require auth
