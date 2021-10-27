@@ -36,7 +36,7 @@ export class SimpleLambdaWorkerStack extends cdk.Stack {
     );
 
     const vpc = ec2.Vpc.fromLookup(this, `${prefix}-vpc`, {
-      vpcName: "vpc-0155db5e1ab5c28b6",
+      vpcId: "vpc-0155db5e1ab5c28b6",
     });
 
     // Create the Lambda
