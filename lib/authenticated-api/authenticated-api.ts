@@ -9,6 +9,7 @@ import * as lambdaNodeJs from "@aws-cdk/aws-lambda-nodejs";
 import * as path from "path";
 
 import { AuthenticatedApiProps } from "./authenticated-api-props";
+import { RouteLambdaProps } from "./route-lambda-props";
 
 const DEFAULT_API_LATENCY_THRESHOLD = cdk.Duration.minutes(1);
 const DEFAULT_LAMBDA_DURATION_THRESHOLD = cdk.Duration.minutes(1);
@@ -109,7 +110,7 @@ export class AuthenticatedApi extends cdk.Construct {
       });
 
       for (const path of routeProps.paths) {
-        if (props.authenticateAllRoutes === true || routeProps.requiresAuth) {
+        if (this.shouldBeAuthenticated(props, routeProps)) {
           httpApi.addRoutes({
             path: path,
             methods: [routeProps.method],
@@ -188,5 +189,20 @@ export class AuthenticatedApi extends cdk.Construct {
     );
     routeLatencyAlarm.addAlarmAction(alarmAction);
     routeLatencyAlarm.addOkAction(alarmAction);
+  }
+
+  shouldBeAuthenticated(props : AuthenticatedApiProps, routeProps : RouteLambdaProps) {
+    // If we have set the authenticateAllRoutes prop then the route should be authenticated regardless 
+    if (props.authenticateAllRoutes === true) {
+      return true;
+    }
+
+    // If we have set the requiresAuth prop for this route - then use the prop.
+    if (routeProps.requiresAuth) {
+      return routeProps.requiresAuth;
+    }
+
+    // By default the route shoud require auth
+    return true;
   }
 }
