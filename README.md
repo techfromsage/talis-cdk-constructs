@@ -21,7 +21,7 @@ Builds are conducted by CircleCI, and upon successful build of the `main` branch
   - Possible replacement for Resque Workers / Jobs
   - Details [here](/examples/simple-lambda-worker/README.md).
 
-- AuthenticatedApi
+- `AuthenticatedApi`
   - An API Gateway (v2)
   - Built in optional Persona authentication on routes
   - Details [here](/examples/simple-authenticated-api/README.md).
