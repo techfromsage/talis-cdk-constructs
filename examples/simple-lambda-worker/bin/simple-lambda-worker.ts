@@ -4,7 +4,7 @@ import * as cdk from "@aws-cdk/core";
 import { SimpleLambdaWorkerStack } from "../lib/simple-lambda-worker-stack";
 
 const app = new cdk.App();
-new SimpleLambdaWorkerStack(app, "SimpleLambdaWorkerStack", {
+new SimpleLambdaWorkerStack(app, `${process.env.AWS_PREFIX}SimpleLambdaWorkerStack`, {
   /* If you don't specify 'env', this stack will be environment-agnostic.
    * Account/Region-dependent features and context lookups will not work,
    * but a single synthesized template can be deployed anywhere. */

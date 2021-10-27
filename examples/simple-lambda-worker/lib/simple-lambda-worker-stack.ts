@@ -2,6 +2,7 @@ import * as ec2 from "@aws-cdk/aws-ec2";
 import * as cdk from "@aws-cdk/core";
 import * as sns from "@aws-cdk/aws-sns";
 import * as lambda from '@aws-cdk/aws-lambda';
+import * as iam from '@aws-cdk/aws-iam';
 
 import { LambdaWorker } from "../../../lib";
 
@@ -40,6 +41,32 @@ export class SimpleLambdaWorkerStack extends cdk.Stack {
       vpcId: "vpc-0155db5e1ab5c28b6",
     });
 
+    const s3Policy = new iam.PolicyDocument({
+      statements: [
+        new iam.PolicyStatement({
+          resources: ['arn:aws:s3:::development-mr-pdf-bucket'],
+          effect: iam.Effect.ALLOW,
+          actions: ['s3:GetObject', 's3:ListBucket', 's3:PutObject'],
+        })
+      ]
+    });
+
+    const s3Role = new iam.Role(this, `${prefix}role`, {
+      assumedBy: new iam.ServicePrincipal('s3.amazonaws.com'),
+      description: 'Role for lambda s3 access',
+      inlinePolicies: {
+        s3AccessRole: s3Policy
+      }
+    });
+
+    s3Role.assumeRolePolicy?.addStatements(
+      new iam.PolicyStatement({
+        actions: ['sts:AssumeRole'],
+        effect: iam.Effect.ALLOW,
+        principals: [new iam.ServicePrincipal('lambda.amazonaws.com')],
+      }),
+    );
+
     //Lambda Layer
     const wkHtmlToPdfLayer = new lambda.LayerVersion(this, `${prefix}-wk-html-to-pdf-layer`, {
       code: lambda.Code.fromAsset('lib/wkhtmltox-0.12.6-4.amazonlinux2_lambda.zip'),
@@ -53,6 +80,7 @@ export class SimpleLambdaWorkerStack extends cdk.Stack {
       {
         name: `${prefix}simple-lambda-worker`,
         lambdaProps: {
+          role: s3Role,
           environment: {
             EXAMPLE_ENV_VAR: "example value",
             FONTCONFIG_PATH: "/opt/fonts",
