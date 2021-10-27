@@ -6,6 +6,7 @@ import * as cloudwatchActions from "@aws-cdk/aws-cloudwatch-actions";
 import * as integrations from "@aws-cdk/aws-apigatewayv2-integrations";
 import * as lambda from "@aws-cdk/aws-lambda";
 import * as lambdaNodeJs from "@aws-cdk/aws-lambda-nodejs";
+import * as path from "path";
 
 import { AuthenticatedApiProps } from "./authenticated-api-props";
 
@@ -30,7 +31,7 @@ export class AuthenticatedApi extends cdk.Construct {
       {
         functionName: `${props.prefix}${props.name}-authoriser`,
 
-        entry: "../../src/lambda/api/authorizer.js",
+        entry: `${path.resolve(__dirname)}/../../src/lambda/api/authorizer.js`,
         handler: "validateToken",
 
         bundling: {
