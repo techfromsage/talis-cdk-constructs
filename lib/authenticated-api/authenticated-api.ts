@@ -26,7 +26,7 @@ export class AuthenticatedApi extends cdk.Construct {
 
     // Routes may contain required scopes. These scopes need to be in the config
     // of the authorization lambda. Create this config ahead of creating the authorization lambda
-    const scopeConfig : {[k: string]: any} = {};
+    const scopeConfig: { [k: string]: any } = {};
     for (const routeProps of props.routes) {
       if (routeProps.requiredScope) {
         for (const path of routeProps.paths) {
