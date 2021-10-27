@@ -4,7 +4,8 @@ import * as cdk from "@aws-cdk/core";
 import { SimpleLambdaWorkerStack } from "../lib/simple-lambda-worker-stack";
 
 const app = new cdk.App();
-new SimpleLambdaWorkerStack(app, 
+new SimpleLambdaWorkerStack(
+  app,
   `${process.env.AWS_PREFIX}SimpleLambdaWorkerStack`,
   {
     env: {
