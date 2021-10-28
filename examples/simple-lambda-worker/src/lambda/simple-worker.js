@@ -3,6 +3,8 @@ const wkhtmltopdf = require('wkhtmltopdf');
 
 const fs = require('fs');
 
+let s3 = new aws.S3();
+
 class SimpleLambdaWorker {
   constructor(event) {
     this.event = event;
@@ -12,63 +14,73 @@ class SimpleLambdaWorker {
     console.log("START - Simple Worker processing event...");
     console.log('The url: ' + this.event.url);
 
-    const output = `/tmp/urlToPdfOutput.pdf`;
-    const writeStream = fs.createWriteStream(output);
+    const outputFile = '/tmp/urlToPdfOutput.pdf';
+    const writeStream = fs.createWriteStream(outputFile);
 
     const sampleHtml = '<h1>Test</h1>';
 
     // Simple output example
-    wkhtmltopdf(sampleHtml).pipe(writeStream);
-    console.log(fs.existsSync('/tmp/urlToPdfOutput.pdf'));
+    await wkhtmltopdf(sampleHtml).pipe(writeStream);
+    console.log(fs.existsSync(outputFile));
 
     console.log('calling s3 testing function...');
-    await testS3();
 
-    // let s3 = new aws.S3();
-    // let params = {
-    //   Bucket: 'development-mr-pdf-bucket',
-    //   Key: 'sample.pdf',
-    //   Body: 'some text'
-    // }
-    //
-    // console.log('Start of PUT object...');
-    // s3.putObject(params, function(err, data){
-    //   if (err) {
-    //     console.log(err, err.stack)
-    //   }
-    //   else {
-    //     console.log('Complete file upload to S3');
-    //   }
-    // });
-    // console.log('End of put');
-    //
-    // console.log('Start of list...');
-    // s3.listObjects({Bucket: params.Bucket}, function(err, data) {
-    //   if (err) {
-    //     console.log('Error', err);
-    //   } else {
-    //     console.log("Success", data);
-    //   }
-    // });
-    // console.log('End of list.');
+    await new Promise((resolve, reject) => {
+      wkhtmltopdf(sampleHtml, {},() => {
+        console.log('calling S3 stuff...');
+        s3.putObject({
+          Bucket: 'development-mr-pdf-bucket',
+          Key: 'urlToPdfOutput.pdf',
+          Body: fs.createReadStream(outputFile),
+          ContentType: 'application/pdf',
+        }, (error) => {
+          if (error != null) {
+            console.log('Unable to send file to S3', error);
+            reject('Unable to send file to S3', {});
+          } else {
+            console.log('Upload done!');
+            resolve('done');
+          }
+        });
+      }).pipe(writeStream);
+    });
 
-    //S3 implementation
-    // wkhtmltopdf(this.event.url, { pageSize: 'a4'}, () => {
-    //   S3.putObject({
-    //     Bucket: 'development-mr-pdf-bucket',
-    //     Key: 'urlToPdfOutput.pdf',
-    //     Body: fs.createReadStream(output),
-    //     ContentType: 'application/pdf'
-    //   }, (error) => {
-    //     if (error != null) {
-    //       console.log('urlToPdfOutput.pdf upload failed to send to S3 with error!' + error);
-    //       callback('Unable to send file to S3', {});
-    //     } else {
-    //       console.log('urlToPdfOutput.pdf upload is complete!');
-    //       callback(null, { filename: 'urlToPdfOutput.pdf' });
+    // await testS3();
+    // await testPutObject('/tmp/urlToPdfOutput.pdf');
+
+
+    // S3 implementation
+    /* working **/
+    // await new Promise((resolve, reject) => {
+    //   fs.readFile('/tmp/urlToPdfOutput.pdf', (err, data) => {
+    //     if (err){
+    //       console.log('Reading file problem', err);
     //     }
+    //     let base64Data = new Buffer(data, 'binary');
+    //     console.log('base64 done', base64Data);
+    //
+    //     let putParams = {
+    //       Bucket: 'development-mr-pdf-bucket',
+    //       Key: 'urlToPdfOutput.pdf',
+    //       Body: base64Data,
+    //       ContentType: 'application/pdf'
+    //     }
+    //
+    //     console.log('putting object');
+    //     s3.putObject(putParams, (err2, data2) => {
+    //       if (err) {
+    //         console.log('There was an error putting object', err2);
+    //         reject(err);
+    //       } else {
+    //         console.log('success');
+    //         console.log(data2);
+    //         resolve(data2);
+    //       }
+    //     })
     //   })
-    // }).pipe(writeStream);
+    // });
+    /* end of working **/
+
 
     console.log("END - Simple Worker processing event");
   }
@@ -76,7 +88,7 @@ class SimpleLambdaWorker {
 
 // AWS S3 testing function
 async function testS3() {
-  let s3 = new aws.S3();
+  // let s3 = new aws.S3();
   let params = {
     Bucket: 'development-mr-pdf-bucket',
   }
@@ -92,7 +104,32 @@ async function testS3() {
       });
     }
   }).promise();
+
   console.log('End of bucket listing.');
+}
+
+async function testPutObject(objectPath) {
+  let fileContent = fs.readFileSync(objectPath);
+  let putParams = {
+    Bucket: 'development-mr-pdf-bucket',
+    Key: 'testPdfWrite.pdf',
+    Body: fileContent
+  }
+
+  console.log('Start of put object...');
+  await new Promise((resolve, reject) => {
+    s3.putObject(putParams, (err, data) => {
+      if (err) {
+        console.log('There was an error putting object', err);
+        reject(err);
+      } else {
+        console.log('success');
+        console.log(data);
+        resolve(data);
+      }
+    });
+  });
+  console.log('End of put object...');
 }
 
 module.exports.simpleLambdaWorker = async (event) => {

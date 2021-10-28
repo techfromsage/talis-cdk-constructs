@@ -44,9 +44,9 @@ export class SimpleLambdaWorkerStack extends cdk.Stack {
     const s3Policy = new iam.PolicyDocument({
       statements: [
         new iam.PolicyStatement({
-          resources: ['arn:aws:s3:::development-mr-pdf-bucket'],
           effect: iam.Effect.ALLOW,
-          actions: ['s3:GetObject', 's3:ListBucket', 's3:PutObject'],
+          actions: ['s3:GetObject', 's3:PutObject', 's3:PutObjectAcl', 's3:ListBucket'],
+          resources: ['arn:aws:s3:::development-mr-pdf-bucket/*'],
         })
       ]
     });
