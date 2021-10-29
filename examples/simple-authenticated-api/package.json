@@ -1,8 +1,8 @@
 {
-  "name": "simple-lambda-worker",
+  "name": "simple-authenticated-api",
   "version": "0.1.0",
   "bin": {
-    "simple-lambda-worker": "bin/simple-lambda-worker.js"
+    "simple-authenticated-api": "bin/simple-authenticated-api.js"
   },
   "scripts": {
     "build": "tsc",
@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@aws-cdk/core": "1.129.0",
+    "talis-node": "git://github.com/talis/talis-node.git#v0.0.3",
     "source-map-support": "^0.5.16"
   }
 }

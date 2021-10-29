@@ -16,9 +16,15 @@ Builds are conducted by CircleCI, and upon successful build of the `main` branch
   - `CdnSiteHostingWithDnsConstruct` for static-site or single-page application hosting in S3 via CloudFront, with DNS record provisioning
 
 - `LambdaWorker`
+
   - A serverless background job.
   - Possible replacement for Resque Workers / Jobs
   - Details [here](/examples/simple-lambda-worker/README.md).
+
+- `AuthenticatedApi`
+  - An API Gateway (v2)
+  - Built in optional Persona authentication on routes
+  - Details [here](/examples/simple-authenticated-api/README.md).
 
 ## Useful commands
 

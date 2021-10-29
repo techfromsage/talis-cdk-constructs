@@ -36,8 +36,11 @@ jobs:
           name: Build code
           command: npm run build
       - run:
-          name: Build example code
+          name: Build lambda worker example code
           command: cd examples/simple-lambda-worker && npm install && npm run build
+      - run:
+          name: Build authenticated api example code
+          command: cd examples/simple-authenticated-api && npm install && npm run build
       - run:
           name: Run tests
           command: npm test

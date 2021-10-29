@@ -1,0 +1,34 @@
+import * as cdk from "@aws-cdk/core";
+import * as ec2 from "@aws-cdk/aws-ec2";
+import * as sns from "@aws-cdk/aws-sns";
+
+import { RouteLambdaProps } from "./route-lambda-props";
+
+export interface AuthenticatedApiProps {
+  prefix: string;
+  name: string;
+  description: string;
+  stageName: string;
+  routes: Array<RouteLambdaProps>;
+  securityGroup?: ec2.ISecurityGroup;
+  vpc: ec2.IVpc;
+  vpcSubnets: ec2.SubnetSelection;
+
+  // Persona props are all strings - even the port.
+  // These are set as environment variables on the Auth Lambda.
+  persona: {
+    host: string;
+    scheme: string;
+    port: string;
+    oauth_route: string;
+  };
+
+  // SNS Topic all alarm actions should be sent to
+  alarmTopic: sns.ITopic;
+
+  // The ApiGateway will have an alarm for the latency of responces.
+  // This covers all routes in the API. By default the threshold for
+  // this alarm will be one second. This default can be overriden by
+  // setting the apiLatencyAlarmThreshold property.
+  apiLatencyAlarmThreshold?: cdk.Duration;
+}
