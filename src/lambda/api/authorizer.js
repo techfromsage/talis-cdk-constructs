@@ -2,6 +2,42 @@ import { _ } from "lodash";
 
 import { persona } from "talis-node";
 
+// Constants used by parseMethodArn:
+//
+// Example MethodARN:
+//   "arn:aws:execute-api:<Region id>:<Account id>:<API id>/<Stage>/<Method>/<Resource path>"
+// Method ARN Index:  0   1   2           3           4            5
+// API Gateway ARN Index:                                          0        1       2        3
+//
+//
+const ARN_INDEX = 0;
+const AWS_INDEX = 1;
+const EXECUTE_INDEX = 2;
+const REGION_INDEX = 3;
+const ACCOUNT_ID_INDEX = 4;
+const API_GATEWAY_ARN_INDEX = 5;
+
+const METHOD_ARN_INDEXES = [
+  ARN_INDEX,
+  AWS_INDEX,
+  EXECUTE_INDEX,
+  REGION_INDEX,
+  ACCOUNT_ID_INDEX,
+  API_GATEWAY_ARN_INDEX,
+];
+
+const API_ID_INDEX = 0;
+const STAGE_INDEX = 1;
+const METHOD_INDEX = 2;
+const RESOURCE_PATH_INDEX = 3;
+
+const API_GATEWAY_ARN_INDEXES = [
+  API_ID_INDEX,
+  STAGE_INDEX,
+  METHOD_INDEX,
+  RESOURCE_PATH_INDEX,
+];
+
 class PersonaAuthorizer {
   constructor(event, context) {
     this.event = event;
@@ -11,25 +47,11 @@ class PersonaAuthorizer {
   }
 
   async handle() {
-    const personaConfig = {
-      persona_host: process.env.PERSONA_HOST,
-      persona_scheme: process.env.PERSONA_SCHEME,
-      persona_port: process.env.PERSONA_PORT,
-      persona_oauth_route: process.env.PERSONA_OAUTH_ROUTE,
-    };
-
     console.log("Received event", this.event);
 
     if (this.event.headers.authorization == null) {
       console.log("Missing auth token");
       return this.context.fail("Unauthorized");
-    }
-
-    if (this.personaClient == null) {
-      this.personaClient = persona.createClient(
-        `${process.env.PERSONA_CLIENT_NAME} (lambda; NODE_ENV=${process.env.NODE_ENV})`,
-        _.merge(personaConfig, {})
-      );
     }
 
     const parsedMethodArn = this.parseMethodArn(this.event.routeArn);
@@ -89,7 +111,7 @@ class PersonaAuthorizer {
   }
 
   validateToken(validationOpts) {
-    const client = this.personaClient;
+    const client = this.getPersonaClient();
     return new Promise(function (resolve, reject) {
       client.validateToken(validationOpts, (error) => {
         if (error) {
@@ -123,40 +145,6 @@ class PersonaAuthorizer {
    *   }}
    */
   parseMethodArn(methodArn) {
-    // Example MethodARN:
-    //   "arn:aws:execute-api:<Region id>:<Account id>:<API id>/<Stage>/<Method>/<Resource path>"
-    // Method ARN Index:  0   1   2           3           4            5
-    // API Gateway ARN Index:                                          0        1       2        3
-    //
-    //
-    const ARN_INDEX = 0;
-    const AWS_INDEX = 1;
-    const EXECUTE_INDEX = 2;
-    const REGION_INDEX = 3;
-    const ACCOUNT_ID_INDEX = 4;
-    const API_GATEWAY_ARN_INDEX = 5;
-
-    const METHOD_ARN_INDEXES = [
-      ARN_INDEX,
-      AWS_INDEX,
-      EXECUTE_INDEX,
-      REGION_INDEX,
-      ACCOUNT_ID_INDEX,
-      API_GATEWAY_ARN_INDEX,
-    ];
-
-    const API_ID_INDEX = 0;
-    const STAGE_INDEX = 1;
-    const METHOD_INDEX = 2;
-    const RESOURCE_PATH_INDEX = 3;
-
-    const API_GATEWAY_ARN_INDEXES = [
-      API_ID_INDEX,
-      STAGE_INDEX,
-      METHOD_INDEX,
-      RESOURCE_PATH_INDEX,
-    ];
-
     const methodArnParts = methodArn.split(":");
     console.log(`Method ARN Parts: ${JSON.stringify(methodArnParts)}`);
     let apiGatewayArn = methodArnParts[API_GATEWAY_ARN_INDEX];
@@ -205,6 +193,24 @@ class PersonaAuthorizer {
       }
     }
     return null;
+  }
+
+  getPersonaClient() {
+    if (this.personaClient == null) {
+      const personaConfig = {
+        persona_host: process.env.PERSONA_HOST,
+        persona_scheme: process.env.PERSONA_SCHEME,
+        persona_port: process.env.PERSONA_PORT,
+        persona_oauth_route: process.env.PERSONA_OAUTH_ROUTE,
+      };
+
+      this.personaClient = persona.createClient(
+        `${process.env.PERSONA_CLIENT_NAME} (lambda; NODE_ENV=${process.env.NODE_ENV})`,
+        _.merge(personaConfig, {})
+      );
+    }
+
+    return this.personaClient;
   }
 }
 

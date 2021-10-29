@@ -7,3 +7,6 @@ node_modules
 .cdk.staging
 cdk.out
 cdk.context.json
+
+!src/lambda/route1.js
+!src/lambda/route2.js

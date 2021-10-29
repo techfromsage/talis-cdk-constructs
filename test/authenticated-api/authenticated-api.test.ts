@@ -35,7 +35,6 @@ describe("AuthenticatedApi", () => {
         vpc,
         vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE },
 
-        authenticateAllRoutes: false,
         persona: {
           host: "staging-users.talis.com",
           scheme: "https",

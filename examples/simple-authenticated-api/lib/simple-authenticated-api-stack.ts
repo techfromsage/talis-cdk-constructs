@@ -39,7 +39,6 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
       vpc,
       vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE },
 
-      authenticateAllRoutes: false,
       persona: {
         host: "staging-users.talis.com",
         scheme: "https",
@@ -57,7 +56,6 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
             handler: "route",
             timeout: cdk.Duration.seconds(30),
           },
-          requiresAuth: true,
           requiredScope: "analytics:admin",
         },
         {
@@ -69,6 +67,7 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
             handler: "route",
             timeout: cdk.Duration.seconds(30),
           },
+          requiresAuth: false,
         },
       ],
     });

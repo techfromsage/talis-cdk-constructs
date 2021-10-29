@@ -9,7 +9,6 @@ export interface AuthenticatedApiProps {
   name: string;
   description: string;
   stageName: string;
-  authenticateAllRoutes: boolean;
   routes: Array<RouteLambdaProps>;
   securityGroup?: ec2.ISecurityGroup;
   vpc: ec2.IVpc;

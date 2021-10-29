@@ -195,11 +195,6 @@ export class AuthenticatedApi extends cdk.Construct {
     props: AuthenticatedApiProps,
     routeProps: RouteLambdaProps
   ): boolean {
-    // If we have set the authenticateAllRoutes prop then the route should be authenticated regardless
-    if (props.authenticateAllRoutes === true) {
-      return true;
-    }
-
     // If we have set the requiresAuth to false - then the route should not be authenticated
     if (routeProps.requiresAuth === false) {
       return false;
