@@ -19,18 +19,27 @@ class SimpleLambdaWorker {
 
     const sampleHtml = '<h1>Test</h1>';
 
+    const s3HtmlData = await s3.getObject({
+        Bucket: 'development-mr-pdf-bucket',
+        Key: 'sample-html.html'
+      }
+    ).promise();
+
+    console.log('file body: ' + JSON.stringify(s3HtmlData));
+
     // Simple output example
-    await wkhtmltopdf(sampleHtml).pipe(writeStream);
-    console.log(fs.existsSync(outputFile));
+    // await wkhtmltopdf(s3HtmlData.Body).pipe(writeStream);
+    // await wkhtmltopdf(sampleHtml).pipe(writeStream);
+    // console.log(fs.existsSync(outputFile));
 
     console.log('calling s3 testing function...');
 
     await new Promise((resolve, reject) => {
-      wkhtmltopdf(sampleHtml, {},() => {
+      wkhtmltopdf(s3HtmlData.Body, {},() => {
         console.log('calling S3 stuff...');
         s3.putObject({
           Bucket: 'development-mr-pdf-bucket',
-          Key: 'urlToPdfOutput.pdf',
+          Key: 'htmlToPdfOutput.pdf',
           Body: fs.createReadStream(outputFile),
           ContentType: 'application/pdf',
         }, (error) => {
@@ -47,40 +56,6 @@ class SimpleLambdaWorker {
 
     // await testS3();
     // await testPutObject('/tmp/urlToPdfOutput.pdf');
-
-
-    // S3 implementation
-    /* working **/
-    // await new Promise((resolve, reject) => {
-    //   fs.readFile('/tmp/urlToPdfOutput.pdf', (err, data) => {
-    //     if (err){
-    //       console.log('Reading file problem', err);
-    //     }
-    //     let base64Data = new Buffer(data, 'binary');
-    //     console.log('base64 done', base64Data);
-    //
-    //     let putParams = {
-    //       Bucket: 'development-mr-pdf-bucket',
-    //       Key: 'urlToPdfOutput.pdf',
-    //       Body: base64Data,
-    //       ContentType: 'application/pdf'
-    //     }
-    //
-    //     console.log('putting object');
-    //     s3.putObject(putParams, (err2, data2) => {
-    //       if (err) {
-    //         console.log('There was an error putting object', err2);
-    //         reject(err);
-    //       } else {
-    //         console.log('success');
-    //         console.log(data2);
-    //         resolve(data2);
-    //       }
-    //     })
-    //   })
-    // });
-    /* end of working **/
-
 
     console.log("END - Simple Worker processing event");
   }
