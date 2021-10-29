@@ -110,18 +110,18 @@ export class AuthenticatedApi extends cdk.Construct {
       });
 
       for (const path of routeProps.paths) {
-        if (this.shouldBeAuthenticated(props, routeProps)) {
+        if (routeProps.isPublic === true) {
           httpApi.addRoutes({
             path: path,
             methods: [routeProps.method],
             integration,
-            authorizer,
           });
         } else {
           httpApi.addRoutes({
             path: path,
             methods: [routeProps.method],
             integration,
+            authorizer,
           });
         }
       }
@@ -189,18 +189,5 @@ export class AuthenticatedApi extends cdk.Construct {
     );
     routeLatencyAlarm.addAlarmAction(alarmAction);
     routeLatencyAlarm.addOkAction(alarmAction);
-  }
-
-  shouldBeAuthenticated(
-    props: AuthenticatedApiProps,
-    routeProps: RouteLambdaProps
-  ): boolean {
-    // If we have set the requiresAuth to false - then the route should not be authenticated
-    if (routeProps.requiresAuth === false) {
-      return false;
-    }
-
-    // By default the route shoud require auth
-    return true;
   }
 }

@@ -62,7 +62,7 @@ describe("AuthenticatedApi", () => {
               handler: "route",
               timeout: cdk.Duration.seconds(30),
             },
-            requiresAuth: false,
+            isPublic: true,
           },
         ],
       });

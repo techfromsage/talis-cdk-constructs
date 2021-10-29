@@ -67,7 +67,7 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
             handler: "route",
             timeout: cdk.Duration.seconds(30),
           },
-          requiresAuth: false,
+          isPublic: true,
         },
       ],
     });
