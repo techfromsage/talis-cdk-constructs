@@ -79,13 +79,16 @@ class PersonaAuthorizer {
     }
 
     try {
+      console.log(`Calling validateToken...`);
       await this.validateToken(validationOpts);
+      console.log(`Call to validateToken returned`);
       const success = {
         isAuthorized: true,
         context: {
           exampleKey: "exampleValue",
         },
       };
+      console.log(`Returning Suceess`);
       return this.context.succeed(success);
     } catch (error) {
       console.log("token validation failed", error);
@@ -97,6 +100,7 @@ class PersonaAuthorizer {
             exampleKey: "exampleValue",
           },
         };
+        console.log(`Returning insufficient scope`);
         return this.context.succeed(insuffcientScope);
       }
 
@@ -106,17 +110,24 @@ class PersonaAuthorizer {
           exampleKey: "exampleValue",
         },
       };
+      console.log(`Returning failure`);
       return this.context.succeed(failure);
     }
   }
 
   validateToken(validationOpts) {
+    console.log('In validateToken...');
     const client = this.getPersonaClient();
+    console.log('Have client');
     return new Promise(function (resolve, reject) {
+      console.log('In promise');
       client.validateToken(validationOpts, (error) => {
+        console.log('Client validate token returned');
         if (error) {
+          console.log('Rejecting promise');
           reject(error);
         }
+        console.log('Resolving promise');
         resolve();
       });
     });
@@ -196,6 +207,7 @@ class PersonaAuthorizer {
   }
 
   getPersonaClient() {
+    console.log('In getPersonaClient');
     if (this.personaClient == null) {
       const personaConfig = {
         persona_host: process.env.PERSONA_HOST,
@@ -203,13 +215,16 @@ class PersonaAuthorizer {
         persona_port: process.env.PERSONA_PORT,
         persona_oauth_route: process.env.PERSONA_OAUTH_ROUTE,
       };
+      console.log(`personsConfig: ${JSON.stringify(personaConfig)}`);
 
+      console.log('Creating client...')
       this.personaClient = persona.createClient(
         `${process.env.PERSONA_CLIENT_NAME} (lambda; NODE_ENV=${process.env.NODE_ENV})`,
         _.merge(personaConfig, {})
       );
     }
 
+    console.log('Returining client');
     return this.personaClient;
   }
 }
