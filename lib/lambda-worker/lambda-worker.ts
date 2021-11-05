@@ -121,9 +121,9 @@ export class LambdaWorker extends cdk.Construct {
       runtime: lambda.Runtime.NODEJS_14_X,
     });
 
-    if (props.lambdaProps.policies) {
-      for (const policy of props.lambdaProps.policies) {
-        lambdaWorker.role?.attachInlinePolicy(policy);
+    if (props.lambdaProps.policyStatements) {
+      for (const statement of props.lambdaProps.policyStatements) {
+        lambdaWorker.role?.addToPolicy(statement)
       }
     }
 
