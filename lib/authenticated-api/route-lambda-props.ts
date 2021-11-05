@@ -10,6 +10,7 @@ export interface RouteLambdaProps {
 
   lambdaProps: {
     entry: string;
+    environment?: { [key: string]: string };
     handler: string;
     timeout: cdk.Duration;
   };

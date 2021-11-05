@@ -93,6 +93,7 @@ export class AuthenticatedApi extends cdk.Construct {
 
           entry: routeProps.lambdaProps.entry,
           handler: routeProps.lambdaProps.handler,
+          environment: routeProps.lambdaProps.environment,
 
           // Enforce the following properties
           awsSdkConnectionReuse: true,
