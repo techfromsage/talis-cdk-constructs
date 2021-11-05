@@ -110,7 +110,7 @@ export class LambdaWorker extends cdk.Construct {
       reservedConcurrentExecutions:
         props.lambdaProps.reservedConcurrentExecutions,
       retryAttempts: props.lambdaProps.retryAttempts,
-      role: props.lambdaProps.role,
+      /* role: props.lambdaProps.role, */
       securityGroup: props.lambdaProps.securityGroup,
       timeout: props.lambdaProps.timeout,
       vpc: props.lambdaProps.vpc,
@@ -120,6 +120,12 @@ export class LambdaWorker extends cdk.Construct {
       awsSdkConnectionReuse: true,
       runtime: lambda.Runtime.NODEJS_14_X,
     });
+
+    if (props.lambdaProps.policies) {
+      for (const policy of props.lambdaProps.policies) {
+        lambdaWorker.role?.attachInlinePolicy(policy);
+      }
+    }
 
     // Add main queue and DLQ as event sources to the lambda
     // By default, the main queue is enabled and the DLQ is disabled
