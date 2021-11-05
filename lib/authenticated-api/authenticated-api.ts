@@ -92,8 +92,9 @@ export class AuthenticatedApi extends cdk.Construct {
           functionName: `${props.prefix}${props.name}-${routeProps.name}`,
 
           entry: routeProps.lambdaProps.entry,
-          handler: routeProps.lambdaProps.handler,
           environment: routeProps.lambdaProps.environment,
+          handler: routeProps.lambdaProps.handler,
+          role: routeProps.lambdaProps.role,
 
           // Enforce the following properties
           awsSdkConnectionReuse: true,
