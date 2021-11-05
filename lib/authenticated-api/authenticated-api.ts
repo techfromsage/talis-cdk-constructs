@@ -142,9 +142,9 @@ export class AuthenticatedApi extends cdk.Construct {
       const durationMetric = routeLambda.metric("Duration");
       const durationAlarm = new cloudwatch.Alarm(
         this,
-        `${props.name}-${routeProps.name}-duration-alarm`,
+        `${props.prefix}${props.name}-${routeProps.name}-duration-alarm`,
         {
-          alarmName: `${props.name}-${routeProps.name}-duration-alarm`,
+          alarmName: `${props.prefix}${props.name}-${routeProps.name}-duration-alarm`,
           alarmDescription: `Alarm if duration of lambda for route ${
             props.name
           }-${
@@ -175,9 +175,9 @@ export class AuthenticatedApi extends cdk.Construct {
 
     const routeLatencyAlarm = new cloudwatch.Alarm(
       this,
-      `${props.name}-latency-alarm`,
+      `${props.prefix}${props.name}-latency-alarm`,
       {
-        alarmName: `${props.name}-latency-alarm`,
+        alarmName: `${props.prefix}${props.name}-latency-alarm`,
         alarmDescription: `Alarm if latency on api ${
           props.name
         } exceeds ${latencyThreshold.toMilliseconds()} milliseconds`,
