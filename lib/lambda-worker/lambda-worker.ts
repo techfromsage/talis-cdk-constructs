@@ -17,12 +17,16 @@ const MINIMUM_LAMBDA_TIMEOUT = cdk.Duration.seconds(30);
 
 export class LambdaWorker extends cdk.Construct {
 
+  // The ARN of the queue messages for this LambdaWorker to process
+  // should be placed on.
+  public lambdaQueueArn : string;
+
   // The URL of the queue messages for this LambdaWorker to process
   // should be placed on. If you have passed in an option subscrip topic,
   // this queue will have automatically been subscribed to that topic.
   // If you have not supplied a topic, then you will need to route
   // messages to the queue at lambdaQueueUrl.
-  public lambdaQueueUrl : string
+  public lambdaQueueUrl : string;
 
   constructor(scope: cdk.Construct, id: string, props: LambdaWorkerProps) {
     super(scope, id);
@@ -76,6 +80,7 @@ export class LambdaWorker extends cdk.Construct {
       deadLetterQueue: { queue: lambdaDLQ, maxReceiveCount: maxReceiveCount },
     });
     this.lambdaQueueUrl = lambdaQueue.queueUrl;
+    this.lambdaQueueArn = lambdaQueue.queueArn;
 
     // If we have specified a topic, then subscribe
     // the main queue to the topic.
