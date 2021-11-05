@@ -13,6 +13,7 @@ export interface RouteLambdaProps {
     entry: string;
     environment?: { [key: string]: string };
     handler: string;
+    policyStatements?: [ iam.PolicyStatement ];
     role?: iam.IRole;
     timeout: cdk.Duration;
   };
