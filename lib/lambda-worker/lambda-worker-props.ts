@@ -15,7 +15,7 @@ export interface LambdaWorkerProps {
     entry: string;
     environment?: { [key: string]: string };
     memorySize: number; // LambdaWorker will set a minimum memory size of 1024
-    policyStatements?: [ iam.PolicyStatement ];
+    policyStatements?: iam.PolicyStatement[];
     reservedConcurrentExecutions?: number;
     retryAttempts?: number;
     role?: iam.IRole;
