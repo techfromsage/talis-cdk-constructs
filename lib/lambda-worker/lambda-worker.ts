@@ -130,10 +130,10 @@ export class LambdaWorker extends cdk.Construct {
     // Add main queue and DLQ as event sources to the lambda
     // By default, the main queue is enabled and the DLQ is disabled
     lambdaWorker.addEventSource(
-      new eventSource.SqsEventSource(lambdaQueue, { enabled: true })
+      new eventSource.SqsEventSource(lambdaQueue, { enabled: true, batchSize: 1 })
     );
     lambdaWorker.addEventSource(
-      new eventSource.SqsEventSource(lambdaDLQ, { enabled: false })
+      new eventSource.SqsEventSource(lambdaDLQ, { enabled: false, batchSize: 1 })
     );
 
     // Add alerting
