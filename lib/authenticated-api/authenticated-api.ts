@@ -108,7 +108,7 @@ export class AuthenticatedApi extends cdk.Construct {
 
       if (routeProps.lambdaProps.policyStatements) {
         for (const statement of routeProps.lambdaProps.policyStatements) {
-          routeLambda.role?.addToPolicy(statement)
+          routeLambda.role?.addToPolicy(statement);
         }
       }
 

@@ -16,17 +16,16 @@ const MINIMUM_MEMORY_SIZE = 1024;
 const MINIMUM_LAMBDA_TIMEOUT = cdk.Duration.seconds(30);
 
 export class LambdaWorker extends cdk.Construct {
-
   // The ARN of the queue messages for this LambdaWorker to process
   // should be placed on.
-  public lambdaQueueArn : string;
+  public lambdaQueueArn: string;
 
   // The URL of the queue messages for this LambdaWorker to process
   // should be placed on. If you have passed in an option subscrip topic,
   // this queue will have automatically been subscribed to that topic.
   // If you have not supplied a topic, then you will need to route
   // messages to the queue at lambdaQueueUrl.
-  public lambdaQueueUrl : string;
+  public lambdaQueueUrl: string;
 
   constructor(scope: cdk.Construct, id: string, props: LambdaWorkerProps) {
     super(scope, id);
@@ -123,17 +122,23 @@ export class LambdaWorker extends cdk.Construct {
 
     if (props.lambdaProps.policyStatements) {
       for (const statement of props.lambdaProps.policyStatements) {
-        lambdaWorker.role?.addToPolicy(statement)
+        lambdaWorker.role?.addToPolicy(statement);
       }
     }
 
     // Add main queue and DLQ as event sources to the lambda
     // By default, the main queue is enabled and the DLQ is disabled
     lambdaWorker.addEventSource(
-      new eventSource.SqsEventSource(lambdaQueue, { enabled: true, batchSize: 1 })
+      new eventSource.SqsEventSource(lambdaQueue, {
+        enabled: true,
+        batchSize: 1,
+      })
     );
     lambdaWorker.addEventSource(
-      new eventSource.SqsEventSource(lambdaDLQ, { enabled: false, batchSize: 1 })
+      new eventSource.SqsEventSource(lambdaDLQ, {
+        enabled: false,
+        batchSize: 1,
+      })
     );
 
     // Add alerting
