@@ -1,5 +1,6 @@
 import * as apigatewayv2 from "@aws-cdk/aws-apigatewayv2";
 import * as cdk from "@aws-cdk/core";
+import * as iam from "@aws-cdk/aws-iam";
 
 export interface RouteLambdaProps {
   name: string;
@@ -10,7 +11,9 @@ export interface RouteLambdaProps {
 
   lambdaProps: {
     entry: string;
+    environment?: { [key: string]: string };
     handler: string;
+    policyStatements?: iam.PolicyStatement[];
     timeout: cdk.Duration;
   };
 

@@ -3,14 +3,16 @@ import {
   countResources,
   haveResourceLike,
 } from "@aws-cdk/assert";
-import * as ec2 from "@aws-cdk/aws-ec2";
 import * as cdk from "@aws-cdk/core";
+import * as ec2 from "@aws-cdk/aws-ec2";
+import * as iam from "@aws-cdk/aws-iam";
 import * as sns from "@aws-cdk/aws-sns";
 import { LambdaWorker } from "../../lib/lambda-worker";
 
 describe("LambdaWorker", () => {
   describe("with only required props", () => {
     let stack: cdk.Stack;
+    let worker: LambdaWorker;
 
     beforeAll(() => {
       const app = new cdk.App();
@@ -23,12 +25,19 @@ describe("LambdaWorker", () => {
         cidr: "10.0.0.0/16",
       });
 
-      new LambdaWorker(stack, "MyTestLambdaWorker", {
+      worker = new LambdaWorker(stack, "MyTestLambdaWorker", {
         name: "MyTestLambdaWorker",
         lambdaProps: {
           entry: "examples/simple-lambda-worker/src/lambda/simple-worker.js",
           handler: "testWorker",
           memorySize: 2048,
+          policyStatements: [
+            new iam.PolicyStatement({
+              effect: iam.Effect.ALLOW,
+              actions: ["sqs:*"],
+              resources: ["*"],
+            }),
+          ],
           timeout: cdk.Duration.minutes(5),
           vpc: vpc,
           vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE },
@@ -55,6 +64,20 @@ describe("LambdaWorker", () => {
           },
         })
       );
+    });
+
+    test.skip("exposes the sqs queue url and arn", () => {
+      // This test does not work. In this test suite the construct has been created,
+      // but the value of these properties are Tokens. e.g. "${Token[TOKEN.266]}"
+      // See: https://github.com/aws/aws-cdk/issues/7258
+      // And the reply it links to here: https://github.com/aws/aws-cdk/issues/7079#issuecomment-606394303
+      // The tokens are not resolved into URL's until the `prepare` phase
+      // This has not happened due to the way we are unit testing the constructs here.
+      // We have a ticket to add integration tests for these constructs:
+      // https://github.com/talis/platform/issues/5204
+      // These will be tested in those integration tests.
+      expect(worker.lambdaQueueUrl).toBe("expected url");
+      expect(worker.lambdaQueueArn).toBe("expected arn");
     });
 
     test("provisions SQS queue and dead letter queue", () => {

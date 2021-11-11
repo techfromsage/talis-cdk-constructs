@@ -7,6 +7,7 @@ import {
 import * as apigatewayv2 from "@aws-cdk/aws-apigatewayv2";
 import * as ec2 from "@aws-cdk/aws-ec2";
 import * as cdk from "@aws-cdk/core";
+import * as iam from "@aws-cdk/aws-iam";
 import * as path from "path";
 import * as sns from "@aws-cdk/aws-sns";
 
@@ -49,7 +50,17 @@ describe("AuthenticatedApi", () => {
             method: apigatewayv2.HttpMethod.GET,
             lambdaProps: {
               entry: `${path.resolve(__dirname)}/routes/route1.js`,
+              environment: {
+                TALIS_ENV_VAR: "some value",
+              },
               handler: "route",
+              policyStatements: [
+                new iam.PolicyStatement({
+                  effect: iam.Effect.ALLOW,
+                  actions: ["sqs:*"],
+                  resources: ["*"],
+                }),
+              ],
               timeout: cdk.Duration.seconds(30),
             },
           },
@@ -61,6 +72,9 @@ describe("AuthenticatedApi", () => {
               entry: `${path.resolve(__dirname)}/routes/route2.js`,
               handler: "route",
               timeout: cdk.Duration.seconds(30),
+              environment: {
+                TALIS_ENV_VAR: "some value",
+              },
             },
             isPublic: true,
           },
@@ -129,6 +143,7 @@ describe("AuthenticatedApi", () => {
           Runtime: "nodejs14.x",
           Environment: {
             Variables: {
+              TALIS_ENV_VAR: "some value",
               AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1",
             },
           },
@@ -143,6 +158,7 @@ describe("AuthenticatedApi", () => {
           Runtime: "nodejs14.x",
           Environment: {
             Variables: {
+              TALIS_ENV_VAR: "some value",
               AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1",
             },
           },
@@ -157,7 +173,7 @@ describe("AuthenticatedApi", () => {
     test("provisions alarm to warn of latency on the api", () => {
       expectCDK(stack).to(
         haveResourceLike("AWS::CloudWatch::Alarm", {
-          AlarmName: "MyTestAuthenticatedApi-latency-alarm",
+          AlarmName: "test-MyTestAuthenticatedApi-latency-alarm",
           AlarmDescription:
             "Alarm if latency on api MyTestAuthenticatedApi exceeds 60000 milliseconds",
           Namespace: "AWS/ApiGateway",
@@ -183,7 +199,7 @@ describe("AuthenticatedApi", () => {
     test("provisions alarm to warn of latency on the api", () => {
       expectCDK(stack).to(
         haveResourceLike("AWS::CloudWatch::Alarm", {
-          AlarmName: "MyTestAuthenticatedApi-latency-alarm",
+          AlarmName: "test-MyTestAuthenticatedApi-latency-alarm",
           AlarmDescription:
             "Alarm if latency on api MyTestAuthenticatedApi exceeds 60000 milliseconds",
           Namespace: "AWS/ApiGateway",
@@ -209,7 +225,7 @@ describe("AuthenticatedApi", () => {
     test("provisions alarms on latency of lambda's", () => {
       expectCDK(stack).to(
         haveResourceLike("AWS::CloudWatch::Alarm", {
-          AlarmName: "MyTestAuthenticatedApi-route1-duration-alarm",
+          AlarmName: "test-MyTestAuthenticatedApi-route1-duration-alarm",
           AlarmDescription:
             "Alarm if duration of lambda for route MyTestAuthenticatedApi-route1 exceeds duration 60000 milliseconds",
           Namespace: "AWS/Lambda",
@@ -233,7 +249,7 @@ describe("AuthenticatedApi", () => {
 
       expectCDK(stack).to(
         haveResourceLike("AWS::CloudWatch::Alarm", {
-          AlarmName: "MyTestAuthenticatedApi-route2-duration-alarm",
+          AlarmName: "test-MyTestAuthenticatedApi-route2-duration-alarm",
           AlarmDescription:
             "Alarm if duration of lambda for route MyTestAuthenticatedApi-route2 exceeds duration 60000 milliseconds",
           Namespace: "AWS/Lambda",
