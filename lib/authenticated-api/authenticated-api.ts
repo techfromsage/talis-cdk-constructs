@@ -71,9 +71,9 @@ export class AuthenticatedApi extends cdk.Construct {
         awsSdkConnectionReuse: true,
         runtime: lambda.Runtime.NODEJS_14_X,
         timeout: cdk.Duration.minutes(2),
-        /* securityGroup: props.securityGroup, */
-        /* vpc: props.vpc, */
-        /* vpcSubnets: props.vpcSubnets, */
+        securityGroup: props.securityGroup,
+        vpc: props.vpc,
+        vpcSubnets: props.vpcSubnets,
       }
     );
 
@@ -94,15 +94,14 @@ export class AuthenticatedApi extends cdk.Construct {
           entry: routeProps.lambdaProps.entry,
           environment: routeProps.lambdaProps.environment,
           handler: routeProps.lambdaProps.handler,
-          role: routeProps.lambdaProps.role,
 
           // Enforce the following properties
           awsSdkConnectionReuse: true,
           runtime: lambda.Runtime.NODEJS_14_X,
           timeout: routeProps.lambdaProps.timeout,
-          /* securityGroup: props.securityGroup, */
-          /* vpc: props.vpc, */
-          /* vpcSubnets: props.vpcSubnets, */
+          securityGroup: props.securityGroup,
+          vpc: props.vpc,
+          vpcSubnets: props.vpcSubnets,
         }
       );
 

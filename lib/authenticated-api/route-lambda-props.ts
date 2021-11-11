@@ -14,7 +14,6 @@ export interface RouteLambdaProps {
     environment?: { [key: string]: string };
     handler: string;
     policyStatements?: iam.PolicyStatement[];
-    role?: iam.IRole;
     timeout: cdk.Duration;
   };
 

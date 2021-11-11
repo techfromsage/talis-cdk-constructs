@@ -109,11 +109,10 @@ export class LambdaWorker extends cdk.Construct {
       reservedConcurrentExecutions:
         props.lambdaProps.reservedConcurrentExecutions,
       retryAttempts: props.lambdaProps.retryAttempts,
-      /* role: props.lambdaProps.role, */
-      /* securityGroup: props.lambdaProps.securityGroup, */
+      securityGroup: props.lambdaProps.securityGroup,
       timeout: props.lambdaProps.timeout,
-      /* vpc: props.lambdaProps.vpc, */
-      /* vpcSubnets: props.lambdaProps.vpcSubnets, */
+      vpc: props.lambdaProps.vpc,
+      vpcSubnets: props.lambdaProps.vpcSubnets,
 
       // Enforce the following properties
       awsSdkConnectionReuse: true,
