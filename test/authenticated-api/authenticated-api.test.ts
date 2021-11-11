@@ -51,6 +51,9 @@ describe("AuthenticatedApi", () => {
               entry: `${path.resolve(__dirname)}/routes/route1.js`,
               handler: "route",
               timeout: cdk.Duration.seconds(30),
+              environment: {
+                TALIS_ENV_VAR: "some value",
+              },
             },
           },
           {
@@ -61,6 +64,9 @@ describe("AuthenticatedApi", () => {
               entry: `${path.resolve(__dirname)}/routes/route2.js`,
               handler: "route",
               timeout: cdk.Duration.seconds(30),
+              environment: {
+                TALIS_ENV_VAR: "some value",
+              },
             },
             isPublic: true,
           },
@@ -129,6 +135,7 @@ describe("AuthenticatedApi", () => {
           Runtime: "nodejs14.x",
           Environment: {
             Variables: {
+              TALIS_ENV_VAR: "some value",
               AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1",
             },
           },
@@ -143,6 +150,7 @@ describe("AuthenticatedApi", () => {
           Runtime: "nodejs14.x",
           Environment: {
             Variables: {
+              TALIS_ENV_VAR: "some value",
               AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1",
             },
           },
