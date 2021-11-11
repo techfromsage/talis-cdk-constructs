@@ -157,7 +157,7 @@ describe("AuthenticatedApi", () => {
     test("provisions alarm to warn of latency on the api", () => {
       expectCDK(stack).to(
         haveResourceLike("AWS::CloudWatch::Alarm", {
-          AlarmName: "MyTestAuthenticatedApi-latency-alarm",
+          AlarmName: "test-MyTestAuthenticatedApi-latency-alarm",
           AlarmDescription:
             "Alarm if latency on api MyTestAuthenticatedApi exceeds 60000 milliseconds",
           Namespace: "AWS/ApiGateway",
@@ -183,7 +183,7 @@ describe("AuthenticatedApi", () => {
     test("provisions alarm to warn of latency on the api", () => {
       expectCDK(stack).to(
         haveResourceLike("AWS::CloudWatch::Alarm", {
-          AlarmName: "MyTestAuthenticatedApi-latency-alarm",
+          AlarmName: "test-MyTestAuthenticatedApi-latency-alarm",
           AlarmDescription:
             "Alarm if latency on api MyTestAuthenticatedApi exceeds 60000 milliseconds",
           Namespace: "AWS/ApiGateway",
@@ -209,7 +209,7 @@ describe("AuthenticatedApi", () => {
     test("provisions alarms on latency of lambda's", () => {
       expectCDK(stack).to(
         haveResourceLike("AWS::CloudWatch::Alarm", {
-          AlarmName: "MyTestAuthenticatedApi-route1-duration-alarm",
+          AlarmName: "test-MyTestAuthenticatedApi-route1-duration-alarm",
           AlarmDescription:
             "Alarm if duration of lambda for route MyTestAuthenticatedApi-route1 exceeds duration 60000 milliseconds",
           Namespace: "AWS/Lambda",
@@ -233,7 +233,7 @@ describe("AuthenticatedApi", () => {
 
       expectCDK(stack).to(
         haveResourceLike("AWS::CloudWatch::Alarm", {
-          AlarmName: "MyTestAuthenticatedApi-route2-duration-alarm",
+          AlarmName: "test-MyTestAuthenticatedApi-route2-duration-alarm",
           AlarmDescription:
             "Alarm if duration of lambda for route MyTestAuthenticatedApi-route2 exceeds duration 60000 milliseconds",
           Namespace: "AWS/Lambda",
