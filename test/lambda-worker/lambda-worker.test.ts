@@ -34,8 +34,8 @@ describe("LambdaWorker", () => {
           policyStatements: [
             new iam.PolicyStatement({
               effect: iam.Effect.ALLOW,
-              actions: ['sqs:*'],
-              resources: ['*'],
+              actions: ["sqs:*"],
+              resources: ["*"],
             }),
           ],
           timeout: cdk.Duration.minutes(5),
@@ -76,8 +76,8 @@ describe("LambdaWorker", () => {
       // We have a ticket to add integration tests for these constructs:
       // https://github.com/talis/platform/issues/5204
       // These will be tested in those integration tests.
-      expect(worker.lambdaQueueUrl).toBe('expected url');
-      expect(worker.lambdaQueueArn).toBe('expected arn');
+      expect(worker.lambdaQueueUrl).toBe("expected url");
+      expect(worker.lambdaQueueArn).toBe("expected arn");
     });
 
     test("provisions SQS queue and dead letter queue", () => {

@@ -57,8 +57,8 @@ describe("AuthenticatedApi", () => {
               policyStatements: [
                 new iam.PolicyStatement({
                   effect: iam.Effect.ALLOW,
-                  actions: ['sqs:*'],
-                  resources: ['*'],
+                  actions: ["sqs:*"],
+                  resources: ["*"],
                 }),
               ],
               timeout: cdk.Duration.seconds(30),
