@@ -45,6 +45,14 @@ export class LambdaWorker extends cdk.Construct {
       );
     }
 
+    if (
+      !this.isContainerLambda(props) && !this.isFunctionLambda(props)
+    ) {
+      throw new Error(
+        `Invalid lambdaProps only dockerImagePath or handler/entry can be specified.`
+      )
+    }
+
     // Queue settings
     const maxReceiveCount =
       props.queueProps && props.queueProps.maxReceiveCount
@@ -218,5 +226,19 @@ export class LambdaWorker extends cdk.Construct {
     );
     queueMessagesVisable.addAlarmAction(alarmAction);
     queueMessagesVisable.addOkAction(alarmAction);
+  }
+
+  isContainerLambda(props: LambdaWorkerProps): boolean {
+     if (props.lambdaProps.dockerImagePath && !props.lambdaProps.entry && !props.lambdaProps.handler) {
+       return true
+     }
+     return false
+  }
+
+  isFunctionLambda(props: LambdaWorkerProps): boolean {
+    if (!props.lambdaProps.dockerImagePath && props.lambdaProps.entry && props.lambdaProps.handler) {
+      return true
+    }
+    return false
   }
 }

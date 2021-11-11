@@ -375,4 +375,74 @@ describe("LambdaWorker", () => {
       );
     });
   });
+
+  describe("when dockerImagePath and handler/entry are specified", () => {
+
+    const cases = [
+      {
+        description: 'throws an exception when all are specified', 
+        dockerImagePath: 'examples/container-lambda-worker/container', 
+        handler: 'testWorker', 
+        entry: 'examples/simple-lambda-worker/src/lambda/simple-worker.js'
+      },
+      {
+        description: 'throws an exception when none are specified', 
+        dockerImagePath: undefined, 
+        handler: undefined, 
+        entry: undefined
+      },
+      {
+        description: 'throws an exception when only handler is specified', 
+        dockerImagePath: undefined, 
+        handler: 'testWorker', 
+        entry: undefined
+      },
+      {
+        description: 'throws an exception when only entry is specified', 
+        dockerImagePath: undefined, 
+        handler: undefined, 
+        entry: 'examples/simple-lambda-worker/src/lambda/simple-worker.js'
+      }
+    ]
+
+    cases.forEach((config) => {
+      test(config.description, () => {
+        const app = new cdk.App();
+        const stack = new cdk.Stack(app, "TestStack");
+        const alarmTopic = new sns.Topic(stack, "TestAlarm", {
+          topicName: "TestAlarm",
+        });
+
+        const vpc = new ec2.Vpc(stack, "TheVPC", {
+          cidr: "10.0.0.0/16",
+        });
+
+        expect(() => {
+          new LambdaWorker(stack, "MyTestLambdaWorker", {
+            name: "MyTestLambdaWorker",
+            lambdaProps: {
+              entry: config.entry,
+              handler: config.handler,
+              dockerImagePath: config.dockerImagePath,
+              memorySize: 2048,
+              timeout: cdk.Duration.minutes(5),
+              vpc: vpc,
+              vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE },
+            },
+            queueProps: {},
+            alarmTopic: alarmTopic,
+          });
+        }).toThrow(
+          "Invalid lambdaProps only dockerImagePath or handler/entry can be specified."
+        );
+      })
+    })
+
+    // test("throws an exception when all are specified", () => {
+      
+    // })
+    // test("throws an exception when none are specified", () => {})
+    // test("throws an exception when only handler is specified", () => {})
+    // test("throws an exception when only entry is specified", () => {})
+  });
 });
