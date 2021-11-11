@@ -7,6 +7,7 @@ import {
 import * as apigatewayv2 from "@aws-cdk/aws-apigatewayv2";
 import * as ec2 from "@aws-cdk/aws-ec2";
 import * as cdk from "@aws-cdk/core";
+import * as iam from "@aws-cdk/aws-iam";
 import * as path from "path";
 import * as sns from "@aws-cdk/aws-sns";
 
@@ -49,11 +50,18 @@ describe("AuthenticatedApi", () => {
             method: apigatewayv2.HttpMethod.GET,
             lambdaProps: {
               entry: `${path.resolve(__dirname)}/routes/route1.js`,
-              handler: "route",
-              timeout: cdk.Duration.seconds(30),
               environment: {
                 TALIS_ENV_VAR: "some value",
               },
+              handler: "route",
+              policyStatements: [
+                new iam.PolicyStatement({
+                  effect: iam.Effect.ALLOW,
+                  actions: ['sqs:*'],
+                  resources: ['*'],
+                }),
+              ],
+              timeout: cdk.Duration.seconds(30),
             },
           },
           {

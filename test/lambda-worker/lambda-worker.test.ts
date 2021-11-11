@@ -3,8 +3,9 @@ import {
   countResources,
   haveResourceLike,
 } from "@aws-cdk/assert";
-import * as ec2 from "@aws-cdk/aws-ec2";
 import * as cdk from "@aws-cdk/core";
+import * as ec2 from "@aws-cdk/aws-ec2";
+import * as iam from "@aws-cdk/aws-iam";
 import * as sns from "@aws-cdk/aws-sns";
 import { LambdaWorker } from "../../lib/lambda-worker";
 
@@ -30,6 +31,13 @@ describe("LambdaWorker", () => {
           entry: "examples/simple-lambda-worker/src/lambda/simple-worker.js",
           handler: "testWorker",
           memorySize: 2048,
+          policyStatements: [
+            new iam.PolicyStatement({
+              effect: iam.Effect.ALLOW,
+              actions: ['sqs:*'],
+              resources: ['*'],
+            }),
+          ],
           timeout: cdk.Duration.minutes(5),
           vpc: vpc,
           vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE },
