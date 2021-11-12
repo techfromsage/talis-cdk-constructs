@@ -12,6 +12,8 @@ export interface LambdaWorkerProps {
   lambdaProps: {
     description?: string;
     dockerImagePath?: string;
+    ecrRepositoryArn?: string;
+    ecrRepositoryName?: string;
     handler?: string;
     entry?: string;
     environment?: { [key: string]: string };

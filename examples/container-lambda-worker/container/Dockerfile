@@ -8,4 +8,4 @@ COPY src/lambda/container-worker.js package.json  ${LAMBDA_TASK_ROOT}
 RUN npm install
 
 # Set the CMD to your handler (could also be done as a parameter override outside of the Dockerfile)
-CMD [ "containerLambdaWorker" ]  
+CMD [ "container-worker.containerLambdaWorker" ]  
