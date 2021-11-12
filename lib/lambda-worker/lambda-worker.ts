@@ -6,9 +6,6 @@ import * as lambda from "@aws-cdk/aws-lambda";
 import * as lambdaNodeJs from "@aws-cdk/aws-lambda-nodejs";
 import * as sqs from "@aws-cdk/aws-sqs";
 import * as subs from "@aws-cdk/aws-sns-subscriptions";
-import { DockerImageAsset } from '@aws-cdk/aws-ecr-assets';
-import * as ecrdeploy from 'cdk-ecr-deployment';
-import { v4 as uuidv4 } from 'uuid';
 import * as ecr from '@aws-cdk/aws-ecr';
 
 import { LambdaWorkerProps } from "./lambda-worker-props";
@@ -54,7 +51,7 @@ export class LambdaWorker extends cdk.Construct {
       !this.isContainerLambda(props) && !this.isFunctionLambda(props)
     ) {
       throw new Error(
-        `Invalid lambdaProps only dockerImagePath or handler/entry can be specified.`
+        `Invalid lambdaProps only dockerImageTag/ecrRepositoryArn/ecrRepositoryName or handler/entry can be specified.`
       )
     }
 
@@ -213,14 +210,14 @@ export class LambdaWorker extends cdk.Construct {
   }
 
   isContainerLambda(props: LambdaWorkerProps): boolean {
-     if (props.lambdaProps.dockerImagePath && props.lambdaProps.ecrRepositoryArn && props.lambdaProps.ecrRepositoryName && !props.lambdaProps.entry && !props.lambdaProps.handler) {
+     if (props.lambdaProps.dockerImageTag && props.lambdaProps.ecrRepositoryArn && props.lambdaProps.ecrRepositoryName && !props.lambdaProps.entry && !props.lambdaProps.handler) {
        return true
      }
      return false
   }
 
   isFunctionLambda(props: LambdaWorkerProps): boolean {
-    if (!props.lambdaProps.dockerImagePath && !props.lambdaProps.ecrRepositoryArn && !props.lambdaProps.ecrRepositoryName && props.lambdaProps.entry && props.lambdaProps.handler) {
+    if (!props.lambdaProps.dockerImageTag && !props.lambdaProps.ecrRepositoryArn && !props.lambdaProps.ecrRepositoryName && props.lambdaProps.entry && props.lambdaProps.handler) {
       return true
     }
     return false
@@ -228,7 +225,7 @@ export class LambdaWorker extends cdk.Construct {
 
   createLambdaFunction(props: LambdaWorkerProps): lambda.Function {
     if (this.isContainerLambda(props)) {
-      const imagePath: string = props.lambdaProps.dockerImagePath ? props.lambdaProps.dockerImagePath : '';
+      const imageTag: string = props.lambdaProps.dockerImageTag ? props.lambdaProps.dockerImageTag : '';
       const ecrRepositoryArn: string = props.lambdaProps.ecrRepositoryArn ? props.lambdaProps.ecrRepositoryArn : '';
       const ecrRepositoryName: string = props.lambdaProps.ecrRepositoryName ? props.lambdaProps.ecrRepositoryName : '';
       const ecrRepository: IRepository = ecr.Repository.fromRepositoryAttributes(this, `${props.name}-ecr`, {
@@ -236,18 +233,7 @@ export class LambdaWorker extends cdk.Construct {
         repositoryName: ecrRepositoryName
       });
 
-      const dockerImage = new DockerImageAsset(this, `${props.name}-build`, {
-        directory: imagePath
-      });
-
-      const imageTag = `${props.name}-${uuidv4()}`;
-
-      const ecrDeploy = new ecrdeploy.ECRDeployment(this, `${props.name}-ecr-deploy`, {
-        src: new ecrdeploy.DockerImageName(dockerImage.imageUri),
-        dest: new ecrdeploy.DockerImageName(ecrRepository.repositoryUriForTag(imageTag))
-      });
-
-      const lambdaFunction = new lambda.DockerImageFunction(this, props.name, {
+      return new lambda.DockerImageFunction(this, props.name, {
         code: lambda.DockerImageCode.fromEcr(ecrRepository, {
           tag: imageTag
         }),
@@ -263,10 +249,6 @@ export class LambdaWorker extends cdk.Construct {
         vpc: props.lambdaProps.vpc,
         vpcSubnets: props.lambdaProps.vpcSubnets,
       });
-
-      lambdaFunction.node.addDependency(ecrDeploy);
-
-      return lambdaFunction;
     }
 
     return new lambdaNodeJs.NodejsFunction(this, props.name, {

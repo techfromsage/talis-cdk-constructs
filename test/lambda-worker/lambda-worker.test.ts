@@ -349,8 +349,8 @@ describe("LambdaWorker", () => {
         worker = new LambdaWorker(stack, "MyTestLambdaWorker", {
           name: "MyTestLambdaWorker",
           lambdaProps: {
-            dockerImagePath: "examples/container-lambda-worker/container",
-            ecrRepositoryArn: "arn:aws:ecr:eu-west-1:012345678910:repository/test",
+            dockerImageTag: "test-lambda-12345",
+            ecrRepositoryArn: "arn:aws:ecr:eu-west-1:012345678910:repository",
             ecrRepositoryName: "repository",
             memorySize: 2048,
             policyStatements: [
@@ -370,7 +370,7 @@ describe("LambdaWorker", () => {
       });
   
       test("provisions a lambda", () => {
-        expectCDK(stack).to(countResources("AWS::Lambda::Function", 2));
+        expectCDK(stack).to(countResources("AWS::Lambda::Function", 1));
   
         expectCDK(stack).to(
           haveResourceLike("AWS::Lambda::Function", {
@@ -386,7 +386,7 @@ describe("LambdaWorker", () => {
                     {
                       "Ref": "AWS::URLSuffix"
                     },
-                    `/repository:MyTestLambdaWorker-${generatedUUID}`
+                    `/repository:test-lambda-12345`
                   ]
                 ]
               }
@@ -591,12 +591,12 @@ describe("LambdaWorker", () => {
     });
   });
 
-  describe("when dockerImagePath/ecrRepositoryUri and handler/entry are specified", () => {
+  describe("when dockerImageTag/ecrRepositoryArn/ecrRepositoryName and handler/entry are specified", () => {
 
     const cases = [
       {
         description: 'throws an exception when all are specified', 
-        dockerImagePath: 'examples/container-lambda-worker/container',
+        dockerImageTag: 'test-image-12345',
         ecrRepositoryArn: 'arn:aws:ecr:eu-west-1:012345678910:repository/test',
         ecrRepositoryName: 'repository',
         handler: 'testWorker', 
@@ -604,7 +604,7 @@ describe("LambdaWorker", () => {
       },
       {
         description: 'throws an exception when none are specified', 
-        dockerImagePath: undefined,
+        dockerImageTag: undefined,
         ecrRepositoryArn: undefined,
         ecrRepositoryName: undefined,
         handler: undefined, 
@@ -612,7 +612,7 @@ describe("LambdaWorker", () => {
       },
       {
         description: 'throws an exception when only handler is specified', 
-        dockerImagePath: undefined, 
+        dockerImageTag: undefined, 
         ecrRepositoryArn: undefined,
         ecrRepositoryName: undefined,
         handler: 'testWorker', 
@@ -620,15 +620,15 @@ describe("LambdaWorker", () => {
       },
       {
         description: 'throws an exception when only entry is specified', 
-        dockerImagePath: undefined,
+        dockerImageTag: undefined,
         ecrRepositoryArn: undefined,
         ecrRepositoryName: undefined,
         handler: undefined, 
         entry: 'examples/simple-lambda-worker/src/lambda/simple-worker.js'
       },
       {
-        description: 'throws an exception when only dockerImagePath is specified', 
-        dockerImagePath: 'examples/container-lambda-worker/container', 
+        description: 'throws an exception when only dockerImageTag is specified', 
+        dockerImageTag: 'test-lambda-12345', 
         ecrRepositoryArn: undefined,
         ecrRepositoryName: undefined,
         handler: undefined, 
@@ -636,14 +636,14 @@ describe("LambdaWorker", () => {
       },
       {
         description: 'throws an exception when only ecrRepositoryArn is specified', 
-        dockerImagePath: undefined,
+        dockerImageTag: undefined,
         ecrRepositoryArn: 'arn:aws:ecr:eu-west-1:012345678910:repository/test',
         handler: undefined, 
         entry: undefined
       },
       {
         description: 'throws an exception when only ecrRepositoryName is specified', 
-        dockerImagePath: undefined,
+        dockerImageTag: undefined,
         ecrRepositoryArn: undefined,
         ecrRepositoryName: 'repository',
         handler: undefined, 
@@ -669,7 +669,7 @@ describe("LambdaWorker", () => {
             lambdaProps: {
               entry: config.entry,
               handler: config.handler,
-              dockerImagePath: config.dockerImagePath,
+              dockerImageTag: config.dockerImageTag,
               ecrRepositoryArn: config.ecrRepositoryArn,
               memorySize: 2048,
               timeout: cdk.Duration.minutes(5),
@@ -680,7 +680,7 @@ describe("LambdaWorker", () => {
             alarmTopic: alarmTopic,
           });
         }).toThrow(
-          "Invalid lambdaProps only dockerImagePath or handler/entry can be specified."
+          "Invalid lambdaProps only dockerImageTag/ecrRepositoryArn/ecrRepositoryName or handler/entry can be specified."
         );
       })
     })
