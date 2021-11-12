@@ -437,12 +437,5 @@ describe("LambdaWorker", () => {
         );
       })
     })
-
-    // test("throws an exception when all are specified", () => {
-      
-    // })
-    // test("throws an exception when none are specified", () => {})
-    // test("throws an exception when only handler is specified", () => {})
-    // test("throws an exception when only entry is specified", () => {})
   });
 });
