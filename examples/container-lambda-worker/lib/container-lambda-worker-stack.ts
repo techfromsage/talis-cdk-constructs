@@ -1,10 +1,10 @@
-import * as cdk from '@aws-cdk/core';
-import * as ecr from '@aws-cdk/aws-ecr';
-import * as path from 'path';
-import { DockerImageAsset } from '@aws-cdk/aws-ecr-assets';
-import * as ecrdeploy from 'cdk-ecr-deployment';
-import { v4 as uuidv4 } from 'uuid';
-import { RemovalPolicy } from '@aws-cdk/core';
+import * as cdk from "@aws-cdk/core";
+import * as ecr from "@aws-cdk/aws-ecr";
+import * as path from "path";
+import { DockerImageAsset } from "@aws-cdk/aws-ecr-assets";
+import * as ecrdeploy from "cdk-ecr-deployment";
+import { v4 as uuidv4 } from "uuid";
+import { RemovalPolicy } from "@aws-cdk/core";
 import * as sns from "@aws-cdk/aws-sns";
 import * as ec2 from "@aws-cdk/aws-ec2";
 
@@ -24,23 +24,25 @@ export class ContainerLambdaWorkerStack extends cdk.Stack {
 
     // LambdaWorker requires an existing ECR Repository to retrieve images from.
 
-    const repository = new ecr.Repository(this, 'example-repo', {
+    const repository = new ecr.Repository(this, "example-repo", {
       repositoryName: `${prefix}cdk-container-lambda`,
       removalPolicy: RemovalPolicy.DESTROY,
     });
 
     // LambdaWorker requires an existing image tag within the repository
     // Build docker image asset from example container Dockerfile
-    const dockerImage = new DockerImageAsset(this, 'example-build', {
-      directory: path.join(__dirname, '../container')
+    const dockerImage = new DockerImageAsset(this, "example-build", {
+      directory: path.join(__dirname, "../container"),
     });
     const imageTag = `example-${uuidv4()}`;
 
     // Currently there is no native CDK support for pushing an image to an ECR repository
     // AWS recommend using the 'cdk-ecr-deployment' library
-    new ecrdeploy.ECRDeployment(this, 'example-ecr-deploy', {
+    new ecrdeploy.ECRDeployment(this, "example-ecr-deploy", {
       src: new ecrdeploy.DockerImageName(dockerImage.imageUri),
-      dest: new ecrdeploy.DockerImageName(repository.repositoryUriForTag(imageTag))
+      dest: new ecrdeploy.DockerImageName(
+        repository.repositoryUriForTag(imageTag)
+      ),
     });
 
     // The LambdaWorker will be triggered by a queue created in the construct.
@@ -49,9 +51,13 @@ export class ContainerLambdaWorkerStack extends cdk.Stack {
     //
     // This is useful when using Pub/Sub as depot-serverless does. A single
     // "File" topic is created which all workers subscribe to.
-    const topic = new sns.Topic(this, `${prefix}container-lambda-worker-topic`, {
-      topicName: `${prefix}container-lambda-worker-topic`,
-    });
+    const topic = new sns.Topic(
+      this,
+      `${prefix}container-lambda-worker-topic`,
+      {
+        topicName: `${prefix}container-lambda-worker-topic`,
+      }
+    );
 
     // LambdaWorker requires an existing SNS topic to publish alarms to.
     // TODO : A real app would not create this topic which is already created by terraform.
@@ -110,6 +116,5 @@ export class ContainerLambdaWorkerStack extends cdk.Stack {
         },
       }
     );
-
   }
 }

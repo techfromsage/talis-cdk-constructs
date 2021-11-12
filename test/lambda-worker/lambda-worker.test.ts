@@ -8,38 +8,24 @@ import * as ec2 from "@aws-cdk/aws-ec2";
 import * as iam from "@aws-cdk/aws-iam";
 import * as sns from "@aws-cdk/aws-sns";
 import { LambdaWorker } from "../../lib/lambda-worker";
-import { v4 as uuidv4 } from 'uuid';
-
-const generatedUUID = 'd7045ee9-bd74-4103-8ff0-5f5543e05103';
-
-jest.mock('uuid', () => {
-  const originalModule = jest.requireActual('uuid');
-  return {
-    __esModule: true,
-    ...originalModule,
-    v4: () => {return generatedUUID}
-  };
-});
 
 describe("LambdaWorker", () => {
-
   describe("function lambda", () => {
-
     describe("with only required props", () => {
       let stack: cdk.Stack;
       let worker: LambdaWorker;
-  
+
       beforeAll(() => {
         const app = new cdk.App();
         stack = new cdk.Stack(app, "TestStack");
         const alarmTopic = new sns.Topic(stack, "TestAlarm", {
           topicName: "TestAlarm",
         });
-  
+
         const vpc = new ec2.Vpc(stack, "TheVPC", {
           cidr: "10.0.0.0/16",
         });
-  
+
         worker = new LambdaWorker(stack, "MyTestLambdaWorker", {
           name: "MyTestLambdaWorker",
           lambdaProps: {
@@ -61,10 +47,10 @@ describe("LambdaWorker", () => {
           alarmTopic: alarmTopic,
         });
       });
-  
+
       test("provisions a lambda", () => {
         expectCDK(stack).to(countResources("AWS::Lambda::Function", 1));
-  
+
         expectCDK(stack).to(
           haveResourceLike("AWS::Lambda::Function", {
             FunctionName: "MyTestLambdaWorker",
@@ -80,7 +66,7 @@ describe("LambdaWorker", () => {
           })
         );
       });
-  
+
       test.skip("exposes the sqs queue url and arn", () => {
         // This test does not work. In this test suite the construct has been created,
         // but the value of these properties are Tokens. e.g. "${Token[TOKEN.266]}"
@@ -94,10 +80,10 @@ describe("LambdaWorker", () => {
         expect(worker.lambdaQueueUrl).toBe("expected url");
         expect(worker.lambdaQueueArn).toBe("expected arn");
       });
-  
+
       test("provisions SQS queue and dead letter queue", () => {
         expectCDK(stack).to(countResources("AWS::SQS::Queue", 2));
-  
+
         expectCDK(stack).to(
           haveResourceLike("AWS::SQS::Queue", {
             QueueName: "MyTestLambdaWorker-queue",
@@ -113,7 +99,7 @@ describe("LambdaWorker", () => {
             },
           })
         );
-  
+
         expectCDK(stack).to(
           haveResourceLike("AWS::SQS::Queue", {
             QueueName: "MyTestLambdaWorker-dlq",
@@ -121,11 +107,11 @@ describe("LambdaWorker", () => {
           })
         );
       });
-  
+
       test("provisions three alarms", () => {
         expectCDK(stack).to(countResources("AWS::CloudWatch::Alarm", 3));
       });
-  
+
       test("provisions a message visible alarm on the dead letter queue", () => {
         expectCDK(stack).to(
           haveResourceLike("AWS::CloudWatch::Alarm", {
@@ -154,7 +140,7 @@ describe("LambdaWorker", () => {
           })
         );
       });
-  
+
       test("provisions a message visible alarm on the main queue", () => {
         expectCDK(stack).to(
           haveResourceLike("AWS::CloudWatch::Alarm", {
@@ -183,7 +169,7 @@ describe("LambdaWorker", () => {
           })
         );
       });
-  
+
       test("provisions an age of oldest message alarm on the main queue", () => {
         expectCDK(stack).to(
           haveResourceLike("AWS::CloudWatch::Alarm", {
@@ -213,21 +199,21 @@ describe("LambdaWorker", () => {
         );
       });
     });
-  
+
     describe("with optional props", () => {
       let stack: cdk.Stack;
-  
+
       beforeAll(() => {
         const app = new cdk.App();
         stack = new cdk.Stack(app, "TestStack");
         const alarmTopic = new sns.Topic(stack, "TestAlarm", {
           topicName: "TestAlarm",
         });
-  
+
         const vpc = new ec2.Vpc(stack, "TheVPC", {
           cidr: "10.0.0.0/16",
         });
-  
+
         new LambdaWorker(stack, "MyTestLambdaWorker", {
           name: "MyTestLambdaWorker",
           lambdaProps: {
@@ -237,7 +223,7 @@ describe("LambdaWorker", () => {
             timeout: cdk.Duration.minutes(5),
             vpc: vpc,
             vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE },
-  
+
             // Optional
             description: "Test Description",
             environment: {
@@ -249,10 +235,10 @@ describe("LambdaWorker", () => {
           alarmTopic: alarmTopic,
         });
       });
-  
+
       test("provisions a lambda", () => {
         expectCDK(stack).to(countResources("AWS::Lambda::Function", 1));
-  
+
         expectCDK(stack).to(
           haveResourceLike("AWS::Lambda::Function", {
             FunctionName: "MyTestLambdaWorker",
@@ -273,10 +259,10 @@ describe("LambdaWorker", () => {
         );
       });
     });
-  
+
     describe("given an optional topic", () => {
       let stack: cdk.Stack;
-  
+
       beforeAll(() => {
         const app = new cdk.App();
         stack = new cdk.Stack(app, "TestStack");
@@ -286,11 +272,11 @@ describe("LambdaWorker", () => {
         const topic = new sns.Topic(stack, "TestTopic", {
           topicName: "TestTopic",
         });
-  
+
         const vpc = new ec2.Vpc(stack, "TheVPC", {
           cidr: "10.0.0.0/16",
         });
-  
+
         new LambdaWorker(stack, "MyTestLambdaWorker", {
           name: "MyTestLambdaWorker",
           lambdaProps: {
@@ -308,10 +294,10 @@ describe("LambdaWorker", () => {
           },
         });
       });
-  
+
       test("subscribes to the topic", () => {
         expectCDK(stack).to(countResources("AWS::SNS::Subscription", 1));
-  
+
         expectCDK(stack).to(
           haveResourceLike("AWS::SNS::Subscription", {
             Protocol: "sqs",
@@ -330,22 +316,22 @@ describe("LambdaWorker", () => {
     });
   });
 
-  describe ("container lambda", () => {
+  describe("container lambda", () => {
     describe("with only required props", () => {
       let stack: cdk.Stack;
       let worker: LambdaWorker;
-  
+
       beforeAll(() => {
         const app = new cdk.App();
         stack = new cdk.Stack(app, "TestStack");
         const alarmTopic = new sns.Topic(stack, "TestAlarm", {
           topicName: "TestAlarm",
         });
-  
+
         const vpc = new ec2.Vpc(stack, "TheVPC", {
           cidr: "10.0.0.0/16",
         });
-  
+
         worker = new LambdaWorker(stack, "MyTestLambdaWorker", {
           name: "MyTestLambdaWorker",
           lambdaProps: {
@@ -368,10 +354,10 @@ describe("LambdaWorker", () => {
           alarmTopic: alarmTopic,
         });
       });
-  
+
       test("provisions a lambda", () => {
         expectCDK(stack).to(countResources("AWS::Lambda::Function", 1));
-  
+
         expectCDK(stack).to(
           haveResourceLike("AWS::Lambda::Function", {
             FunctionName: "MyTestLambdaWorker",
@@ -384,17 +370,17 @@ describe("LambdaWorker", () => {
                   [
                     "012345678910.dkr.ecr.eu-west-1.",
                     {
-                      "Ref": "AWS::URLSuffix"
+                      Ref: "AWS::URLSuffix",
                     },
-                    `/repository:test-lambda-12345`
-                  ]
-                ]
-              }
-            }
+                    `/repository:test-lambda-12345`,
+                  ],
+                ],
+              },
+            },
           })
         );
       });
-  
+
       test.skip("exposes the sqs queue url and arn", () => {
         // This test does not work. In this test suite the construct has been created,
         // but the value of these properties are Tokens. e.g. "${Token[TOKEN.266]}"
@@ -408,10 +394,10 @@ describe("LambdaWorker", () => {
         expect(worker.lambdaQueueUrl).toBe("expected url");
         expect(worker.lambdaQueueArn).toBe("expected arn");
       });
-  
+
       test("provisions SQS queue and dead letter queue", () => {
         expectCDK(stack).to(countResources("AWS::SQS::Queue", 2));
-  
+
         expectCDK(stack).to(
           haveResourceLike("AWS::SQS::Queue", {
             QueueName: "MyTestLambdaWorker-queue",
@@ -427,7 +413,7 @@ describe("LambdaWorker", () => {
             },
           })
         );
-  
+
         expectCDK(stack).to(
           haveResourceLike("AWS::SQS::Queue", {
             QueueName: "MyTestLambdaWorker-dlq",
@@ -435,11 +421,11 @@ describe("LambdaWorker", () => {
           })
         );
       });
-  
+
       test("provisions three alarms", () => {
         expectCDK(stack).to(countResources("AWS::CloudWatch::Alarm", 3));
       });
-  
+
       test("provisions a message visible alarm on the dead letter queue", () => {
         expectCDK(stack).to(
           haveResourceLike("AWS::CloudWatch::Alarm", {
@@ -468,7 +454,7 @@ describe("LambdaWorker", () => {
           })
         );
       });
-  
+
       test("provisions a message visible alarm on the main queue", () => {
         expectCDK(stack).to(
           haveResourceLike("AWS::CloudWatch::Alarm", {
@@ -497,7 +483,7 @@ describe("LambdaWorker", () => {
           })
         );
       });
-  
+
       test("provisions an age of oldest message alarm on the main queue", () => {
         expectCDK(stack).to(
           haveResourceLike("AWS::CloudWatch::Alarm", {
@@ -592,64 +578,66 @@ describe("LambdaWorker", () => {
   });
 
   describe("when dockerImageTag/ecrRepositoryArn/ecrRepositoryName and handler/entry are specified", () => {
-
     const cases = [
       {
-        description: 'throws an exception when all are specified', 
-        dockerImageTag: 'test-image-12345',
-        ecrRepositoryArn: 'arn:aws:ecr:eu-west-1:012345678910:repository/test',
-        ecrRepositoryName: 'repository',
-        handler: 'testWorker', 
-        entry: 'examples/simple-lambda-worker/src/lambda/simple-worker.js'
+        description: "throws an exception when all are specified",
+        dockerImageTag: "test-image-12345",
+        ecrRepositoryArn: "arn:aws:ecr:eu-west-1:012345678910:repository/test",
+        ecrRepositoryName: "repository",
+        handler: "testWorker",
+        entry: "examples/simple-lambda-worker/src/lambda/simple-worker.js",
       },
       {
-        description: 'throws an exception when none are specified', 
+        description: "throws an exception when none are specified",
         dockerImageTag: undefined,
         ecrRepositoryArn: undefined,
         ecrRepositoryName: undefined,
-        handler: undefined, 
-        entry: undefined
+        handler: undefined,
+        entry: undefined,
       },
       {
-        description: 'throws an exception when only handler is specified', 
-        dockerImageTag: undefined, 
-        ecrRepositoryArn: undefined,
-        ecrRepositoryName: undefined,
-        handler: 'testWorker', 
-        entry: undefined
-      },
-      {
-        description: 'throws an exception when only entry is specified', 
+        description: "throws an exception when only handler is specified",
         dockerImageTag: undefined,
         ecrRepositoryArn: undefined,
         ecrRepositoryName: undefined,
-        handler: undefined, 
-        entry: 'examples/simple-lambda-worker/src/lambda/simple-worker.js'
+        handler: "testWorker",
+        entry: undefined,
       },
       {
-        description: 'throws an exception when only dockerImageTag is specified', 
-        dockerImageTag: 'test-lambda-12345', 
+        description: "throws an exception when only entry is specified",
+        dockerImageTag: undefined,
         ecrRepositoryArn: undefined,
         ecrRepositoryName: undefined,
-        handler: undefined, 
-        entry: undefined
+        handler: undefined,
+        entry: "examples/simple-lambda-worker/src/lambda/simple-worker.js",
       },
       {
-        description: 'throws an exception when only ecrRepositoryArn is specified', 
+        description:
+          "throws an exception when only dockerImageTag is specified",
+        dockerImageTag: "test-lambda-12345",
+        ecrRepositoryArn: undefined,
+        ecrRepositoryName: undefined,
+        handler: undefined,
+        entry: undefined,
+      },
+      {
+        description:
+          "throws an exception when only ecrRepositoryArn is specified",
         dockerImageTag: undefined,
-        ecrRepositoryArn: 'arn:aws:ecr:eu-west-1:012345678910:repository/test',
-        handler: undefined, 
-        entry: undefined
+        ecrRepositoryArn: "arn:aws:ecr:eu-west-1:012345678910:repository/test",
+        handler: undefined,
+        entry: undefined,
       },
       {
-        description: 'throws an exception when only ecrRepositoryName is specified', 
+        description:
+          "throws an exception when only ecrRepositoryName is specified",
         dockerImageTag: undefined,
         ecrRepositoryArn: undefined,
-        ecrRepositoryName: 'repository',
-        handler: undefined, 
-        entry: undefined
-      }
-    ]
+        ecrRepositoryName: "repository",
+        handler: undefined,
+        entry: undefined,
+      },
+    ];
 
     cases.forEach((config) => {
       test(config.description, () => {
@@ -682,7 +670,7 @@ describe("LambdaWorker", () => {
         }).toThrow(
           "Invalid lambdaProps only dockerImageTag/ecrRepositoryArn/ecrRepositoryName or handler/entry can be specified."
         );
-      })
-    })
+      });
+    });
   });
 });

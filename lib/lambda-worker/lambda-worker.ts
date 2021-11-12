@@ -6,7 +6,7 @@ import * as lambda from "@aws-cdk/aws-lambda";
 import * as lambdaNodeJs from "@aws-cdk/aws-lambda-nodejs";
 import * as sqs from "@aws-cdk/aws-sqs";
 import * as subs from "@aws-cdk/aws-sns-subscriptions";
-import * as ecr from '@aws-cdk/aws-ecr';
+import * as ecr from "@aws-cdk/aws-ecr";
 
 import { LambdaWorkerProps } from "./lambda-worker-props";
 import { IRepository } from "@aws-cdk/aws-ecr";
@@ -47,12 +47,10 @@ export class LambdaWorker extends cdk.Construct {
       );
     }
 
-    if (
-      !this.isContainerLambda(props) && !this.isFunctionLambda(props)
-    ) {
+    if (!this.isContainerLambda(props) && !this.isFunctionLambda(props)) {
       throw new Error(
         `Invalid lambdaProps only dockerImageTag/ecrRepositoryArn/ecrRepositoryName or handler/entry can be specified.`
-      )
+      );
     }
 
     // Queue settings
@@ -106,7 +104,7 @@ export class LambdaWorker extends cdk.Construct {
     }
 
     // Create the lambda
-    const lambdaWorker: lambda.Function = this.createLambdaFunction(props)
+    const lambdaWorker: lambda.Function = this.createLambdaFunction(props);
 
     if (props.lambdaProps.policyStatements) {
       for (const statement of props.lambdaProps.policyStatements) {
@@ -210,39 +208,58 @@ export class LambdaWorker extends cdk.Construct {
   }
 
   isContainerLambda(props: LambdaWorkerProps): boolean {
-     if (props.lambdaProps.dockerImageTag && props.lambdaProps.ecrRepositoryArn && props.lambdaProps.ecrRepositoryName && !props.lambdaProps.entry && !props.lambdaProps.handler) {
-       return true
-     }
-     return false
+    if (
+      props.lambdaProps.dockerImageTag &&
+      props.lambdaProps.ecrRepositoryArn &&
+      props.lambdaProps.ecrRepositoryName &&
+      !props.lambdaProps.entry &&
+      !props.lambdaProps.handler
+    ) {
+      return true;
+    }
+    return false;
   }
 
   isFunctionLambda(props: LambdaWorkerProps): boolean {
-    if (!props.lambdaProps.dockerImageTag && !props.lambdaProps.ecrRepositoryArn && !props.lambdaProps.ecrRepositoryName && props.lambdaProps.entry && props.lambdaProps.handler) {
-      return true
+    if (
+      !props.lambdaProps.dockerImageTag &&
+      !props.lambdaProps.ecrRepositoryArn &&
+      !props.lambdaProps.ecrRepositoryName &&
+      props.lambdaProps.entry &&
+      props.lambdaProps.handler
+    ) {
+      return true;
     }
-    return false
+    return false;
   }
 
   createLambdaFunction(props: LambdaWorkerProps): lambda.Function {
     if (this.isContainerLambda(props)) {
-      const imageTag: string = props.lambdaProps.dockerImageTag ? props.lambdaProps.dockerImageTag : '';
-      const ecrRepositoryArn: string = props.lambdaProps.ecrRepositoryArn ? props.lambdaProps.ecrRepositoryArn : '';
-      const ecrRepositoryName: string = props.lambdaProps.ecrRepositoryName ? props.lambdaProps.ecrRepositoryName : '';
-      const ecrRepository: IRepository = ecr.Repository.fromRepositoryAttributes(this, `${props.name}-ecr`, {
-        repositoryArn: ecrRepositoryArn,
-        repositoryName: ecrRepositoryName
-      });
+      const imageTag: string = props.lambdaProps.dockerImageTag
+        ? props.lambdaProps.dockerImageTag
+        : "";
+      const ecrRepositoryArn: string = props.lambdaProps.ecrRepositoryArn
+        ? props.lambdaProps.ecrRepositoryArn
+        : "";
+      const ecrRepositoryName: string = props.lambdaProps.ecrRepositoryName
+        ? props.lambdaProps.ecrRepositoryName
+        : "";
+      const ecrRepository: IRepository =
+        ecr.Repository.fromRepositoryAttributes(this, `${props.name}-ecr`, {
+          repositoryArn: ecrRepositoryArn,
+          repositoryName: ecrRepositoryName,
+        });
 
       return new lambda.DockerImageFunction(this, props.name, {
         code: lambda.DockerImageCode.fromEcr(ecrRepository, {
-          tag: imageTag
+          tag: imageTag,
         }),
         functionName: props.name,
         description: props.lambdaProps.description,
         environment: props.lambdaProps.environment,
         memorySize: props.lambdaProps.memorySize,
         reservedConcurrentExecutions:
-        props.lambdaProps.reservedConcurrentExecutions,
+          props.lambdaProps.reservedConcurrentExecutions,
         retryAttempts: props.lambdaProps.retryAttempts,
         securityGroup: props.lambdaProps.securityGroup,
         timeout: props.lambdaProps.timeout,
@@ -273,6 +290,5 @@ export class LambdaWorker extends cdk.Construct {
       awsSdkConnectionReuse: true,
       runtime: lambda.Runtime.NODEJS_14_X,
     });
-
   }
 }
