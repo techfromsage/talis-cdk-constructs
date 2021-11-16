@@ -235,13 +235,15 @@ export class LambdaWorker extends cdk.Construct {
 
   createLambdaFunction(props: LambdaWorkerProps): lambda.Function {
     if (this.isContainerLambda(props)) {
-      return this.createContainerLambdaFunction(props)
+      return this.createContainerLambdaFunction(props);
     }
 
     return this.createNodejsLambdaFunction(props);
   }
 
-  private createNodejsLambdaFunction(props: LambdaWorkerProps): lambda.Function {
+  private createNodejsLambdaFunction(
+    props: LambdaWorkerProps
+  ): lambda.Function {
     return new lambdaNodeJs.NodejsFunction(this, props.name, {
       functionName: props.name,
 
@@ -252,7 +254,8 @@ export class LambdaWorker extends cdk.Construct {
       description: props.lambdaProps.description,
       environment: props.lambdaProps.environment,
       memorySize: props.lambdaProps.memorySize,
-      reservedConcurrentExecutions: props.lambdaProps.reservedConcurrentExecutions,
+      reservedConcurrentExecutions:
+        props.lambdaProps.reservedConcurrentExecutions,
       retryAttempts: props.lambdaProps.retryAttempts,
       securityGroup: props.lambdaProps.securityGroup,
       timeout: props.lambdaProps.timeout,
@@ -265,7 +268,9 @@ export class LambdaWorker extends cdk.Construct {
     });
   }
 
-  private createContainerLambdaFunction(props: LambdaWorkerProps): lambda.Function {
+  private createContainerLambdaFunction(
+    props: LambdaWorkerProps
+  ): lambda.Function {
     const imageTag: string = props.lambdaProps.dockerImageTag
       ? props.lambdaProps.dockerImageTag
       : "";
@@ -275,11 +280,14 @@ export class LambdaWorker extends cdk.Construct {
     const ecrRepositoryName: string = props.lambdaProps.ecrRepositoryName
       ? props.lambdaProps.ecrRepositoryName
       : "";
-    const ecrRepository: IRepository =
-      ecr.Repository.fromRepositoryAttributes(this, `${props.name}-ecr`, {
+    const ecrRepository: IRepository = ecr.Repository.fromRepositoryAttributes(
+      this,
+      `${props.name}-ecr`,
+      {
         repositoryArn: ecrRepositoryArn,
         repositoryName: ecrRepositoryName,
-      });
+      }
+    );
 
     return new lambda.DockerImageFunction(this, props.name, {
       code: lambda.DockerImageCode.fromEcr(ecrRepository, {
