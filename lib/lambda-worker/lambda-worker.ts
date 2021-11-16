@@ -235,39 +235,13 @@ export class LambdaWorker extends cdk.Construct {
 
   createLambdaFunction(props: LambdaWorkerProps): lambda.Function {
     if (this.isContainerLambda(props)) {
-      const imageTag: string = props.lambdaProps.dockerImageTag
-        ? props.lambdaProps.dockerImageTag
-        : "";
-      const ecrRepositoryArn: string = props.lambdaProps.ecrRepositoryArn
-        ? props.lambdaProps.ecrRepositoryArn
-        : "";
-      const ecrRepositoryName: string = props.lambdaProps.ecrRepositoryName
-        ? props.lambdaProps.ecrRepositoryName
-        : "";
-      const ecrRepository: IRepository =
-        ecr.Repository.fromRepositoryAttributes(this, `${props.name}-ecr`, {
-          repositoryArn: ecrRepositoryArn,
-          repositoryName: ecrRepositoryName,
-        });
-
-      return new lambda.DockerImageFunction(this, props.name, {
-        code: lambda.DockerImageCode.fromEcr(ecrRepository, {
-          tag: imageTag,
-        }),
-        functionName: props.name,
-        description: props.lambdaProps.description,
-        environment: props.lambdaProps.environment,
-        memorySize: props.lambdaProps.memorySize,
-        reservedConcurrentExecutions:
-          props.lambdaProps.reservedConcurrentExecutions,
-        retryAttempts: props.lambdaProps.retryAttempts,
-        securityGroup: props.lambdaProps.securityGroup,
-        timeout: props.lambdaProps.timeout,
-        vpc: props.lambdaProps.vpc,
-        vpcSubnets: props.lambdaProps.vpcSubnets,
-      });
+      return this.createContainerLambdaFunction(props)
     }
 
+    return this.createNodejsLambdaFunction(props);
+  }
+
+  private createNodejsLambdaFunction(props: LambdaWorkerProps): lambda.Function {
     return new lambdaNodeJs.NodejsFunction(this, props.name, {
       functionName: props.name,
 
@@ -278,8 +252,7 @@ export class LambdaWorker extends cdk.Construct {
       description: props.lambdaProps.description,
       environment: props.lambdaProps.environment,
       memorySize: props.lambdaProps.memorySize,
-      reservedConcurrentExecutions:
-        props.lambdaProps.reservedConcurrentExecutions,
+      reservedConcurrentExecutions: props.lambdaProps.reservedConcurrentExecutions,
       retryAttempts: props.lambdaProps.retryAttempts,
       securityGroup: props.lambdaProps.securityGroup,
       timeout: props.lambdaProps.timeout,
@@ -289,6 +262,40 @@ export class LambdaWorker extends cdk.Construct {
       // Enforce the following properties
       awsSdkConnectionReuse: true,
       runtime: lambda.Runtime.NODEJS_14_X,
+    });
+  }
+
+  private createContainerLambdaFunction(props: LambdaWorkerProps): lambda.Function {
+    const imageTag: string = props.lambdaProps.dockerImageTag
+      ? props.lambdaProps.dockerImageTag
+      : "";
+    const ecrRepositoryArn: string = props.lambdaProps.ecrRepositoryArn
+      ? props.lambdaProps.ecrRepositoryArn
+      : "";
+    const ecrRepositoryName: string = props.lambdaProps.ecrRepositoryName
+      ? props.lambdaProps.ecrRepositoryName
+      : "";
+    const ecrRepository: IRepository =
+      ecr.Repository.fromRepositoryAttributes(this, `${props.name}-ecr`, {
+        repositoryArn: ecrRepositoryArn,
+        repositoryName: ecrRepositoryName,
+      });
+
+    return new lambda.DockerImageFunction(this, props.name, {
+      code: lambda.DockerImageCode.fromEcr(ecrRepository, {
+        tag: imageTag,
+      }),
+      functionName: props.name,
+      description: props.lambdaProps.description,
+      environment: props.lambdaProps.environment,
+      memorySize: props.lambdaProps.memorySize,
+      reservedConcurrentExecutions:
+        props.lambdaProps.reservedConcurrentExecutions,
+      retryAttempts: props.lambdaProps.retryAttempts,
+      securityGroup: props.lambdaProps.securityGroup,
+      timeout: props.lambdaProps.timeout,
+      vpc: props.lambdaProps.vpc,
+      vpcSubnets: props.lambdaProps.vpcSubnets,
     });
   }
 }
