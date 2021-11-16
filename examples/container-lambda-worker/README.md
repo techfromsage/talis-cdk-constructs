@@ -1,8 +1,59 @@
-# Welcome to your CDK TypeScript project!
+# LambdaWorker Container Example
 
-This is a blank project for TypeScript development with CDK.
+This is an example of using the LambdaWorker in a simple worker from a container image.
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+The LambdaWorker:
+
+- is subscribed to an SQS queue whose trigger is enabled by default
+- sends failed jobs to another SQS queue - a dead letter queue
+- is subscribed to the dead letter queue but this trigger is disabled by default
+- allows for the replay of failed jobs with the talis-cli tools awsdlq tool
+- triggers an alarm for failed jobs
+- triggers an alarm when the queue of jobs exceeds a configuarble maximum threshold
+- triggers an alarm when a message waiting on the queue is older than a configurable maximum
+
+The Container LambdaWorker:
+
+- is run from an existing container image tag within an ecr repository
+
+Optionionally, the LambdaWorker:
+
+- can have its SQS queue subscribed to an SNS topic.
+  - For example all Depot workers subscribe to a "File" topic in a Pub/Sub architecture.
+- can have a filterPolicy specified so that it only receives messages from the SNS topic which it is interested in.
+
+## ContainerLambdaWorkerStack
+
+The ContainerLambdaWorkerStack:
+
+- creates an ecr repository
+- builds the docker image from the `container` directory
+- publishes the docker image as `example-UUID` to the created repository
+- creates the LambdaWorker from the given image and repository
+
+## Construct Diagram
+
+![LambdaWorker Construct diagram](LambdaWorker-Container.drawio.png)
+
+## Note:
+
+The `talis-cli-tools` `awsdlq` tool can be used to replay messages.
+See the tech team talk on the `awsdlq` [here](https://docs.google.com/presentation/d/1ND9LMPBeMFqqoxCfsh3Z57Gl0N8JnA9XjZGmqYgTo_A).
+
+## This Example
+
+To build and deploy this example:
+
+- `export AWS_PREFIX=development-XX-` where XX are your initials
+  - This is used in the name of the stack and resources created, so that they do not clash with anyone elses stack in AWS
+- `source awsenv <profile>` to set your credentials to the shared account
+- `npm install`
+- `npm run build`
+- `cdk deploy`
+
+After you have finished with the example, remove your stack in AWS using:
+
+- `cdk destroy`
 
 ## Useful commands
 
