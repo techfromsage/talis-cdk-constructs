@@ -11,8 +11,11 @@ export interface LambdaWorkerProps {
   // Documented here https://docs.aws.amazon.com/cdk/api/latest/docs/@aws-cdk_aws-lambda-nodejs.NodejsFunctionProps.html
   lambdaProps: {
     description?: string;
-    handler: string;
-    entry: string;
+    dockerImageTag?: string;
+    ecrRepositoryArn?: string;
+    ecrRepositoryName?: string;
+    handler?: string;
+    entry?: string;
     environment?: { [key: string]: string };
     memorySize: number; // LambdaWorker will set a minimum memory size of 1024
     policyStatements?: iam.PolicyStatement[];
