@@ -82,6 +82,7 @@ export class ContainerLambdaWorkerStack extends cdk.Stack {
           environment: {
             EXAMPLE_ENV_VAR: "example value",
           },
+          dockerCommand: "container-worker.containerLambdaWorker",
           dockerImageTag: imageTag,
           ecrRepositoryArn: repository.repositoryArn,
           ecrRepositoryName: repository.repositoryName,

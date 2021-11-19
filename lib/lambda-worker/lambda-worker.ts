@@ -210,6 +210,7 @@ export class LambdaWorker extends cdk.Construct {
   isContainerLambda(props: LambdaWorkerProps): boolean {
     if (
       props.lambdaProps.dockerImageTag &&
+      props.lambdaProps.dockerCommand &&
       props.lambdaProps.ecrRepositoryArn &&
       props.lambdaProps.ecrRepositoryName &&
       !props.lambdaProps.entry &&
@@ -222,6 +223,7 @@ export class LambdaWorker extends cdk.Construct {
 
   isFunctionLambda(props: LambdaWorkerProps): boolean {
     if (
+      !props.lambdaProps.dockerCommand &&
       !props.lambdaProps.dockerImageTag &&
       !props.lambdaProps.ecrRepositoryArn &&
       !props.lambdaProps.ecrRepositoryName &&
@@ -292,6 +294,7 @@ export class LambdaWorker extends cdk.Construct {
     return new lambda.DockerImageFunction(this, props.name, {
       code: lambda.DockerImageCode.fromEcr(ecrRepository, {
         tag: imageTag,
+        cmd: [props.lambdaProps.dockerCommand ?? ""],
       }),
       functionName: props.name,
       description: props.lambdaProps.description,

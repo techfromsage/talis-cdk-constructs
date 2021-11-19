@@ -338,6 +338,7 @@ describe("LambdaWorker", () => {
             dockerImageTag: "test-lambda-12345",
             ecrRepositoryArn: "arn:aws:ecr:eu-west-1:012345678910:repository",
             ecrRepositoryName: "repository",
+            dockerCommand: "./src/script",
             memorySize: 2048,
             policyStatements: [
               new iam.PolicyStatement({
@@ -581,6 +582,7 @@ describe("LambdaWorker", () => {
     const cases = [
       {
         description: "throws an exception when all are specified",
+        dockerCommand: "./src/example",
         dockerImageTag: "test-image-12345",
         ecrRepositoryArn: "arn:aws:ecr:eu-west-1:012345678910:repository/test",
         ecrRepositoryName: "repository",
@@ -589,6 +591,7 @@ describe("LambdaWorker", () => {
       },
       {
         description: "throws an exception when none are specified",
+        dockerCommand: undefined,
         dockerImageTag: undefined,
         ecrRepositoryArn: undefined,
         ecrRepositoryName: undefined,
@@ -597,6 +600,7 @@ describe("LambdaWorker", () => {
       },
       {
         description: "throws an exception when only handler is specified",
+        dockerCommand: undefined,
         dockerImageTag: undefined,
         ecrRepositoryArn: undefined,
         ecrRepositoryName: undefined,
@@ -605,6 +609,7 @@ describe("LambdaWorker", () => {
       },
       {
         description: "throws an exception when only entry is specified",
+        dockerCommand: undefined,
         dockerImageTag: undefined,
         ecrRepositoryArn: undefined,
         ecrRepositoryName: undefined,
@@ -614,6 +619,7 @@ describe("LambdaWorker", () => {
       {
         description:
           "throws an exception when only dockerImageTag is specified",
+        dockerCommand: undefined,
         dockerImageTag: "test-lambda-12345",
         ecrRepositoryArn: undefined,
         ecrRepositoryName: undefined,
@@ -623,6 +629,7 @@ describe("LambdaWorker", () => {
       {
         description:
           "throws an exception when only ecrRepositoryArn is specified",
+        dockerCommand: undefined,
         dockerImageTag: undefined,
         ecrRepositoryArn: "arn:aws:ecr:eu-west-1:012345678910:repository/test",
         handler: undefined,
@@ -631,9 +638,19 @@ describe("LambdaWorker", () => {
       {
         description:
           "throws an exception when only ecrRepositoryName is specified",
+        dockerCommand: undefined,
         dockerImageTag: undefined,
         ecrRepositoryArn: undefined,
         ecrRepositoryName: "repository",
+        handler: undefined,
+        entry: undefined,
+      },
+      {
+        description: "throws an exception when only dockerCommand is specified",
+        dockerCommand: "src/example",
+        dockerImageTag: undefined,
+        ecrRepositoryArn: undefined,
+        ecrRepositoryName: undefined,
         handler: undefined,
         entry: undefined,
       },
@@ -657,8 +674,10 @@ describe("LambdaWorker", () => {
             lambdaProps: {
               entry: config.entry,
               handler: config.handler,
+              dockerCommand: config.dockerCommand,
               dockerImageTag: config.dockerImageTag,
               ecrRepositoryArn: config.ecrRepositoryArn,
+              ecrRepositoryName: config.ecrRepositoryName,
               memorySize: 2048,
               timeout: cdk.Duration.minutes(5),
               vpc: vpc,

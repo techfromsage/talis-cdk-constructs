@@ -11,6 +11,7 @@ export interface LambdaWorkerProps {
   // Documented here https://docs.aws.amazon.com/cdk/api/latest/docs/@aws-cdk_aws-lambda-nodejs.NodejsFunctionProps.html
   lambdaProps: {
     description?: string;
+    dockerCommand?: string;
     dockerImageTag?: string;
     ecrRepositoryArn?: string;
     ecrRepositoryName?: string;
