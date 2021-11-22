@@ -2,6 +2,7 @@ import * as cdk from "@aws-cdk/core";
 import * as ec2 from "@aws-cdk/aws-ec2";
 import * as iam from "@aws-cdk/aws-iam";
 import * as sns from "@aws-cdk/aws-sns";
+import * as lambda from "@aws-cdk/aws-lambda";
 
 export interface LambdaWorkerProps {
   // The name of the LambdaWorker
@@ -18,6 +19,7 @@ export interface LambdaWorkerProps {
     handler?: string;
     entry?: string;
     environment?: { [key: string]: string };
+    filesystem?: lambda.FileSystem;
     memorySize: number; // LambdaWorker will set a minimum memory size of 1024
     policyStatements?: iam.PolicyStatement[];
     reservedConcurrentExecutions?: number;
