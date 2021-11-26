@@ -18,6 +18,7 @@ export interface LambdaWorkerProps {
     ecrRepositoryName?: string;
     handler?: string;
     entry?: string;
+    enableQueue?: boolean;
     environment?: { [key: string]: string };
     filesystem?: lambda.FileSystem;
     memorySize: number; // LambdaWorker will set a minimum memory size of 1024

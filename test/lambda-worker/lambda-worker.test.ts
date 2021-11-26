@@ -314,6 +314,123 @@ describe("LambdaWorker", () => {
         );
       });
     });
+
+    describe("disabling queue event source", () => {
+      let stack: cdk.Stack;
+
+      beforeAll(() => {
+        const app = new cdk.App();
+        stack = new cdk.Stack(app, "TestStack");
+        const alarmTopic = new sns.Topic(stack, "TestAlarm", {
+          topicName: "TestAlarm",
+        });
+        const topic = new sns.Topic(stack, "TestTopic", {
+          topicName: "TestTopic",
+        });
+
+        const vpc = new ec2.Vpc(stack, "TheVPC", {
+          cidr: "10.0.0.0/16",
+        });
+
+        new LambdaWorker(stack, "MyTestLambdaWorker", {
+          name: "MyTestLambdaWorker",
+          lambdaProps: {
+            entry: "examples/simple-lambda-worker/src/lambda/simple-worker.js",
+            handler: "testWorker",
+            memorySize: 2048,
+            timeout: cdk.Duration.minutes(5),
+            enableQueue: false,
+            vpc: vpc,
+            vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE },
+          },
+          queueProps: {},
+          alarmTopic: alarmTopic,
+          subscription: {
+            topic: topic,
+          },
+        });
+      });
+
+      test("provisions a lambda with disabled source", () => {
+        expectCDK(stack).to(countResources("AWS::Lambda::Function", 1));
+        expectCDK(stack).to(
+          countResources("AWS::Lambda::EventSourceMapping", 2)
+        );
+
+        expectCDK(stack).to(
+          haveResourceLike("AWS::Lambda::EventSourceMapping", {
+            FunctionName: {
+              Ref: "MyTestLambdaWorker107005A6",
+            },
+            Enabled: false,
+            EventSourceArn: {
+              "Fn::GetAtt": [
+                "MyTestLambdaWorkerMyTestLambdaWorkerqueue01D6E79E",
+                "Arn",
+              ],
+            },
+          })
+        );
+      });
+    });
+
+    describe("enable queue event source defaults to true", () => {
+      let stack: cdk.Stack;
+
+      beforeAll(() => {
+        const app = new cdk.App();
+        stack = new cdk.Stack(app, "TestStack");
+        const alarmTopic = new sns.Topic(stack, "TestAlarm", {
+          topicName: "TestAlarm",
+        });
+        const topic = new sns.Topic(stack, "TestTopic", {
+          topicName: "TestTopic",
+        });
+
+        const vpc = new ec2.Vpc(stack, "TheVPC", {
+          cidr: "10.0.0.0/16",
+        });
+
+        new LambdaWorker(stack, "MyTestLambdaWorker", {
+          name: "MyTestLambdaWorker",
+          lambdaProps: {
+            entry: "examples/simple-lambda-worker/src/lambda/simple-worker.js",
+            handler: "testWorker",
+            memorySize: 2048,
+            timeout: cdk.Duration.minutes(5),
+            vpc: vpc,
+            vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE },
+          },
+          queueProps: {},
+          alarmTopic: alarmTopic,
+          subscription: {
+            topic: topic,
+          },
+        });
+      });
+
+      test("provisions a lambda with enabled source", () => {
+        expectCDK(stack).to(countResources("AWS::Lambda::Function", 1));
+        expectCDK(stack).to(
+          countResources("AWS::Lambda::EventSourceMapping", 2)
+        );
+
+        expectCDK(stack).to(
+          haveResourceLike("AWS::Lambda::EventSourceMapping", {
+            FunctionName: {
+              Ref: "MyTestLambdaWorker107005A6",
+            },
+            Enabled: true,
+            EventSourceArn: {
+              "Fn::GetAtt": [
+                "MyTestLambdaWorkerMyTestLambdaWorkerqueue01D6E79E",
+                "Arn",
+              ],
+            },
+          })
+        );
+      });
+    });
   });
 
   describe("container lambda", () => {
