@@ -116,7 +116,7 @@ export class LambdaWorker extends cdk.Construct {
     // By default, the main queue is enabled and the DLQ is disabled
     lambdaWorker.addEventSource(
       new eventSource.SqsEventSource(lambdaQueue, {
-        enabled: true,
+        enabled: props.lambdaProps.enableQueue ?? true,
         batchSize: 1,
       })
     );
