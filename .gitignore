@@ -10,5 +10,5 @@ test/**/*.d.ts
 .cdk.staging
 cdk.out
 
-!test/authenticated-api/routes/route1.js
-!test/authenticated-api/routes/route2.js
+!test/infra/authenticated-api/routes/route1.js
+!test/infra/authenticated-api/routes/route2.js

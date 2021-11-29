@@ -42,8 +42,8 @@ jobs:
           name: Build authenticated api example code
           command: cd examples/simple-authenticated-api && npm install && npm run build
       - run:
-          name: Run tests
-          command: npm test
+          name: Run infra tests
+          command: npm infra-test
       - run:
           name: Semantic Release
           command: npx semantic-release

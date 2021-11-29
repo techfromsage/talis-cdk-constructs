@@ -11,7 +11,7 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
-    "test": "npm run build && jest",
+    "infra-test": "npm run build && jest test/infra",
     "lint:prettier": "prettier --check .",
     "lint:eslint": "eslint . --ext .js,.ts",
     "lint": "npm run lint:prettier && npm run lint:eslint",

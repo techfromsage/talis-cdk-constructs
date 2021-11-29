@@ -7,7 +7,7 @@ import {
 import * as cdk from "@aws-cdk/core";
 import { Environment, RemovalPolicy, Stack } from "@aws-cdk/core";
 import * as s3deploy from "@aws-cdk/aws-s3-deployment";
-import { CdnSiteHostingConstruct } from "../../lib/cdn-site-hosting";
+import { CdnSiteHostingConstruct } from "../../../lib/cdn-site-hosting";
 
 // hosted-zone requires an environment be attached to the Stack
 const testEnv: Environment = {

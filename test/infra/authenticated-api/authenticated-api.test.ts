@@ -11,7 +11,7 @@ import * as iam from "@aws-cdk/aws-iam";
 import * as path from "path";
 import * as sns from "@aws-cdk/aws-sns";
 
-import { AuthenticatedApi } from "../../lib";
+import { AuthenticatedApi } from "../../../lib";
 
 describe("AuthenticatedApi", () => {
   describe("with only required props", () => {
