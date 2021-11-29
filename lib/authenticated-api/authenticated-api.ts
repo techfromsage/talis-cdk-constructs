@@ -14,6 +14,9 @@ const DEFAULT_API_LATENCY_THRESHOLD = cdk.Duration.minutes(1);
 const DEFAULT_LAMBDA_DURATION_THRESHOLD = cdk.Duration.minutes(1);
 
 export class AuthenticatedApi extends cdk.Construct {
+  readonly apiId: string;
+  readonly httpApiId: string;
+
   constructor(scope: cdk.Construct, id: string, props: AuthenticatedApiProps) {
     super(scope, id);
 
@@ -23,6 +26,9 @@ export class AuthenticatedApi extends cdk.Construct {
       this,
       `${props.prefix}${props.name}`
     );
+
+    this.apiId = httpApi.apiId;
+    this.httpApiId = httpApi.httpApiId;
 
     // Routes may contain required scopes. These scopes need to be in the config
     // of the authorization lambda. Create this config ahead of creating the authorization lambda
