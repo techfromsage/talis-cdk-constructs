@@ -12,6 +12,7 @@
     "build": "tsc",
     "watch": "tsc -w",
     "infra-test": "npm run build && jest test/infra",
+    "integration-test": "npm run build && jest test/integration",
     "lint:prettier": "prettier --check .",
     "lint:eslint": "eslint . --ext .js,.ts",
     "lint": "npm run lint:prettier && npm run lint:eslint",
