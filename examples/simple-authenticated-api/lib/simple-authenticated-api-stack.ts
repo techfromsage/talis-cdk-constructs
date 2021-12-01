@@ -23,7 +23,7 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
     const alarmTopic = new sns.Topic(
       this,
       `${prefix}simple-lambda-Worker-alarm`,
-      { topicName: `${prefix}simple-lambda-worker-alarm` }
+      { topicName: `${prefix}simple-authenticated-api-alarm` }
     );
 
     const vpc = ec2.Vpc.fromLookup(this, `${prefix}-vpc`, {
