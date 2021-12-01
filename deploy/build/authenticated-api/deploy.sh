@@ -8,4 +8,4 @@ export AWS_PREFIX=build-20211201-
 
 npm install
 npm run build
-npx cdk deploy
+npx cdk --require-approval never deploy
