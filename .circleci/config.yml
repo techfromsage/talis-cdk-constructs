@@ -14,6 +14,8 @@ orbs:
 
 jobs:
   build:
+    context:
+      - cdk-deploy-to-shared-aspire
     executor: default_executor
     steps:
       - add_ssh_keys:
