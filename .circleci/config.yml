@@ -39,8 +39,8 @@ jobs:
           name: Build lambda worker example code
           command: cd examples/simple-lambda-worker && npm install && npm run build
       - run:
-          name: Build authenticated api example code
-          command: cd examples/simple-authenticated-api && npm install && npm run build
+          name: Build and deploy authenticated api example code
+          command: cd examples/simple-authenticated-api && npm install && npm run build && npx cdk --require-approval never deploy
       - run:
           name: Run infra tests
           command: npm run infra-test
@@ -57,3 +57,4 @@ workflows:
       - build:
           context:
             - cdk-deploy-to-shared-aspire
+            - talis-cdk-constructs-build
