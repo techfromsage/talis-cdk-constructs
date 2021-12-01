@@ -36,17 +36,14 @@ jobs:
           name: Build code
           command: npm run build
       - run:
-          name: Build lambda worker example code
-          command: cd examples/simple-lambda-worker && npm install && npm run build
-      - run:
-          name: Build and deploy authenticated api example code
-          command: cd examples/simple-authenticated-api && npm install && npm run build && npx cdk --require-approval never deploy
-      - run:
           name: Run infra tests
           command: npm run infra-test
       - run:
-          name: Deploy Authenticated Api for Integration Tests
-          command: ./deploy/build/authenticated-api/deploy.sh
+          name: Build and deploy lambda worker example code
+          command: cd examples/simple-lambda-worker && npm install && npm run build && npx cdk --require-approval never deploy
+      - run:
+          name: Build and deploy authenticated api example code
+          command: cd examples/simple-authenticated-api && npm install && npm run build && npx cdk --require-approval never deploy
       - run:
           name: Semantic Release
           command: npx semantic-release
