@@ -54,6 +54,6 @@ jobs:
 workflows:
   build:
     jobs:
-      - build
+      - build:
           context:
             - cdk-deploy-to-shared-aspire
