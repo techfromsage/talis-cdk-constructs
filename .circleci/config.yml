@@ -45,6 +45,9 @@ jobs:
           name: Run infra tests
           command: npm run infra-test
       - run:
+          name: Deploy Authenticated Api for Integration Tests
+          command: ./deploy/build/authenticated-api/deploy.sh
+      - run:
           name: Semantic Release
           command: npx semantic-release
 
