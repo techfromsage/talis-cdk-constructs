@@ -6,7 +6,10 @@ const api = new AWS.ApiGatewayV2();
 describe("AuthenticatedApi", () => {
   
   let apiGatewayId: String;
-  let axiosInstance: AxiosInstance;
+
+  let axiosNoAuthInstance: AxiosInstance;
+  let axiosBadAuthInstance: AxiosInstance;
+  let axiosAuthInstance: AxiosInstance;
 
   async function findApiGatewayId(nextToken: String|null = null) : Promise<String> {
     const response = await api.getApis({ NextToken: nextToken }).promise()
@@ -26,23 +29,46 @@ describe("AuthenticatedApi", () => {
 
   beforeAll( async () => {
     apiGatewayId = await findApiGatewayId();
-    axiosInstance = axios.create({
+    axiosNoAuthInstance = axios.create({
+      baseURL: `https://${apiGatewayId}.execute-api.eu-west-1.amazonaws.com/1/`
+    });
+    axiosBadAuthInstance = axios.create({
+      headers: {'Authorization': 'Bearer badtoken'},
+      baseURL: `https://${apiGatewayId}.execute-api.eu-west-1.amazonaws.com/1/`
+    });
+    axiosAuthInstance = axios.create({
+      headers: {'Authorization': 'Bearer todo - get token'},
       baseURL: `https://${apiGatewayId}.execute-api.eu-west-1.amazonaws.com/1/`
     });
   });
 
   test("returns 200 for unauthenticated route", async () => {
-    const response = await axiosInstance.get('route2');
+    const response = await axiosNoAuthInstance.get('route2');
     expect(response.status).toBe(200);
     expect(response.data).toBe('route 2');
   });
 
   test("returns 401 for authenticated route", async () => {
     try {
-      await axiosInstance.get('route1');
+      await axiosNoAuthInstance.get('route1');
       throw Error('Expected a 401 response');
     } catch (err) {
       expect(err.message).toBe('Request failed with status code 401');
     }
+  });
+
+  test("returns 403 when using bad token", async () => {
+    try {
+      await axiosBadAuthInstance.get('route1');
+      throw Error('Expected a 403 response');
+    } catch (err) {
+      expect(err.message).toBe('Request failed with status code 403');
+    }
+  });
+
+  test("returns 200 when authorised", async () => {
+    const response = await axiosAuthInstance.get('route1');
+    expect(response.status).toBe(200);
+    expect(response.data).toBe('route 1');
   });
 });
