@@ -1,9 +1,5 @@
 describe.only("LambdaWorker", () => {
-  
-  beforeAll( async () => {
-  });
-
   test("does", async () => {
-    expect('bob').toBe('bob');
+    expect("bob").toBe("bob");
   });
 });
