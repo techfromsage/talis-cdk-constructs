@@ -45,6 +45,9 @@ jobs:
           name: Build and deploy authenticated api example code
           command: cd examples/simple-authenticated-api && npm install && npm run build && npx cdk --require-approval never deploy
       - run:
+          name: Run integration tests
+          command: npm run integration-test
+      - run:
           name: Semantic Release
           command: npx semantic-release
 
