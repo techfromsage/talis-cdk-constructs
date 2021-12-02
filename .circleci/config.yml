@@ -53,5 +53,6 @@ workflows:
     jobs:
       - build:
           context:
-            - cdk-deploy-to-shared-aspire
+            - cdk-deploy-to-shared-aspire-20211202
+            - aws-region-eu
             - talis-cdk-constructs-build
