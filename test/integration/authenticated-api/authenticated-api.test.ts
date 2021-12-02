@@ -7,10 +7,6 @@ const api = new ApiGatewayV2();
 describe("AuthenticatedApi", () => {
   let apiGatewayId: string;
 
-  let axiosNoAuthInstance: AxiosInstance;
-  let axiosBadAuthInstance: AxiosInstance;
-  let axiosAuthInstance: AxiosInstance;
-
   async function findApiGatewayId(
     nextToken: string | undefined = undefined
   ): Promise<string> {
@@ -39,20 +35,12 @@ describe("AuthenticatedApi", () => {
 
   beforeAll(async () => {
     apiGatewayId = await findApiGatewayId();
-    axiosNoAuthInstance = axios.create({
-      baseURL: `https://${apiGatewayId}.execute-api.eu-west-1.amazonaws.com/1/`,
-    });
-    axiosBadAuthInstance = axios.create({
-      headers: { Authorization: "Bearer badtoken" },
-      baseURL: `https://${apiGatewayId}.execute-api.eu-west-1.amazonaws.com/1/`,
-    });
-    axiosAuthInstance = axios.create({
-      headers: { Authorization: "Bearer todo - get token" },
-      baseURL: `https://${apiGatewayId}.execute-api.eu-west-1.amazonaws.com/1/`,
-    });
   });
 
   test("returns 200 for unauthenticated route", async () => {
+    const axiosNoAuthInstance = axios.create({
+      baseURL: `https://${apiGatewayId}.execute-api.eu-west-1.amazonaws.com/1/`,
+    });
     const response = await axiosNoAuthInstance.get("route2");
     expect(response.status).toBe(200);
     expect(response.data).toBe("route 2");
@@ -60,6 +48,9 @@ describe("AuthenticatedApi", () => {
 
   test("returns 401 for authenticated route", async () => {
     try {
+      const axiosNoAuthInstance = axios.create({
+        baseURL: `https://${apiGatewayId}.execute-api.eu-west-1.amazonaws.com/1/`,
+      });
       await axiosNoAuthInstance.get("route1");
       throw Error("Expected a 401 response");
     } catch (err) {
@@ -69,6 +60,10 @@ describe("AuthenticatedApi", () => {
 
   test("returns 403 when using bad token", async () => {
     try {
+      const axiosBadAuthInstance = axios.create({
+        headers: { Authorization: "Bearer badtoken" },
+        baseURL: `https://${apiGatewayId}.execute-api.eu-west-1.amazonaws.com/1/`,
+      });
       await axiosBadAuthInstance.get("route1");
       throw Error("Expected a 403 response");
     } catch (err) {
@@ -77,6 +72,10 @@ describe("AuthenticatedApi", () => {
   });
 
   test("returns 200 when authorised", async () => {
+    const axiosAuthInstance = axios.create({
+      headers: { Authorization: "Bearer todo - get token" },
+      baseURL: `https://${apiGatewayId}.execute-api.eu-west-1.amazonaws.com/1/`,
+    });
     const response = await axiosAuthInstance.get("route1");
     expect(response.status).toBe(200);
     expect(response.data).toBe("route 1");
