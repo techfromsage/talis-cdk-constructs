@@ -1,11 +1,11 @@
-const AWS = require('aws-sdk');
+/* const AWS = require('aws-sdk'); */
 
-const sqs = new AWS.SQS();
+/* const sqs = new AWS.SQS(); */
 
-const JOB_WHICH_WILL_SUCCEED = { result: 'SUCCESS' };
-const JOB_WHICH_WILL_FAIL = { result: 'FAIL' };
+/* const JOB_WHICH_WILL_SUCCEED = { result: 'SUCCESS' }; */
+/* const JOB_WHICH_WILL_FAIL = { result: 'FAIL' }; */
 
-describe.only("LambdaWorker", () => {
+describe("LambdaWorker", () => {
   
   /* async function sendJob(message) { */
   /*   const params = { */
