@@ -6,7 +6,6 @@
 /* const JOB_WHICH_WILL_FAIL = { result: 'FAIL' }; */
 
 describe("LambdaWorker", () => {
-  
   /* async function sendJob(message) { */
   /*   const params = { */
   /*     QueueUrl: successSqsUrl, */

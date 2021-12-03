@@ -1,13 +1,16 @@
-const querystring = require('querystring');
-import axios, { AxiosInstance } from "axios";
+import axios from "axios";
 import { ApiGatewayV2 } from "aws-sdk";
 
 const api = new ApiGatewayV2();
 
-const TALIS_CDK_AUTH_API_MISSING_SCOPE_CLIENT = process.env.TALIS_CDK_AUTH_API_MISSING_SCOPE_CLIENT ?? '';
-const TALIS_CDK_AUTH_API_MISSING_SCOPE_SECRET = process.env.TALIS_CDK_AUTH_API_MISSING_SCOPE_SECRET ?? '';
-const TALIS_CDK_AUTH_API_VALID_CLIENT = process.env.TALIS_CDK_AUTH_API_VALID_CLIENT ?? '';
-const TALIS_CDK_AUTH_API_VALID_SECRET = process.env.TALIS_CDK_AUTH_API_VALID_SECRET ?? '';
+const TALIS_CDK_AUTH_API_MISSING_SCOPE_CLIENT =
+  process.env.TALIS_CDK_AUTH_API_MISSING_SCOPE_CLIENT ?? "";
+const TALIS_CDK_AUTH_API_MISSING_SCOPE_SECRET =
+  process.env.TALIS_CDK_AUTH_API_MISSING_SCOPE_SECRET ?? "";
+const TALIS_CDK_AUTH_API_VALID_CLIENT =
+  process.env.TALIS_CDK_AUTH_API_VALID_CLIENT ?? "";
+const TALIS_CDK_AUTH_API_VALID_SECRET =
+  process.env.TALIS_CDK_AUTH_API_VALID_SECRET ?? "";
 
 describe("AuthenticatedApi", () => {
   // Increase the timeout We are making http calls which might have to spin up a cold lambda
@@ -41,18 +44,25 @@ describe("AuthenticatedApi", () => {
     throw Error("ApiGateway not found");
   }
 
-  async function getOAuthToken(client: string, secret: string): Promise<string> {
-    const postData = 'grant_type=client_credentials';
-    const response = await axios.post('https://staging-users.talis.com/oauth/tokens', postData, {
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Content-Length': `${postData.length}`,
-      },
-      auth: {
-        username: client,
-        password: secret,
+  async function getOAuthToken(
+    client: string,
+    secret: string
+  ): Promise<string> {
+    const postData = "grant_type=client_credentials";
+    const response = await axios.post(
+      "https://staging-users.talis.com/oauth/tokens",
+      postData,
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "Content-Length": `${postData.length}`,
+        },
+        auth: {
+          username: client,
+          password: secret,
+        },
       }
-    });
+    );
 
     return response.data.access_token;
   }
