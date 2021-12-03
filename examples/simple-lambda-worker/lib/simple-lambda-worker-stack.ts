@@ -1,6 +1,7 @@
 import * as ec2 from "@aws-cdk/aws-ec2";
 import * as cdk from "@aws-cdk/core";
 import * as sns from "@aws-cdk/aws-sns";
+import * as sqs from "@aws-cdk/aws-sqs";
 
 import { LambdaWorker } from "../../../lib";
 
@@ -39,6 +40,15 @@ export class SimpleLambdaWorkerStack extends cdk.Stack {
       vpcId: "vpc-0155db5e1ab5c28b6",
     });
 
+    // In this example, and to aid integration tests, after successfully processing
+    // a message the lambda worker will send a new messages to an SQS queue.
+    // This is a common thing for the worker to do - passing to the next
+    // worker in the chain. See Echo-Serverless as an example of this.
+    // Create a queue to recieve the message.
+    const successQueue = new sqs.Queue(this, `${prefix}success`, {
+      queueName: `${prefix}success`,
+    });
+
     // Create the Lambda
     /* const worker = */ new LambdaWorker(
       this,
@@ -48,6 +58,7 @@ export class SimpleLambdaWorkerStack extends cdk.Stack {
         lambdaProps: {
           environment: {
             EXAMPLE_ENV_VAR: "example value",
+            SUCCESS_QUEUE_URL: successQueue.queueUrl,
           },
           entry: "src/lambda/simple-worker.js",
           handler: "simpleLambdaWorker",
