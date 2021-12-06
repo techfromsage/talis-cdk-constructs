@@ -36,7 +36,6 @@ describe("AuthenticatedApi", () => {
       }
     }
 
-    console.log(`Response NextToken : ${JSON.stringify(response.NextToken)}`);
     if (response.NextToken) {
       return await findApiGatewayId(response.NextToken);
     }
