@@ -13,6 +13,12 @@ orbs:
   node: circleci/node@4.5.1
 
 jobs:
+  fan_out:
+    executor: default_executor
+    steps:
+      - run:
+          command: echo "starting build"
+
   build:
     executor: default_executor
     steps:
@@ -54,7 +60,18 @@ jobs:
 workflows:
   build:
     jobs:
+      - fan_out
+      - be_kind_to_your_colleagues:
+          type: approval
+          filters:
+            branches:
+              ignore:
+                - master
+                - /^dependabot-.*$/
       - build:
+          requires:
+            - fan_out
+            - be_kind_to_your_colleagues
           context:
             - cdk-deploy-to-shared-aspire-20211202
             - aws-region-eu
