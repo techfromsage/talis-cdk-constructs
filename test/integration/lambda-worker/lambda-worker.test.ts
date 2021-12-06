@@ -7,7 +7,7 @@ const JOB_WHICH_WILL_FAIL = { result: 'FAIL' };
 
 describe("LambdaWorker", () => {
   // Increase the timeout We are sending messages and waiting for lambda's to run
-  jest.setTimeout(600000);
+  jest.setTimeout(350000);
 
   let workerSqsUrl: string;
 
@@ -60,8 +60,10 @@ describe("LambdaWorker", () => {
   }
 
   async function waitForQueueSizeToBe(queueUrl: string, expectedSize: number) {
-    const checkPeriod: number = 10000;
-    const attempts: number = 30;
+    // Check queue size every 5 seconds, making a maximum of 20 checks
+    // before failing
+    const checkPeriod: number = 5000;
+    const attempts: number = 20;
     let currentAttempt: number = 1;
 
     while (currentAttempt++ <= attempts) {
@@ -69,13 +71,14 @@ describe("LambdaWorker", () => {
       if (currentSize === expectedSize) {
         return;
       } else if (currentSize > expectedSize) {
-        throw Error("Found too many messages on the queue");
+        throw Error(`Looking for ${expectedSize} messages on ${queueUrl} But there are already ${currentSize}.`);
       } else {
         await sleep(checkPeriod);
       }
     }
 
-    throw Error("Expected queue size not reached");
+    const finalSize = await queueSize(queueUrl);
+    throw Error(`Looking for ${expectedSize} messages on ${queueUrl}. But there are only ${finalSize}`);
   }
 
   function sleep(ms: number) {
@@ -89,37 +92,19 @@ describe("LambdaWorker", () => {
   });
 
   beforeEach(async () => {
-    await sleep(5000);
     originalSuccessSqsLength = await queueSize(successSqsUrl);
     originalDlqSqsLength = await queueSize(dlqSqsUrl);
   });
 
   test("successfully processes messages", async () => {
     sendJob(JOB_WHICH_WILL_SUCCEED);
-
-    await sleep(5000);
-
-    /* const successSqsLength = await queueSize(successSqsUrl); */
-    /* const dlqSqsLength = await queueSize(dlqSqsUrl); */
-
     await waitForQueueSizeToBe(successSqsUrl, originalSuccessSqsLength + 1);
     await waitForQueueSizeToBe(dlqSqsUrl, originalDlqSqsLength);
-    /* expect(successSqsLength).toBe(originalSuccessSqsLength + 1); */
-    /* expect(dlqSqsLength).toBe(originalDlqSqsLength); */
   });
 
   test("failed messages go to the dlq", async () => {
     sendJob(JOB_WHICH_WILL_FAIL);
-
-    await sleep(5000);
-
     await waitForQueueSizeToBe(dlqSqsUrl, originalDlqSqsLength + 1);
     await waitForQueueSizeToBe(successSqsUrl, originalSuccessSqsLength);
-
-    /* const successSqsLength = await queueSize(successSqsUrl); */
-    /* const dlqSqsLength = await queueSize(dlqSqsUrl); */
-
-    /* expect(successSqsLength).toBe(originalSuccessSqsLength); */
-    /* expect(dlqSqsLength).toBe(originalDlqSqsLength + 1); */
   });
 });
