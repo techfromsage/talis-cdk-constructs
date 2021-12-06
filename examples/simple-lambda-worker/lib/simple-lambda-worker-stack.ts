@@ -1,5 +1,6 @@
 import * as ec2 from "@aws-cdk/aws-ec2";
 import * as cdk from "@aws-cdk/core";
+import * as iam from "@aws-cdk/aws-iam";
 import * as sns from "@aws-cdk/aws-sns";
 import * as sqs from "@aws-cdk/aws-sqs";
 
@@ -46,7 +47,7 @@ export class SimpleLambdaWorkerStack extends cdk.Stack {
     // worker in the chain. See Echo-Serverless as an example of this.
     // Create a queue to recieve the message.
     const successQueue = new sqs.Queue(this, `${prefix}success`, {
-      queueName: `${prefix}success`,
+      queueName: `${prefix}simple-lambda-worker-success`,
     });
 
     // Create the Lambda
@@ -63,12 +64,19 @@ export class SimpleLambdaWorkerStack extends cdk.Stack {
           entry: "src/lambda/simple-worker.js",
           handler: "simpleLambdaWorker",
           memorySize: 1024,
-          timeout: cdk.Duration.minutes(5),
+          timeout: cdk.Duration.seconds(30),
           vpc: vpc,
           vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE },
+          policyStatements: [
+            new iam.PolicyStatement({
+              effect: iam.Effect.ALLOW,
+              actions: ["sqs:*"],
+              resources: [ successQueue.queueArn ],
+            }),
+          ],
         },
         queueProps: {
-          maxReceiveCount: 3,
+          maxReceiveCount: 1,
         },
         alarmTopic: alarmTopic,
 
