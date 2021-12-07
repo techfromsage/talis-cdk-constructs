@@ -70,8 +70,9 @@ export class SimpleLambdaWorkerStack extends cdk.Stack {
           policyStatements: [
             new iam.PolicyStatement({
               effect: iam.Effect.ALLOW,
-              actions: ["sqs:*"],
+              actions: ["sqs:SendMessage"],
               resources: [successQueue.queueArn],
+              /* resources: ["*"], */
             }),
           ],
         },

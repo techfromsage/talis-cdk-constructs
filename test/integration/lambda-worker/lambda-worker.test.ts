@@ -10,12 +10,8 @@ describe("LambdaWorker", () => {
   jest.setTimeout(350000);
 
   let workerSqsUrl: string;
-
   let successSqsUrl: string;
-  let originalSuccessSqsLength: number;
-
   let dlqSqsUrl: string;
-  let originalDlqSqsLength: number;
 
   async function findQueueUrl(
     queuePostfix: string,
@@ -102,19 +98,30 @@ describe("LambdaWorker", () => {
   });
 
   beforeEach(async () => {
-    originalSuccessSqsLength = await queueSize(successSqsUrl);
-    originalDlqSqsLength = await queueSize(dlqSqsUrl);
+    console.log('Purging queues...');
+    await sqs.purgeQueue({QueueUrl: workerSqsUrl}).promise();
+    await sqs.purgeQueue({QueueUrl: dlqSqsUrl}).promise();
+    await sqs.purgeQueue({QueueUrl: successSqsUrl}).promise();
+
+    console.log('Waiting for purge to take affect....');
+    // You are only allowed one purge every 60 seconds - reducing this will cause failures
+    await sleep(60000);
+
+    console.log('Checking queue sizes are zero before starting test');
+    await waitForQueueSizeToBe(successSqsUrl, 0);
+    await waitForQueueSizeToBe(dlqSqsUrl, 0);
+    console.log('Queues sizes are zero.');
   });
 
   test("successfully processes messages", async () => {
     sendJob(JSON.stringify(JOB_WHICH_WILL_SUCCEED));
-    await waitForQueueSizeToBe(successSqsUrl, originalSuccessSqsLength + 1);
-    await waitForQueueSizeToBe(dlqSqsUrl, originalDlqSqsLength);
+    await waitForQueueSizeToBe(successSqsUrl, 1);
+    await waitForQueueSizeToBe(dlqSqsUrl, 0);
   });
 
   test("failed messages go to the dlq", async () => {
     sendJob(JSON.stringify(JOB_WHICH_WILL_FAIL));
-    await waitForQueueSizeToBe(dlqSqsUrl, originalDlqSqsLength + 1);
-    await waitForQueueSizeToBe(successSqsUrl, originalSuccessSqsLength);
+    await waitForQueueSizeToBe(dlqSqsUrl, 1);
+    await waitForQueueSizeToBe(successSqsUrl, 0);
   });
 });
