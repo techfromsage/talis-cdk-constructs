@@ -30,6 +30,18 @@ Builds are conducted by CircleCI, and upon successful build of the `main` branch
 
 - `npm run build` compile typescript to js
 - `npm run watch` watch for changes and compile
-- `npm run test` perform the jest unit tests
+- `npm run infra-test` perform the infra jest unit tests
+- `npm run integration-test` perform the integration tests
 - `npm run lint` will check code quality and style guidelines (using ESlint and Prettier)
 - `npm run format` will format the code (using Prettier)
+
+## Integration Tests
+
+The integration tests are run against versions of the example projects deployed into AWS.
+
+To run the integration tests locally:
+
+- `export AWS_PREFIX=development-XX-` where XX are your initials
+- Following the instruction to deploy the `simple-lambda-worker` in the examples readme.
+- Following the instruction to deploy the `simple-authenticated-api` in the examples readme.
+- `npm run integration-test`
