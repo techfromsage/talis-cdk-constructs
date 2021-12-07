@@ -98,19 +98,19 @@ describe("LambdaWorker", () => {
   });
 
   beforeEach(async () => {
-    console.log('Purging queues...');
-    await sqs.purgeQueue({QueueUrl: workerSqsUrl}).promise();
-    await sqs.purgeQueue({QueueUrl: dlqSqsUrl}).promise();
-    await sqs.purgeQueue({QueueUrl: successSqsUrl}).promise();
+    console.log("Purging queues...");
+    await sqs.purgeQueue({ QueueUrl: workerSqsUrl }).promise();
+    await sqs.purgeQueue({ QueueUrl: dlqSqsUrl }).promise();
+    await sqs.purgeQueue({ QueueUrl: successSqsUrl }).promise();
 
-    console.log('Waiting for purge to take affect....');
+    console.log("Waiting for purge to take affect....");
     // You are only allowed one purge every 60 seconds - reducing this will cause failures
     await sleep(60000);
 
-    console.log('Checking queue sizes are zero before starting test');
+    console.log("Checking queue sizes are zero before starting test");
     await waitForQueueSizeToBe(successSqsUrl, 0);
     await waitForQueueSizeToBe(dlqSqsUrl, 0);
-    console.log('Queues sizes are zero.');
+    console.log("Queues sizes are zero.");
   });
 
   test("successfully processes messages", async () => {

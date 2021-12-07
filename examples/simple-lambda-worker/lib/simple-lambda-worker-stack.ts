@@ -72,7 +72,6 @@ export class SimpleLambdaWorkerStack extends cdk.Stack {
               effect: iam.Effect.ALLOW,
               actions: ["sqs:SendMessage"],
               resources: [successQueue.queueArn],
-              /* resources: ["*"], */
             }),
           ],
         },
