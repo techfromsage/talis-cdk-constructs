@@ -261,8 +261,8 @@ export class LambdaWorker extends cdk.Construct {
       retryAttempts: props.lambdaProps.retryAttempts,
       securityGroup: props.lambdaProps.securityGroup,
       timeout: props.lambdaProps.timeout,
-      vpc: props.lambdaProps.vpc,
-      vpcSubnets: props.lambdaProps.vpcSubnets,
+      /* vpc: props.lambdaProps.vpc, */
+      /* vpcSubnets: props.lambdaProps.vpcSubnets, */
       filesystem: props.lambdaProps.filesystem,
 
       // Enforce the following properties
@@ -307,8 +307,8 @@ export class LambdaWorker extends cdk.Construct {
       securityGroup: props.lambdaProps.securityGroup,
       timeout: props.lambdaProps.timeout,
       filesystem: props.lambdaProps.filesystem,
-      vpc: props.lambdaProps.vpc,
-      vpcSubnets: props.lambdaProps.vpcSubnets,
+      /* vpc: props.lambdaProps.vpc, */
+      /* vpcSubnets: props.lambdaProps.vpcSubnets, */
     });
   }
 }
