@@ -185,7 +185,6 @@ workflows:
       - destroy-lambda-worker:
           requires:
             - test
-          when: always
           context:
             - cdk-deploy-to-shared-aspire-20211202
             - aws-region-eu
@@ -193,7 +192,6 @@ workflows:
       - destroy-authenticated-api:
           requires:
             - test
-          when: always
           context:
             - cdk-deploy-to-shared-aspire-20211202
             - aws-region-eu
