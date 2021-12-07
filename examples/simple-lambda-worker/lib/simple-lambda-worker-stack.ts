@@ -66,7 +66,7 @@ export class SimpleLambdaWorkerStack extends cdk.Stack {
           memorySize: 1024,
           timeout: cdk.Duration.seconds(30),
           vpc: vpc,
-          vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE },
+          vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT },
           policyStatements: [
             new iam.PolicyStatement({
               effect: iam.Effect.ALLOW,
