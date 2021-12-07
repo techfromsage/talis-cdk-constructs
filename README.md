@@ -42,6 +42,11 @@ The integration tests are run against versions of the example projects deployed 
 To run the integration tests locally:
 
 - `export AWS_PREFIX=development-XX-` where XX are your initials
+- The `authenticated-lambda` construct integration test needs the following environment variables for client/secrets. The values can be found by searching for `talis-cdk-construct integration tests` in keeper.
+  - `export TALIS_CDK_AUTH_API_MISSING_SCOPE_CLIENT=`
+  - `export TALIS_CDK_AUTH_API_MISSING_SCOPE_SECRET=`
+  - `export TALIS_CDK_AUTH_API_VALID_CLIENT=`
+  - `export TALIS_CDK_AUTH_API_VALID_SECRET=`
 - Following the instruction to deploy the `simple-lambda-worker` in the examples readme.
 - Following the instruction to deploy the `simple-authenticated-api` in the examples readme.
 - `npm run integration-test`
