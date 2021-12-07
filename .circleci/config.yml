@@ -84,6 +84,7 @@ jobs:
           fingerprints:
             - "ee:b4:00:e6:23:5b:55:bb:fd:07:bc:73:9e:f7:89:9c" # shared.aspire@talis.com 'talis-cdk-constructs Deploy Key'
       - restore_root_build_number
+      - set_aws_prefix
       - checkout
       - node/install-packages
       - run:
