@@ -104,7 +104,10 @@ describe("LambdaWorker", () => {
     await sqs.purgeQueue({ QueueUrl: successSqsUrl }).promise();
 
     console.log("Waiting for purge to take affect....");
-    // You are only allowed one purge every 60 seconds - reducing this will cause failures
+    // You are only allowed one purge every 60 seconds - reducing this will cause failures.
+    // The purge is what is making this test reliable, but this pattern of a 60 second
+    // pause between tests is not a good one. It adds one minute to the build for every test
+    // written below. Do not copy unlesss necessary and consider this when adding more tests here.
     await sleep(60000);
 
     console.log("Checking queue sizes are zero before starting test");
