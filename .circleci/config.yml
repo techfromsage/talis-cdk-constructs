@@ -84,7 +84,7 @@ jobs:
       - node/install-packages
       - run:
           name: Destroy lambda worker example code
-          command: cd examples/simple-lambda-worker && npm install && npm run build && npx cdk --require-approval never destroy
+          command: cd examples/simple-lambda-worker && npm install && npm run build && npx cdk --require-approval never destroy --force
   destroy-authenticated-api:
     executor: default_executor
     steps:
@@ -94,11 +94,16 @@ jobs:
       - checkout
       - node/install-packages
       - run:
-          name: Build and deploy authenticated api example code
-          command: cd examples/simple-authenticated-api && npm install && npm run build && npx cdk --require-approval never destroy
+          name: Destroy authenticated api example code
+          command: cd examples/simple-authenticated-api && npm install && npm run build && npx cdk --require-approval never destroy --force
   semantic-release:
     executor: default_executor
     steps:
+      - checkout
+      - node/install-packages
+      - run:
+          name: Build code
+          command: npm run build
       - run:
           name: Semantic Release
           command: npx semantic-release
@@ -160,7 +165,8 @@ workflows:
             - talis-cdk-constructs-build
       - semantic-release:
           requires:
-            - test
+            - destroy-lambda-worker
+            - destroy-authenticated-api
           context:
             - cdk-deploy-to-shared-aspire-20211202
             - aws-region-eu

@@ -5,6 +5,10 @@ const sqs = new SQS();
 const JOB_WHICH_WILL_SUCCEED = { result: "SUCCESS" };
 const JOB_WHICH_WILL_FAIL = { result: "FAIL" };
 
+// waitForQueueSizeToBe will check queue size every 5 seconds, making a maximum of 20 checks before failing
+const WATCH_CHECK_PERIOD = 5000;
+const WATCH_ATTEMPTS = 20;
+
 describe("LambdaWorker", () => {
   // Increase the timeout We are sending messages and waiting for lambda's to run
   jest.setTimeout(350000);
@@ -62,13 +66,9 @@ describe("LambdaWorker", () => {
   }
 
   async function waitForQueueSizeToBe(queueUrl: string, expectedSize: number) {
-    // Check queue size every 5 seconds, making a maximum of 20 checks
-    // before failing
-    const checkPeriod = 5000;
-    const attempts = 20;
     let currentAttempt = 1;
 
-    while (currentAttempt++ <= attempts) {
+    while (currentAttempt++ <= WATCH_ATTEMPTS) {
       const currentSize = await queueSize(queueUrl);
       if (currentSize === expectedSize) {
         return;
@@ -77,7 +77,7 @@ describe("LambdaWorker", () => {
           `Looking for ${expectedSize} messages on ${queueUrl} But there are already ${currentSize}.`
         );
       } else {
-        await sleep(checkPeriod);
+        await sleep(WATCH_CHECK_PERIOD);
       }
     }
 
