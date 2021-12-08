@@ -41,7 +41,7 @@ export class SimpleLambdaWorkerStack extends cdk.Stack {
       vpcId: "vpc-0155db5e1ab5c28b6",
     });
 
-    // Setting a security group is an option. This is an example of importing and using a 
+    // Setting a security group is an option. This is an example of importing and using a
     // pre existing security group. This one is defined in terraform.
     // An ulterior motive for importing this security group is that without specifying
     // one, the default group created will add significant time to deploy and destroy
@@ -49,11 +49,11 @@ export class SimpleLambdaWorkerStack extends cdk.Stack {
     // once instead of being created and destroyed on every build.
     const lambdaSecurityGroup = ec2.SecurityGroup.fromSecurityGroupId(
       this,
-      'talis-cdk-constructs-build',
-      'sg-0f2486a645df2533c',
+      "talis-cdk-constructs-build",
+      "sg-0f2486a645df2533c",
       {
         mutable: false,
-      },
+      }
     );
 
     // In this example, and to aid integration tests, after successfully processing
