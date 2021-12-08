@@ -82,9 +82,10 @@ export class AuthenticatedApi extends cdk.Construct {
         vpcSubnets: props.vpcSubnets,
       }
     );
-    /* if (props.securityGroup) { */
+    if (props.securityGroup) {
     /*   authLambda.node.addDependency(props.securityGroup); */
-    /* } */
+      props.securityGroup.node.addDependency(authLambda);
+    }
 
     const authorizer = new authorizers.HttpLambdaAuthorizer({
       authorizerName: `${props.prefix}${props.name}-http-lambda-authoriser`,
@@ -113,9 +114,10 @@ export class AuthenticatedApi extends cdk.Construct {
           vpcSubnets: props.vpcSubnets,
         }
       );
-      /* if (props.securityGroup) { */
-      /*   routeLambda.node.addDependency(props.securityGroup); */
-      /* } */
+      if (props.securityGroup) {
+        /* routeLambda.node.addDependency(props.securityGroup); */
+        props.securityGroup.node.addDependency(routeLambda);
+      }
 
       if (routeProps.lambdaProps.policyStatements) {
         for (const statement of routeProps.lambdaProps.policyStatements) {
