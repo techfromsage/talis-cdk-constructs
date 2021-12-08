@@ -7,7 +7,7 @@ import * as cdk from "@aws-cdk/core";
 import * as ec2 from "@aws-cdk/aws-ec2";
 import * as iam from "@aws-cdk/aws-iam";
 import * as sns from "@aws-cdk/aws-sns";
-import { LambdaWorker } from "../../lib/lambda-worker";
+import { LambdaWorker } from "../../../lib/lambda-worker";
 
 describe("LambdaWorker", () => {
   describe("function lambda", () => {

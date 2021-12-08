@@ -1,4 +1,26 @@
 version: 2.1
+commands:
+  save_root_build_number:
+    steps:
+      - run:
+          name: "Caching root build number for workflow"
+          command: echo ${CIRCLE_BUILD_NUM} > /tmp/root-build-number
+      - save_cache:
+          key: v1-root-build-number-{{ .Revision }}
+          paths:
+            - /tmp/root-build-number
+  restore_root_build_number:
+    steps:
+      - restore_cache:
+          name: Restore cached /tmp/root-build-number file
+          keys:
+            - v1-root-build-number-{{ .Revision }}
+  set_aws_prefix:
+    steps:
+      - run:
+          name: Set the AWS_PREFIX
+          command: |
+            echo "export AWS_PREFIX=build-$(cat /tmp/root-build-number)-" >> $BASH_ENV
 
 executors:
   default_executor:
@@ -13,6 +35,13 @@ orbs:
   node: circleci/node@4.5.1
 
 jobs:
+  fan_out:
+    executor: default_executor
+    steps:
+      - run:
+          command: echo "starting build"
+      - save_root_build_number
+
   build:
     executor: default_executor
     steps:
@@ -35,15 +64,79 @@ jobs:
       - run:
           name: Build code
           command: npm run build
+  deploy-lambda-worker:
+    executor: default_executor
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "ee:b4:00:e6:23:5b:55:bb:fd:07:bc:73:9e:f7:89:9c" # shared.aspire@talis.com 'talis-cdk-constructs Deploy Key'
+      - restore_root_build_number
+      - set_aws_prefix
+      - checkout
+      - node/install-packages
       - run:
-          name: Build lambda worker example code
-          command: cd examples/simple-lambda-worker && npm install && npm run build
+          name: Build and deploy lambda worker example code
+          command: cd examples/simple-lambda-worker && npm install && npm run build && npx cdk --require-approval never deploy
+  deploy-authenticated-api:
+    executor: default_executor
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "ee:b4:00:e6:23:5b:55:bb:fd:07:bc:73:9e:f7:89:9c" # shared.aspire@talis.com 'talis-cdk-constructs Deploy Key'
+      - restore_root_build_number
+      - set_aws_prefix
+      - checkout
+      - node/install-packages
       - run:
-          name: Build authenticated api example code
-          command: cd examples/simple-authenticated-api && npm install && npm run build
+          name: Build and deploy authenticated api example code
+          command: cd examples/simple-authenticated-api && npm install && npm run build && npx cdk --require-approval never deploy
+  test:
+    executor: default_executor
+    steps:
+      - restore_root_build_number
+      - set_aws_prefix
+      - checkout
+      - node/install-packages
       - run:
-          name: Run tests
-          command: npm test
+          name: Run infra tests
+          command: npm run infra-test
+      - run:
+          name: Run integration tests
+          command: npm run integration-test
+  destroy-lambda-worker:
+    executor: default_executor
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "ee:b4:00:e6:23:5b:55:bb:fd:07:bc:73:9e:f7:89:9c" # shared.aspire@talis.com 'talis-cdk-constructs Deploy Key'
+      - restore_root_build_number
+      - set_aws_prefix
+      - checkout
+      - node/install-packages
+      - run:
+          name: Destroy lambda worker example code
+          command: cd examples/simple-lambda-worker && npm install && npm run build && npx cdk --require-approval never destroy --force
+  destroy-authenticated-api:
+    executor: default_executor
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "ee:b4:00:e6:23:5b:55:bb:fd:07:bc:73:9e:f7:89:9c" # shared.aspire@talis.com 'talis-cdk-constructs Deploy Key'
+      - restore_root_build_number
+      - set_aws_prefix
+      - checkout
+      - node/install-packages
+      - run:
+          name: Destroy authenticated api example code
+          command: cd examples/simple-authenticated-api && npm install && npm run build && npx cdk --require-approval never destroy --force
+  semantic-release:
+    executor: default_executor
+    steps:
+      - checkout
+      - node/install-packages
+      - run:
+          name: Build code
+          command: npm run build
       - run:
           name: Semantic Release
           command: npx semantic-release
@@ -51,4 +144,63 @@ jobs:
 workflows:
   build:
     jobs:
-      - build
+      - fan_out
+      - be_kind_to_your_colleagues:
+          type: approval
+          filters:
+            branches:
+              ignore:
+                - master
+                - /^dependabot-.*$/
+      - build:
+          requires:
+            - fan_out
+            - be_kind_to_your_colleagues
+          context:
+            - cdk-deploy-to-shared-aspire-20211202
+            - aws-region-eu
+            - talis-cdk-constructs-build
+      - deploy-lambda-worker:
+          requires:
+            - build
+          context:
+            - cdk-deploy-to-shared-aspire-20211202
+            - aws-region-eu
+            - talis-cdk-constructs-build
+      - deploy-authenticated-api:
+          requires:
+            - build
+          context:
+            - cdk-deploy-to-shared-aspire-20211202
+            - aws-region-eu
+            - talis-cdk-constructs-build
+      - test:
+          requires:
+            - deploy-lambda-worker
+            - deploy-authenticated-api
+          context:
+            - cdk-deploy-to-shared-aspire-20211202
+            - aws-region-eu
+            - talis-cdk-constructs-build
+      - destroy-lambda-worker:
+          requires:
+            - test
+          context:
+            - cdk-deploy-to-shared-aspire-20211202
+            - aws-region-eu
+            - talis-cdk-constructs-build
+      - destroy-authenticated-api:
+          requires:
+            - test
+          context:
+            - cdk-deploy-to-shared-aspire-20211202
+            - aws-region-eu
+            - talis-cdk-constructs-build
+      - semantic-release:
+          requires:
+            - destroy-lambda-worker
+            - destroy-authenticated-api
+          context:
+            - cdk-deploy-to-shared-aspire-20211202
+            - aws-region-eu
+            - talis-cdk-constructs-build

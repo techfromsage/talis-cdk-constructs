@@ -11,7 +11,9 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
-    "test": "npm run build && jest",
+    "infra-test": "npm run build && jest test/infra",
+    "integration-test": "npm run build && npm run jest-integration-test",
+    "jest-integration-test": "jest test/integration/",
     "lint:prettier": "prettier --check .",
     "lint:eslint": "eslint . --ext .js,.ts",
     "lint": "npm run lint:prettier && npm run lint:eslint",
@@ -28,6 +30,8 @@
     "@types/uuid": "^8.3.1",
     "@typescript-eslint/eslint-plugin": "^4.28.3",
     "@typescript-eslint/parser": "^4.28.3",
+    "aws-sdk": "^2.1040.0",
+    "axios": "^0.24.0",
     "esbuild": "^0.13.8",
     "eslint": "^7.30.0",
     "eslint-config-prettier": "^8.3.0",
@@ -52,8 +56,8 @@
     "@aws-cdk/aws-ec2": "^1.129.0",
     "@aws-cdk/aws-ecr": "^1.129.0",
     "@aws-cdk/aws-ecr-assets": "^1.129.0",
-    "@aws-cdk/aws-lambda-event-sources": "^1.129.0",
     "@aws-cdk/aws-lambda": "^1.129.0",
+    "@aws-cdk/aws-lambda-event-sources": "^1.129.0",
     "@aws-cdk/aws-lambda-nodejs": "^1.129.0",
     "@aws-cdk/aws-route53": "^1.129.0",
     "@aws-cdk/aws-route53-targets": "^1.129.0",
@@ -63,8 +67,8 @@
     "@aws-cdk/aws-sns-subscriptions": "^1.129.0",
     "@aws-cdk/aws-sqs": "^1.129.0",
     "@aws-cdk/core": "^1.129.0",
-    "uuid": "^8.3.2",
     "cdk-ecr-deployment": "0.0.80",
-    "talis-node": "git://github.com/talis/talis-node.git#v0.0.3"
+    "talis-node": "git://github.com/talis/talis-node.git#v0.0.3",
+    "uuid": "^8.3.2"
   }
 }
