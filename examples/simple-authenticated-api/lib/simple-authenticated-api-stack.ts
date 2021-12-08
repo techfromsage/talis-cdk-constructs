@@ -32,11 +32,11 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
 
     const lambdaSecurityGroup = ec2.SecurityGroup.fromSecurityGroupId(
       this,
-      'depot-serverless-lambda-security-group',
-      'sg-002cdd87d0c5a0fb0',
+      "depot-serverless-lambda-security-group",
+      "sg-002cdd87d0c5a0fb0",
       {
         mutable: false,
-      },
+      }
     );
 
     /* const api = */ new AuthenticatedApi(this, "simple-authenticated-api", {
