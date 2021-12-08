@@ -83,7 +83,7 @@ export class AuthenticatedApi extends cdk.Construct {
       }
     );
     if (props.securityGroup) {
-    /*   authLambda.node.addDependency(props.securityGroup); */
+      /*   authLambda.node.addDependency(props.securityGroup); */
       props.securityGroup.node.addDependency(authLambda);
     }
 

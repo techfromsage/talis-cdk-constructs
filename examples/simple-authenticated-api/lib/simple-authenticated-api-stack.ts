@@ -48,7 +48,7 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
       }
     );
 
-    const api = new AuthenticatedApi(this, "simple-authenticated-api", {
+    /* const api = */ new AuthenticatedApi(this, "simple-authenticated-api", {
       prefix,
       name: "simple-authenticated-api",
       description: "A simple example API",

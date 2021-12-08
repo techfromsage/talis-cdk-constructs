@@ -69,53 +69,57 @@ export class SimpleLambdaWorkerStack extends cdk.Stack {
     });
 
     // Create the Lambda
-    const worker = new LambdaWorker(this, `${prefix}simple-lambda-worker`, {
-      name: `${prefix}simple-lambda-worker`,
-      lambdaProps: {
-        environment: {
-          EXAMPLE_ENV_VAR: "example value",
-          SUCCESS_QUEUE_URL: successQueue.queueUrl,
+    /* const worker = */ new LambdaWorker(
+      this,
+      `${prefix}simple-lambda-worker`,
+      {
+        name: `${prefix}simple-lambda-worker`,
+        lambdaProps: {
+          environment: {
+            EXAMPLE_ENV_VAR: "example value",
+            SUCCESS_QUEUE_URL: successQueue.queueUrl,
+          },
+          entry: "src/lambda/simple-worker.js",
+          handler: "simpleLambdaWorker",
+          memorySize: 1024,
+          securityGroup: lambdaSecurityGroup,
+          timeout: cdk.Duration.seconds(30),
+          vpc: vpc,
+          vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT },
+          policyStatements: [
+            new iam.PolicyStatement({
+              effect: iam.Effect.ALLOW,
+              actions: ["sqs:SendMessage"],
+              resources: [successQueue.queueArn],
+            }),
+          ],
         },
-        entry: "src/lambda/simple-worker.js",
-        handler: "simpleLambdaWorker",
-        memorySize: 1024,
-        securityGroup: lambdaSecurityGroup,
-        timeout: cdk.Duration.seconds(30),
-        vpc: vpc,
-        vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT },
-        policyStatements: [
-          new iam.PolicyStatement({
-            effect: iam.Effect.ALLOW,
-            actions: ["sqs:SendMessage"],
-            resources: [successQueue.queueArn],
-          }),
-        ],
-      },
-      queueProps: {
-        maxReceiveCount: 1,
-      },
-      alarmTopic: alarmTopic,
+        queueProps: {
+          maxReceiveCount: 1,
+        },
+        alarmTopic: alarmTopic,
 
-      // Subscribing to a topic is optional
-      subscription: {
-        topic: topic,
-        // Without a filterPolicy the subscription will receive all messages
-        // An optional filterPolicy can be aplied so only specific messages are received
-        // This example is a real example from Depot's Pub/Sub architecture where we want messages containing:
-        // { action: "COMPLETED", output_type: "DOCUMENT", mime_type: "application/pdf"
-        filterPolicy: {
-          action: sns.SubscriptionFilter.stringFilter({
-            allowlist: ["COMPLETED"],
-          }),
-          output_type: sns.SubscriptionFilter.stringFilter({
-            allowlist: ["DOCUMENT"],
-          }),
-          mime_type: sns.SubscriptionFilter.stringFilter({
-            allowlist: ["application/pdf"],
-          }),
+        // Subscribing to a topic is optional
+        subscription: {
+          topic: topic,
+          // Without a filterPolicy the subscription will receive all messages
+          // An optional filterPolicy can be aplied so only specific messages are received
+          // This example is a real example from Depot's Pub/Sub architecture where we want messages containing:
+          // { action: "COMPLETED", output_type: "DOCUMENT", mime_type: "application/pdf"
+          filterPolicy: {
+            action: sns.SubscriptionFilter.stringFilter({
+              allowlist: ["COMPLETED"],
+            }),
+            output_type: sns.SubscriptionFilter.stringFilter({
+              allowlist: ["DOCUMENT"],
+            }),
+            mime_type: sns.SubscriptionFilter.stringFilter({
+              allowlist: ["application/pdf"],
+            }),
+          },
         },
-      },
-    });
+      }
+    );
 
     /* worker.node.addDependency(lambdaSecurityGroup); */
     /* lambdaSecurityGroup.node.addDependency(worker); */
