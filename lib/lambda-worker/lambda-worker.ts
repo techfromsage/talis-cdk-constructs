@@ -105,6 +105,9 @@ export class LambdaWorker extends cdk.Construct {
 
     // Create the lambda
     const lambdaWorker: lambda.Function = this.createLambdaFunction(props);
+    if (props.lambdaProps.securityGroup) {
+      lambdaWorker.node.addDependency(props.lambdaProps.securityGroup);
+    }
 
     if (props.lambdaProps.policyStatements) {
       for (const statement of props.lambdaProps.policyStatements) {
