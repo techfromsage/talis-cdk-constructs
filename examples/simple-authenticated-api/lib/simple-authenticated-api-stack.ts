@@ -30,6 +30,15 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
       vpcId: "vpc-0155db5e1ab5c28b6",
     });
 
+    const lambdaSecurityGroup = ec2.SecurityGroup.fromSecurityGroupId(
+      this,
+      'depot-serverless-lambda-security-group',
+      'sg-002cdd87d0c5a0fb0',
+      {
+        mutable: false,
+      },
+    );
+
     /* const api = */ new AuthenticatedApi(this, "simple-authenticated-api", {
       prefix,
       name: "simple-authenticated-api",
@@ -38,6 +47,7 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
       alarmTopic,
       vpc,
       vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT },
+      securityGroup: lambdaSecurityGroup,
 
       persona: {
         host: "staging-users.talis.com",

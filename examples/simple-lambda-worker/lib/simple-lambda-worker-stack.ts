@@ -41,6 +41,15 @@ export class SimpleLambdaWorkerStack extends cdk.Stack {
       vpcId: "vpc-0155db5e1ab5c28b6",
     });
 
+    const lambdaSecurityGroup = ec2.SecurityGroup.fromSecurityGroupId(
+      this,
+      'depot-serverless-lambda-security-group',
+      'sg-002cdd87d0c5a0fb0',
+      {
+        mutable: false,
+      },
+    );
+
     // In this example, and to aid integration tests, after successfully processing
     // a message the lambda worker will send a new messages to an SQS queue.
     // This is a common thing for the worker to do - passing to the next
@@ -64,6 +73,7 @@ export class SimpleLambdaWorkerStack extends cdk.Stack {
           entry: "src/lambda/simple-worker.js",
           handler: "simpleLambdaWorker",
           memorySize: 1024,
+          securityGroup: lambdaSecurityGroup,
           timeout: cdk.Duration.seconds(30),
           vpc: vpc,
           vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT },
