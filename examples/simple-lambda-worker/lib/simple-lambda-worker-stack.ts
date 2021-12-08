@@ -50,7 +50,7 @@ export class SimpleLambdaWorkerStack extends cdk.Stack {
     const lambdaSecurityGroup = ec2.SecurityGroup.fromSecurityGroupId(
       this,
       "talis-cdk-constructs-build",
-      "sg-0f2486a645df2533c",
+      "sg-091ff6e1188944bb5",
       {
         mutable: false,
       }
