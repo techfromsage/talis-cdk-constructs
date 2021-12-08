@@ -91,6 +91,7 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
       ],
     });
 
-    api.node.addDependency(lambdaSecurityGroup);
+    /* api.node.addDependency(lambdaSecurityGroup); */
+    lambdaSecurityGroup.node.addDependency(api);
   }
 }

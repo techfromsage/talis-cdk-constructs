@@ -117,6 +117,7 @@ export class SimpleLambdaWorkerStack extends cdk.Stack {
       },
     });
 
-    worker.node.addDependency(lambdaSecurityGroup);
+    /* worker.node.addDependency(lambdaSecurityGroup); */
+    lambdaSecurityGroup.node.addDependency(worker);
   }
 }
