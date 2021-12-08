@@ -41,14 +41,19 @@ export class SimpleLambdaWorkerStack extends cdk.Stack {
       vpcId: "vpc-0155db5e1ab5c28b6",
     });
 
-    const lambdaSecurityGroup = ec2.SecurityGroup.fromSecurityGroupId(
-      this,
-      "depot-serverless-lambda-security-group",
-      "sg-002cdd87d0c5a0fb0",
-      {
-        mutable: false,
-      }
-    );
+    /* const lambdaSecurityGroup = ec2.SecurityGroup.fromSecurityGroupId( */
+    /*   this, */
+    /*   "depot-serverless-lambda-security-group", */
+    /*   "sg-002cdd87d0c5a0fb0", */
+    /*   { */
+    /*     mutable: false, */
+    /*   } */
+    /* ); */
+    const lambdaSecurityGroup = new ec2.SecurityGroup(this, 'stack-security-group', {
+      vpc: vpc,
+      description: `${prefix}simple-lambda-worker  Security Group`,
+      allowAllOutbound: true,
+    });
 
     // In this example, and to aid integration tests, after successfully processing
     // a message the lambda worker will send a new messages to an SQS queue.
@@ -60,7 +65,7 @@ export class SimpleLambdaWorkerStack extends cdk.Stack {
     });
 
     // Create the Lambda
-    /* const worker = */ new LambdaWorker(
+    const worker = new LambdaWorker(
       this,
       `${prefix}simple-lambda-worker`,
       {
@@ -111,5 +116,7 @@ export class SimpleLambdaWorkerStack extends cdk.Stack {
         },
       }
     );
+
+    worker.node.addDependency(lambdaSecurityGroup);
   }
 }
