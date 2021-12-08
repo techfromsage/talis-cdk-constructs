@@ -38,11 +38,15 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
     /*     mutable: false, */
     /*   } */
     /* ); */
-    const lambdaSecurityGroup = new ec2.SecurityGroup(this, 'stack-security-group', {
-      vpc: vpc,
-      description: `${prefix}simple-lambda-worker  Security Group`,
-      allowAllOutbound: true,
-    });
+    const lambdaSecurityGroup = new ec2.SecurityGroup(
+      this,
+      "stack-security-group",
+      {
+        vpc: vpc,
+        description: `${prefix}simple-lambda-worker  Security Group`,
+        allowAllOutbound: true,
+      }
+    );
 
     const api = new AuthenticatedApi(this, "simple-authenticated-api", {
       prefix,
