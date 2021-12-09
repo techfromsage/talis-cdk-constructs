@@ -49,8 +49,8 @@ export class SimpleLambdaWorkerStack extends cdk.Stack {
     // once instead of being created and destroyed on every build.
     const lambdaSecurityGroup = ec2.SecurityGroup.fromSecurityGroupId(
       this,
-      "depot-serverless-lambda-security-group",
-      "sg-002cdd87d0c5a0fb0",
+      "talis-cdk-constructs-build",
+      "sg-091ff6e1188944bb5",
       {
         mutable: false,
       }
