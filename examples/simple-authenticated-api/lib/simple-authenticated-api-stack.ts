@@ -26,6 +26,10 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
       { topicName: `${prefix}simple-authenticated-api-alarm` }
     );
 
+    const vpc = ec2.Vpc.fromLookup(this, `${prefix}-vpc`, {
+      vpcId: "vpc-0155db5e1ab5c28b6",
+    });
+
     // Setting a security group is an option. This is an example of importing and using a
     // pre existing security group. This one is defined in terraform.
     // An ulterior motive for importing this security group is that without specifying
@@ -40,10 +44,6 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
         mutable: false,
       }
     );
-
-    const vpc = ec2.Vpc.fromLookup(this, `${prefix}-vpc`, {
-      vpcId: "vpc-0155db5e1ab5c28b6",
-    });
 
     /* const api = */ new AuthenticatedApi(this, "simple-authenticated-api", {
       prefix,
