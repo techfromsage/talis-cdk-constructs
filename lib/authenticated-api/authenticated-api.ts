@@ -110,10 +110,6 @@ export class AuthenticatedApi extends cdk.Construct {
           vpcSubnets: props.vpcSubnets,
         }
       );
-      routeLambda.node.addDependency(authLambda);
-      /* authLambda.node.addDependency(routeLambda);
-      /* authorizer.node.addDependency(routeLambda); */ // Not valid
-      /* routeLambda.node.addDependency(authorizer); */ // does not implement DependableTrait
 
       if (routeProps.lambdaProps.policyStatements) {
         for (const statement of routeProps.lambdaProps.policyStatements) {
