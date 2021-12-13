@@ -38,8 +38,8 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
     // once instead of being created and destroyed on every build.
     const lambdaSecurityGroup = ec2.SecurityGroup.fromSecurityGroupId(
       this,
-      "talis-cdk-constructs-build",
-      "sg-091ff6e1188944bb5",
+      "a-talis-cdk-constructs-build",
+      "sg-0ac646f0077b5ce03"
       {
         mutable: false,
       }

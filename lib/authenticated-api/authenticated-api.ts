@@ -3,90 +3,15 @@ import * as authorizers from "@aws-cdk/aws-apigatewayv2-authorizers";
 import * as cdk from "@aws-cdk/core";
 import * as cloudwatch from "@aws-cdk/aws-cloudwatch";
 import * as cloudwatchActions from "@aws-cdk/aws-cloudwatch-actions";
-import * as iam from "@aws-cdk/aws-iam";
 import * as integrations from "@aws-cdk/aws-apigatewayv2-integrations";
 import * as lambda from "@aws-cdk/aws-lambda";
 import * as lambdaNodeJs from "@aws-cdk/aws-lambda-nodejs";
 import * as path from "path";
 
-import { Construct as CoreConstruct } from "@aws-cdk/core";
-
 import { AuthenticatedApiProps } from "./authenticated-api-props";
 
 const DEFAULT_API_LATENCY_THRESHOLD = cdk.Duration.minutes(1);
 const DEFAULT_LAMBDA_DURATION_THRESHOLD = cdk.Duration.minutes(1);
-
-enum HttpLambdaResponseType {
-  /** Returns simple boolean response */
-  SIMPLE,
-
-  /** Returns an IAM Policy */
-  IAM,
-}
-
-function lambdaAuthorizerArn(handler: lambda.IFunction) {
-  return `arn:${cdk.Stack.of(handler).partition}:apigateway:${
-    cdk.Stack.of(handler).region
-  }:lambda:path/2015-03-31/functions/${handler.functionArn}/invocations`;
-}
-class TestHttpLambdaAuthorizer implements apigatewayv2.IHttpRouteAuthorizer {
-  public authorizer?: apigatewayv2.HttpAuthorizer;
-  private httpApi?: apigatewayv2.IHttpApi;
-
-  constructor(private readonly props: authorizers.HttpLambdaAuthorizerProps) {}
-
-  public bind(
-    options: apigatewayv2.HttpRouteAuthorizerBindOptions
-  ): apigatewayv2.HttpRouteAuthorizerConfig {
-    if (this.httpApi && this.httpApi.apiId !== options.route.httpApi.apiId) {
-      throw new Error("Cannot attach the same authorizer to multiple Apis");
-    }
-
-    if (!this.authorizer) {
-      const id = this.props.authorizerName;
-
-      const responseTypes = this.props.responseTypes ?? [
-        HttpLambdaResponseType.IAM,
-      ];
-      const enableSimpleResponses =
-        responseTypes.includes(HttpLambdaResponseType.SIMPLE) || undefined;
-
-      this.httpApi = options.route.httpApi;
-      this.authorizer = new apigatewayv2.HttpAuthorizer(options.scope, id, {
-        httpApi: options.route.httpApi,
-        identitySource: this.props.identitySource ?? [
-          "$request.header.Authorization",
-        ],
-        type: apigatewayv2.HttpAuthorizerType.LAMBDA,
-        authorizerName: this.props.authorizerName,
-        enableSimpleResponses,
-        payloadFormatVersion: enableSimpleResponses
-          ? apigatewayv2.AuthorizerPayloadVersion.VERSION_2_0
-          : apigatewayv2.AuthorizerPayloadVersion.VERSION_1_0,
-        authorizerUri: lambdaAuthorizerArn(this.props.handler),
-        resultsCacheTtl: this.props.resultsCacheTtl ?? cdk.Duration.minutes(5),
-      });
-
-      this.props.handler.addPermission(
-        `${cdk.Names.nodeUniqueId(this.authorizer.node)}-Permission`,
-        {
-          scope: options.scope as CoreConstruct,
-          principal: new iam.ServicePrincipal("apigateway.amazonaws.com"),
-          sourceArn: cdk.Stack.of(options.route).formatArn({
-            service: "execute-api",
-            resource: options.route.httpApi.apiId,
-            resourceName: `authorizers/${this.authorizer.authorizerId}`,
-          }),
-        }
-      );
-    }
-
-    return {
-      authorizerId: this.authorizer.authorizerId,
-      authorizationType: "CUSTOM",
-    };
-  }
-}
 
 export class AuthenticatedApi extends cdk.Construct {
   readonly apiId: string;
@@ -158,22 +83,11 @@ export class AuthenticatedApi extends cdk.Construct {
       }
     );
 
-    /* const authorizer = new authorizers.HttpLambdaAuthorizer({ */
-    const authorizer = new TestHttpLambdaAuthorizer({
+    const authorizer = new authorizers.HttpLambdaAuthorizer({
       authorizerName: `${props.prefix}${props.name}-http-lambda-authoriser`,
       responseTypes: [authorizers.HttpLambdaResponseType.SIMPLE], // Define if returns simple and/or iam response
       handler: authLambda,
     });
-
-    /* const authorizer = new apigatewayv2.HttpAuthorizer(this, `${props.prefix}${props.name}-authorizer`, { */
-    /*   httpApi: httpApi, */
-    /*   identitySource: [], */
-    /*   type: apigatewayv2.HttpAuthorizerType.LAMBDA, */
-    /*   authorizerUri: `arn:aws:apigateway:${cdk.Stack.of(this).region}:lambda:path/2015-03-31/functions/${authLambda.functionArn}/invocations`, */
-    /* }); */
-    if (authorizer.authorizer) {
-      authorizer.authorizer.node.addDependency(authLambda);
-    }
 
     for (const routeProps of props.routes) {
       // Create the lambda
