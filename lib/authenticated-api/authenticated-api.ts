@@ -9,7 +9,7 @@ import * as lambda from "@aws-cdk/aws-lambda";
 import * as lambdaNodeJs from "@aws-cdk/aws-lambda-nodejs";
 import * as path from "path";
 
-import { Construct as CoreConstruct } from '@aws-cdk/core';
+import { Construct as CoreConstruct } from "@aws-cdk/core";
 
 import { AuthenticatedApiProps } from "./authenticated-api-props";
 
@@ -25,54 +25,65 @@ enum HttpLambdaResponseType {
 }
 
 function lambdaAuthorizerArn(handler: lambda.IFunction) {
-  return `arn:${cdk.Stack.of(handler).partition}:apigateway:${cdk.Stack.of(handler).region}:lambda:path/2015-03-31/functions/${handler.functionArn}/invocations`;
+  return `arn:${cdk.Stack.of(handler).partition}:apigateway:${
+    cdk.Stack.of(handler).region
+  }:lambda:path/2015-03-31/functions/${handler.functionArn}/invocations`;
 }
 class TestHttpLambdaAuthorizer implements apigatewayv2.IHttpRouteAuthorizer {
   public authorizer?: apigatewayv2.HttpAuthorizer;
   private httpApi?: apigatewayv2.IHttpApi;
 
-  constructor(private readonly props: authorizers.HttpLambdaAuthorizerProps) {
-  }
+  constructor(private readonly props: authorizers.HttpLambdaAuthorizerProps) {}
 
-  public bind(options: apigatewayv2.HttpRouteAuthorizerBindOptions): apigatewayv2.HttpRouteAuthorizerConfig {
-    if (this.httpApi && (this.httpApi.apiId !== options.route.httpApi.apiId)) {
-      throw new Error('Cannot attach the same authorizer to multiple Apis');
+  public bind(
+    options: apigatewayv2.HttpRouteAuthorizerBindOptions
+  ): apigatewayv2.HttpRouteAuthorizerConfig {
+    if (this.httpApi && this.httpApi.apiId !== options.route.httpApi.apiId) {
+      throw new Error("Cannot attach the same authorizer to multiple Apis");
     }
 
     if (!this.authorizer) {
       const id = this.props.authorizerName;
 
-      const responseTypes = this.props.responseTypes ?? [HttpLambdaResponseType.IAM];
-      const enableSimpleResponses = responseTypes.includes(HttpLambdaResponseType.SIMPLE) || undefined;
+      const responseTypes = this.props.responseTypes ?? [
+        HttpLambdaResponseType.IAM,
+      ];
+      const enableSimpleResponses =
+        responseTypes.includes(HttpLambdaResponseType.SIMPLE) || undefined;
 
       this.httpApi = options.route.httpApi;
       this.authorizer = new apigatewayv2.HttpAuthorizer(options.scope, id, {
         httpApi: options.route.httpApi,
         identitySource: this.props.identitySource ?? [
-          '$request.header.Authorization',
+          "$request.header.Authorization",
         ],
         type: apigatewayv2.HttpAuthorizerType.LAMBDA,
         authorizerName: this.props.authorizerName,
         enableSimpleResponses,
-        payloadFormatVersion: enableSimpleResponses ? apigatewayv2.AuthorizerPayloadVersion.VERSION_2_0 : apigatewayv2.AuthorizerPayloadVersion.VERSION_1_0,
+        payloadFormatVersion: enableSimpleResponses
+          ? apigatewayv2.AuthorizerPayloadVersion.VERSION_2_0
+          : apigatewayv2.AuthorizerPayloadVersion.VERSION_1_0,
         authorizerUri: lambdaAuthorizerArn(this.props.handler),
         resultsCacheTtl: this.props.resultsCacheTtl ?? cdk.Duration.minutes(5),
       });
 
-      this.props.handler.addPermission(`${cdk.Names.nodeUniqueId(this.authorizer.node)}-Permission`, {
-        scope: options.scope as CoreConstruct,
-        principal: new iam.ServicePrincipal('apigateway.amazonaws.com'),
-        sourceArn: cdk.Stack.of(options.route).formatArn({
-          service: 'execute-api',
-          resource: options.route.httpApi.apiId,
-          resourceName: `authorizers/${this.authorizer.authorizerId}`,
-        }),
-      });
+      this.props.handler.addPermission(
+        `${cdk.Names.nodeUniqueId(this.authorizer.node)}-Permission`,
+        {
+          scope: options.scope as CoreConstruct,
+          principal: new iam.ServicePrincipal("apigateway.amazonaws.com"),
+          sourceArn: cdk.Stack.of(options.route).formatArn({
+            service: "execute-api",
+            resource: options.route.httpApi.apiId,
+            resourceName: `authorizers/${this.authorizer.authorizerId}`,
+          }),
+        }
+      );
     }
 
     return {
       authorizerId: this.authorizer.authorizerId,
-      authorizationType: 'CUSTOM',
+      authorizationType: "CUSTOM",
     };
   }
 }
