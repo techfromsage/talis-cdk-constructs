@@ -127,9 +127,11 @@ jobs:
       - set_aws_prefix
       - checkout
       - node/install-packages
+      - aws-cli/setup:
+          profile-name: shared
       - run:
           name: Destroy authenticated api example code
-          command: aws cloudformation delete-stack ${AWS_PREFIX}SimpleAuthenticatedApiStack
+          command: aws --profile shared cloudformation delete-stack ${AWS_PREFIX}SimpleAuthenticatedApiStack
   semantic-release:
     executor: default_executor
     steps:
