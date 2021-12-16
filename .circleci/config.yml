@@ -128,7 +128,7 @@ jobs:
       - node/install-packages
       - run:
           name: Destroy authenticated api example code
-          command: cd examples/simple-authenticated-api && npm install && npm run build && npx cdk --require-approval never destroy --force
+          command: aws cloudformation delete-stack ${AWS_PREFIX}SimpleAuthenticatedApiStack
   semantic-release:
     executor: default_executor
     steps:
