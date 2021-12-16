@@ -118,7 +118,7 @@ jobs:
           name: Destroy lambda worker example code
           command: cd examples/simple-lambda-worker && npm install && npm run build && npx cdk --require-approval never destroy --force
   destroy-authenticated-api:
-    executor: default_executor
+    executor: aws-cli/default
     steps:
       - add_ssh_keys:
           fingerprints:
