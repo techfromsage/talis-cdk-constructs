@@ -22,7 +22,7 @@
     "prepare": "husky install && npm run build"
   },
   "devDependencies": {
-    "@aws-cdk/assert": "^1.129.0",
+    "@aws-cdk/assert": "1.129.0",
     "@commitlint/cli": "^12.1.4",
     "@commitlint/config-conventional": "^12.1.4",
     "@types/jest": "^26.0.10",
@@ -43,32 +43,32 @@
     "typescript": "~3.9.7"
   },
   "peerDependencies": {
-    "@aws-cdk/core": "^1.129.0"
+    "@aws-cdk/core": "1.129.0"
   },
   "dependencies": {
-    "@aws-cdk/aws-apigatewayv2": "^1.129.0",
-    "@aws-cdk/aws-apigatewayv2-authorizers": "^1.129.0",
-    "@aws-cdk/aws-apigatewayv2-integrations": "^1.129.0",
-    "@aws-cdk/aws-certificatemanager": "^1.129.0",
-    "@aws-cdk/aws-cloudfront": "^1.129.0",
-    "@aws-cdk/aws-cloudwatch": "^1.129.0",
-    "@aws-cdk/aws-cloudwatch-actions": "^1.129.0",
-    "@aws-cdk/aws-ec2": "^1.129.0",
-    "@aws-cdk/aws-ecr": "^1.129.0",
-    "@aws-cdk/aws-ecr-assets": "^1.129.0",
-    "@aws-cdk/aws-lambda": "^1.129.0",
-    "@aws-cdk/aws-lambda-event-sources": "^1.129.0",
-    "@aws-cdk/aws-lambda-nodejs": "^1.129.0",
-    "@aws-cdk/aws-route53": "^1.129.0",
-    "@aws-cdk/aws-route53-targets": "^1.129.0",
-    "@aws-cdk/aws-s3": "^1.129.0",
-    "@aws-cdk/aws-s3-deployment": "^1.129.0",
-    "@aws-cdk/aws-sns": "^1.129.0",
-    "@aws-cdk/aws-sns-subscriptions": "^1.129.0",
-    "@aws-cdk/aws-sqs": "^1.129.0",
-    "@aws-cdk/core": "^1.129.0",
+    "@aws-cdk/aws-apigatewayv2": "1.129.0",
+    "@aws-cdk/aws-apigatewayv2-authorizers": "1.129.0",
+    "@aws-cdk/aws-apigatewayv2-integrations": "1.129.0",
+    "@aws-cdk/aws-certificatemanager": "1.129.0",
+    "@aws-cdk/aws-cloudfront": "1.129.0",
+    "@aws-cdk/aws-cloudwatch": "1.129.0",
+    "@aws-cdk/aws-cloudwatch-actions": "1.129.0",
+    "@aws-cdk/aws-ec2": "1.129.0",
+    "@aws-cdk/aws-ecr": "1.129.0",
+    "@aws-cdk/aws-ecr-assets": "1.129.0",
+    "@aws-cdk/aws-lambda": "1.129.0",
+    "@aws-cdk/aws-lambda-event-sources": "1.129.0",
+    "@aws-cdk/aws-lambda-nodejs": "1.129.0",
+    "@aws-cdk/aws-route53": "1.129.0",
+    "@aws-cdk/aws-route53-targets": "1.129.0",
+    "@aws-cdk/aws-s3": "1.129.0",
+    "@aws-cdk/aws-s3-deployment": "1.129.0",
+    "@aws-cdk/aws-sns": "1.129.0",
+    "@aws-cdk/aws-sns-subscriptions": "1.129.0",
+    "@aws-cdk/aws-sqs": "1.129.0",
+    "@aws-cdk/core": "1.129.0",
     "cdk-ecr-deployment": "0.0.80",
     "talis-node": "git://github.com/talis/talis-node.git#v0.0.3",
-    "uuid": "^8.3.2"
+    "uuid": "8.3.2"
   }
 }
