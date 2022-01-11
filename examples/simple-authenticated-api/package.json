@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "@aws-cdk/core": "1.129.0",
-    "talis-node": "git://github.com/talis/talis-node.git#v0.0.3",
+    "talis-node": "https://github.com/talis/talis-node.git#v0.0.3",
     "source-map-support": "^0.5.16"
   }
 }
