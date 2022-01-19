@@ -44,6 +44,7 @@ describe("CdnSiteHostingConstruct", () => {
         haveResource("AWS::S3::Bucket", {
           BucketName: fakeFqdn,
           WebsiteConfiguration: {
+            ErrorDocument: "error.html",
             IndexDocument: "index.html",
           },
         })
@@ -95,7 +96,7 @@ describe("CdnSiteHostingConstruct", () => {
         removalPolicy: RemovalPolicy.DESTROY,
         isRoutedSpa: true,
         sources: [s3deploy.Source.asset("./")],
-        websiteErrorDocument: "error.html",
+        websiteErrorDocument: "",
         websiteIndexDocument: "index.html",
       });
     });
@@ -119,7 +120,8 @@ describe("CdnSiteHostingConstruct", () => {
       expectCDK(stack).to(
         haveResourceLike("AWS::S3::Bucket", {
           WebsiteConfiguration: {
-            ErrorDocument: "error.html",
+            IndexDocument: "index.html",
+            ErrorDocument: "index.html",
           },
         })
       );
