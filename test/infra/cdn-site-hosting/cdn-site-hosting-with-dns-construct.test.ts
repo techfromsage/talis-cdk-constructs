@@ -93,7 +93,6 @@ describe("CdnSiteHostingWithDnsConstruct", () => {
     });
   });
 
-
   describe("For a routed SPA", () => {
     let stack: Stack;
 

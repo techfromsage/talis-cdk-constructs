@@ -49,11 +49,11 @@ export class CdnSiteHostingConstruct extends cdk.Construct {
       }
     );
 
-    let websiteErrorDocument: string | undefined = props.websiteErrorDocument
-    if (!websiteErrorDocument) { 
+    let websiteErrorDocument: string | undefined = props.websiteErrorDocument;
+    if (!websiteErrorDocument) {
       websiteErrorDocument = props.isRoutedSpa
         ? props.websiteIndexDocument
-        : undefined
+        : undefined;
     }
 
     // S3 bucket
