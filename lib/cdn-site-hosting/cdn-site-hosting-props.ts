@@ -15,6 +15,6 @@ export interface CommonCdnSiteHostingProps {
   isRoutedSpa?: boolean;
   sources?: s3deploy.ISource[];
   sourcesWithDeploymentOptions?: SourcesWithDeploymentOptions[];
-  websiteErrorDocument: string;
+  websiteErrorDocument?: string;
   websiteIndexDocument: string;
 }
