@@ -244,8 +244,8 @@ describe("CdnSiteHostingConstruct", () => {
       expectCDK(stack).to(
         haveResourceLike("AWS::S3::Bucket", {
           WebsiteConfiguration: {
-            IndexDocument: "error.html",
-            ErrorDocument: "index.html",
+            IndexDocument: "index.html",
+            ErrorDocument: "error.html",
           },
         })
       );
