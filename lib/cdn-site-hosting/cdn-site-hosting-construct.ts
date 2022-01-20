@@ -31,7 +31,7 @@ export class CdnSiteHostingConstruct extends cdk.Construct {
   ) {
     super(scope, id);
 
-    if (props.websiteIndexDocument[0] === "/") {
+    if (props.websiteIndexDocument.startsWith("/")) {
       throw Error("leading slashes are not allowed in websiteIndexDocument");
     }
 
