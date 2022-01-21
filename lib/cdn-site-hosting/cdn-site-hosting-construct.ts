@@ -31,6 +31,10 @@ export class CdnSiteHostingConstruct extends cdk.Construct {
   ) {
     super(scope, id);
 
+    if (props.websiteIndexDocument.startsWith("/")) {
+      throw Error("leading slashes are not allowed in websiteIndexDocument");
+    }
+
     validateProps(props);
 
     const siteDomain = getSiteDomain(props);
@@ -49,11 +53,18 @@ export class CdnSiteHostingConstruct extends cdk.Construct {
       }
     );
 
+    let websiteErrorDocument: string | undefined = props.websiteErrorDocument;
+    if (!websiteErrorDocument) {
+      websiteErrorDocument = props.isRoutedSpa
+        ? props.websiteIndexDocument
+        : undefined;
+    }
+
     // S3 bucket
     this.s3Bucket = new s3.Bucket(this, "SiteBucket", {
       bucketName: siteDomain,
       websiteIndexDocument: props.websiteIndexDocument,
-      websiteErrorDocument: props.websiteErrorDocument,
+      websiteErrorDocument,
       publicReadAccess: true,
       removalPolicy: props.removalPolicy,
       autoDeleteObjects: props.removalPolicy === cdk.RemovalPolicy.DESTROY,
@@ -77,6 +88,15 @@ export class CdnSiteHostingConstruct extends cdk.Construct {
             behaviors: [{ isDefaultBehavior: true }],
           },
         ],
+        errorConfigurations: props.isRoutedSpa
+          ? [
+              {
+                errorCode: 404,
+                responseCode: 200,
+                responsePagePath: `/${props.websiteIndexDocument}`,
+              },
+            ]
+          : undefined,
       }
     );
     new cdk.CfnOutput(this, "DistributionId", {
