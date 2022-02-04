@@ -2,10 +2,10 @@ import * as cdk from "@aws-cdk/core";
 
 import { expect as expectCDK, haveResource } from "@aws-cdk/assert";
 import { Template } from "@aws-cdk/assertions";
-import { ResourcePrefixer } from "../../../../lib";
+import { ResourcePrefixer } from "../../../lib";
 import { Aspects } from "@aws-cdk/core";
-import { EmptyResource } from "../../../fixtures/infra/empty_resource";
-import { ResourcePrefixerTestCases } from "../../../fixtures/infra/resource_prefixer_test_cases";
+import { EmptyResource } from "../../fixtures/infra/empty_resource";
+import { ResourcePrefixerTestCases } from "../../fixtures/infra/resource_prefixer_test_cases";
 
 describe("Resource Prefixer", () => {
   let app: cdk.App;

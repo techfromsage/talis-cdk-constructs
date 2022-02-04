@@ -2,9 +2,9 @@ import * as dynamodb from "@aws-cdk/aws-dynamodb";
 import * as cdk from "@aws-cdk/core";
 
 import { expect as expectCDK, haveResource } from "@aws-cdk/assert";
-import { DynamoDbCfnTablePrefixer } from "../../../../../lib";
-import { CfnTableProperties } from "../../../../fixtures/infra/cfn_table";
-import { EmptyResource } from "../../../../fixtures/infra/empty_resource";
+import { DynamoDbCfnTablePrefixer } from "../../../../lib";
+import { CfnTableProperties } from "../../../fixtures/infra/cfn_table";
+import { EmptyResource } from "../../../fixtures/infra/empty_resource";
 
 describe("DynamoDB CfnTable Prefixer", () => {
   let app: cdk.App;
