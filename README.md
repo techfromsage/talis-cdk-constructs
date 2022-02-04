@@ -22,9 +22,32 @@ Builds are conducted by CircleCI, and upon successful build of the `main` branch
   - Details [here](/examples/simple-lambda-worker/README.md).
 
 - `AuthenticatedApi`
+
   - An API Gateway (v2)
   - Built in optional Persona authentication on routes
   - Details [here](/examples/simple-authenticated-api/README.md).
+
+- `TalisCdkStack`
+  - Base stack to be extended by talis stacks
+  - Details [here](/lib/talis-cdk-stack/README.md)
+
+## Available Constants
+
+- `TalisRegion`
+
+  - Aliases of AWS regions to the regions we deploy applications
+  - Details [here](/lib/talis-cdk-stack/README.md)
+
+- `TalisDeploymentEnvironment`
+  - Aliases and resuable constants for referencing our specific deployment environments.
+  - Details [here](/lib/talis-cdk-stack/README.md)
+
+## Available Aspects
+
+- `ResourcePrefixer`
+
+  - Prefixs all AWS resources with the given prefix
+  - Details [here](/lib/aspects/README.md)
 
 ## Useful commands
 
