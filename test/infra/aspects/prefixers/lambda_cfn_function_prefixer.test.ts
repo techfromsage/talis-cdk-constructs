@@ -16,7 +16,11 @@ describe("Lambda CfnFunction Prefixer", () => {
   beforeEach(() => {
     app = new cdk.App();
     stack = new cdk.Stack(app, "AspectTestStack", {});
-    cfnFunction = new lambda.CfnFunction(stack, "function2", CfnFunctionProperties);
+    cfnFunction = new lambda.CfnFunction(
+      stack,
+      "function2",
+      CfnFunctionProperties
+    );
     prefixer = new LambdaCfnFunctionPrefixer(cfnFunction, "test-prefix-");
     emptyPrefixer = new LambdaCfnFunctionPrefixer(cfnFunction, "");
   });

@@ -2,53 +2,57 @@ import { CfnFunctionProps } from "@aws-cdk/aws-lambda";
 
 export const CfnFunctionProperties: CfnFunctionProps = {
   code: {
-    imageUri: 'imageUri',
-    s3Bucket: 's3Bucket',
-    s3Key: 's3Key',
-    s3ObjectVersion: 's3ObjectVersion',
-    zipFile: 'zipFile',
+    imageUri: "imageUri",
+    s3Bucket: "s3Bucket",
+    s3Key: "s3Key",
+    s3ObjectVersion: "s3ObjectVersion",
+    zipFile: "zipFile",
   },
-  role: 'role',
+  role: "role",
 
   // the properties below are optional
-  architectures: ['architectures'],
-  codeSigningConfigArn: 'codeSigningConfigArn',
+  architectures: ["architectures"],
+  codeSigningConfigArn: "codeSigningConfigArn",
   deadLetterConfig: {
-    targetArn: 'targetArn',
+    targetArn: "targetArn",
   },
-  description: 'description',
+  description: "description",
   environment: {
     variables: {
-      variablesKey: 'variables',
+      variablesKey: "variables",
     },
   },
-  fileSystemConfigs: [{
-    arn: 'arn',
-    localMountPath: 'localMountPath',
-  }],
-  functionName: 'functionName',
-  handler: 'handler',
+  fileSystemConfigs: [
+    {
+      arn: "arn",
+      localMountPath: "localMountPath",
+    },
+  ],
+  functionName: "functionName",
+  handler: "handler",
   imageConfig: {
-    command: ['command'],
-    entryPoint: ['entryPoint'],
-    workingDirectory: 'workingDirectory',
+    command: ["command"],
+    entryPoint: ["entryPoint"],
+    workingDirectory: "workingDirectory",
   },
-  kmsKeyArn: 'kmsKeyArn',
-  layers: ['layers'],
+  kmsKeyArn: "kmsKeyArn",
+  layers: ["layers"],
   memorySize: 123,
-  packageType: 'packageType',
+  packageType: "packageType",
   reservedConcurrentExecutions: 123,
-  runtime: 'runtime',
-  tags: [{
-    key: 'key',
-    value: 'value',
-  }],
+  runtime: "runtime",
+  tags: [
+    {
+      key: "key",
+      value: "value",
+    },
+  ],
   timeout: 123,
   tracingConfig: {
-    mode: 'mode',
+    mode: "mode",
   },
   vpcConfig: {
-    securityGroupIds: ['securityGroupIds'],
-    subnetIds: ['subnetIds'],
-  }
+    securityGroupIds: ["securityGroupIds"],
+    subnetIds: ["subnetIds"],
+  },
 };
