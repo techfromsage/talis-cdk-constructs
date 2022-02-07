@@ -33,7 +33,7 @@ export class ResourcePrefixer implements IAspect {
   }
 
   public visit(node: IConstruct): void {
-    // We only care about Cloudformation Resources so skip anything that isnot one
+    // We only care about Cloudformation Resources so skip anything that is not one
     if (!(node instanceof CfnResource)) {
       return;
     }
@@ -48,7 +48,9 @@ export class ResourcePrefixer implements IAspect {
       }
     }
 
-    throw new Error("Undefined resource for resource prefixer");
+    throw new Error(
+      "Undefined resource for resource prefixer " + node.cfnResourceType
+    );
   }
 
   private registerPrefixer(
