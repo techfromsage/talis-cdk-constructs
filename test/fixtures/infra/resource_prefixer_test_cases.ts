@@ -1,4 +1,5 @@
 import * as dynamodb from "@aws-cdk/aws-dynamodb";
+import * as apigatewayv2 from "@aws-cdk/aws-apigatewayv2";
 import * as cdk from "@aws-cdk/core";
 import { Constructor } from "../../../lib";
 
@@ -23,6 +24,19 @@ export const ResourcePrefixerTestCases: Array<ResourcePrefixerTestCase> = [
     },
     expectedPropsPrefixed: {
       TableName: "test-prefix-tableName",
+    },
+  },
+  {
+    resourceType: apigatewayv2.HttpApi,
+    resourceProps: {
+      apiName: "api-name",
+    },
+    expectedType: "AWS::ApiGatewayV2::Api",
+    expectedPropsUnprefixed: {
+      Name: "api-name",
+    },
+    expectedPropsPrefixed: {
+      Name: "test-prefix-api-name",
     },
   },
 ];

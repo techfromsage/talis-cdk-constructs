@@ -1,15 +1,15 @@
-import { CfnTable } from "@aws-cdk/aws-dynamodb";
+import { CfnApi } from "@aws-cdk/aws-apigatewayv2";
 import { IConstruct } from "@aws-cdk/core";
 import { CfnResourcePrefixer } from "../cfn_resource_prefixer";
 
-export class DynamoDbCfnTablePrefixer implements CfnResourcePrefixer {
-  private node: CfnTable;
+export class Apigatewayv2CfnApiPrefixer implements CfnResourcePrefixer {
+  private node: CfnApi;
   private resourcePrefix: string;
 
   constructor(node: IConstruct, resourcePrefix: string) {
-    if (!(node instanceof CfnTable)) {
+    if (!(node instanceof CfnApi)) {
       throw new Error(
-        "Specified node is not an instance of CfnTable and cannot be prefixed using this prefixer"
+        "Specified node is not an instance of CfnApi and cannot be prefixed using this prefixer"
       );
     }
     this.node = node;
@@ -18,8 +18,8 @@ export class DynamoDbCfnTablePrefixer implements CfnResourcePrefixer {
 
   public prefix(): void {
     this.node.addPropertyOverride(
-      "TableName",
-      `${this.resourcePrefix}${this.node.tableName}`
+      "Name",
+      `${this.resourcePrefix}${this.node.name}`
     );
   }
 }
