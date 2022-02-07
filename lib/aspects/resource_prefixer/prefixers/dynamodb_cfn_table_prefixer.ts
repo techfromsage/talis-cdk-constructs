@@ -16,7 +16,7 @@ export class DynamoDbCfnTablePrefixer implements CfnResourcePrefixer {
     this.resourcePrefix = resourcePrefix;
   }
 
-  public prefix() {
+  public prefix(): void {
     this.node.addPropertyOverride(
       "TableName",
       `${this.resourcePrefix}${this.node.tableName}`

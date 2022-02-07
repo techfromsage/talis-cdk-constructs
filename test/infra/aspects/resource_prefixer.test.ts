@@ -28,7 +28,6 @@ describe("Resource Prefixer", () => {
         resourceProps,
         expectedType,
         expectedPropsUnprefixed,
-        expectedPropsPrefixed,
       }) => {
         new resourceType(stack, "test-item", resourceProps);
         Aspects.of(stack).add(emptyResourcePrefixer);
@@ -46,7 +45,6 @@ describe("Resource Prefixer", () => {
         resourceType,
         resourceProps,
         expectedType,
-        expectedPropsUnprefixed,
         expectedPropsPrefixed,
       }) => {
         new resourceType(stack, "test-item", resourceProps);
