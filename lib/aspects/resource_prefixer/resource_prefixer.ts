@@ -3,12 +3,14 @@ import {
   Apigatewayv2CfnApiPrefixer,
   Apigatewayv2CfnStagePrefixer,
   DynamoDbCfnTablePrefixer,
+  IamCfnRolePrefixer,
   LambdaCfnFunctionPrefixer,
 } from "./prefixers";
 import { CfnResourcePrefixer } from "./cfn_resource_prefixer";
 import { CfnTable } from "@aws-cdk/aws-dynamodb";
 import { CfnApi, CfnStage } from "@aws-cdk/aws-apigatewayv2";
 import { CfnFunction } from "@aws-cdk/aws-lambda";
+import { CfnRole } from "@aws-cdk/aws-iam";
 
 export type Constructor<T> = { new (...args: any[]): T };
 
@@ -30,6 +32,7 @@ export class ResourcePrefixer implements IAspect {
     this.registerPrefixer(CfnApi, Apigatewayv2CfnApiPrefixer);
     this.registerPrefixer(CfnStage, Apigatewayv2CfnStagePrefixer);
     this.registerPrefixer(CfnFunction, LambdaCfnFunctionPrefixer);
+    this.registerPrefixer(CfnRole, IamCfnRolePrefixer);
   }
 
   public visit(node: IConstruct): void {
