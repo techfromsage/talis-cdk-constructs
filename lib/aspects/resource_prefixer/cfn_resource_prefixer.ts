@@ -1,4 +1,4 @@
-import { CfnResource, IConstruct } from "@aws-cdk/core";
+import { CfnResource, IConstruct, Tokenization } from "@aws-cdk/core";
 
 export interface CfnResourcePrefixer {
   prefix(): void;
@@ -21,15 +21,15 @@ export abstract class CfnResourcePrefixerBase implements CfnResourcePrefixer {
     name: string | undefined,
     propertyPath: string
   ): void {
-    if (name) {
-      console.log('Using name' + name);
+    if (!Tokenization.isResolvable(name)) {
+      console.log("Using name" + name);
       this.node.addPropertyOverride(
         propertyPath,
         `${this.resourcePrefix}${name}`
       );
     } else {
       const logicalId = this.node.stack.getLogicalId(this.node);
-      console.log('Using logicalId' + logicalId);
+      console.log("Using logicalId" + logicalId);
       this.node.addPropertyOverride(
         propertyPath,
         `${this.resourcePrefix}${logicalId}`
