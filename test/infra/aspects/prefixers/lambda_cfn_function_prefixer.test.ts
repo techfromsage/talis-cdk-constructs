@@ -3,7 +3,7 @@ import * as cdk from "@aws-cdk/core";
 
 import { expect as expectCDK, haveResource } from "@aws-cdk/assert";
 import { LambdaCfnFunctionPrefixer } from "../../../../lib";
-import { CfnFunctionProperties } from "../../../fixtures/infra/aws-lambda/cfn_function";
+import { CfnSecurityGroupProperties } from "../../../fixtures/infra/aws-lambda/cfn_function";
 import { EmptyResource } from "../../../fixtures/infra/empty_resource";
 
 describe("Lambda CfnFunction Prefixer", () => {
@@ -19,7 +19,7 @@ describe("Lambda CfnFunction Prefixer", () => {
     cfnFunction = new lambda.CfnFunction(
       stack,
       "function2",
-      CfnFunctionProperties
+      CfnSecurityGroupProperties
     );
     prefixer = new LambdaCfnFunctionPrefixer(cfnFunction, "test-prefix-");
     emptyPrefixer = new LambdaCfnFunctionPrefixer(cfnFunction, "");
