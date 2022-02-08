@@ -83,11 +83,14 @@ export class AuthenticatedApi extends cdk.Construct {
       }
     );
 
-    const authorizer = new authorizers.HttpLambdaAuthorizer({
-      authorizerName: `${props.prefix}${props.name}-http-lambda-authoriser`,
-      responseTypes: [authorizers.HttpLambdaResponseType.SIMPLE], // Define if returns simple and/or iam response
-      handler: authLambda,
-    });
+    const authorizer = new authorizers.HttpLambdaAuthorizer(
+      "lambda-authorizer",
+      authLambda,
+      {
+        authorizerName: `${props.prefix}${props.name}-http-lambda-authoriser`,
+        responseTypes: [authorizers.HttpLambdaResponseType.SIMPLE], // Define if returns simple and/or iam response
+      }
+    );
 
     for (const routeProps of props.routes) {
       // Create the lambda
@@ -113,13 +116,14 @@ export class AuthenticatedApi extends cdk.Construct {
 
       if (routeProps.lambdaProps.policyStatements) {
         for (const statement of routeProps.lambdaProps.policyStatements) {
-          routeLambda.role?.addToPolicy(statement);
+          routeLambda.role?.addToPrincipalPolicy(statement);
         }
       }
 
-      const integration = new integrations.LambdaProxyIntegration({
-        handler: routeLambda,
-      });
+      const integration = new integrations.HttpLambdaIntegration(
+        "http-lambda-integration",
+        routeLambda
+      );
 
       for (const path of routeProps.paths) {
         if (routeProps.isPublic === true) {
