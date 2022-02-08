@@ -1,5 +1,6 @@
 import * as dynamodb from "@aws-cdk/aws-dynamodb";
 import * as apigatewayv2 from "@aws-cdk/aws-apigatewayv2";
+import * as lambda from "@aws-cdk/aws-lambda";
 import * as cdk from "@aws-cdk/core";
 import { Constructor } from "../../../lib";
 
@@ -37,6 +38,22 @@ export const ResourcePrefixerTestCases: Array<ResourcePrefixerTestCase> = [
     },
     expectedPropsPrefixed: {
       Name: "test-prefix-api-name",
+    },
+  },
+  {
+    resourceType: lambda.Function,
+    resourceProps: {
+      functionName: "function-name",
+      runtime: lambda.Runtime.NODEJS_12_X,
+      handler: "index.handler",
+      code: lambda.Code.fromInline(`exports.handler = handler.toString()`),
+    },
+    expectedType: "AWS::Lambda::Function",
+    expectedPropsUnprefixed: {
+      FunctionName: "function-name",
+    },
+    expectedPropsPrefixed: {
+      FunctionName: "test-prefix-function-name",
     },
   },
 ];

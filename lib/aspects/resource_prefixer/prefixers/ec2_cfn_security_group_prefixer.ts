@@ -18,7 +18,7 @@ export class Ec2CfnSecurityPrefixer implements CfnResourcePrefixer {
 
   public prefix(): void {
     this.node.addPropertyOverride(
-      "groupName",
+      "GroupName",
       `${this.resourcePrefix}${this.node.groupName}`
     );
   }

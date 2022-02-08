@@ -18,7 +18,7 @@ export class LambdaCfnFunctionPrefixer implements CfnResourcePrefixer {
 
   public prefix(): void {
     this.node.addPropertyOverride(
-      "functionName",
+      "FunctionName",
       `${this.resourcePrefix}${this.node.functionName}`
     );
   }

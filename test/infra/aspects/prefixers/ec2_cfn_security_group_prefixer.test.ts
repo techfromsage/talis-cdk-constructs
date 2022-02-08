@@ -31,7 +31,7 @@ describe("Lambda CfnSecurityGroup Prefixer", () => {
 
       expectCDK(stack).to(
         haveResource("AWS::EC2::SecurityGroup", {
-          groupName: "groupName",
+          GroupName: "groupName",
         })
       );
     });
@@ -43,7 +43,7 @@ describe("Lambda CfnSecurityGroup Prefixer", () => {
 
       expectCDK(stack).to(
         haveResource("AWS::EC2::SecurityGroup", {
-          groupName: "test-prefix-groupName",
+          GroupName: "test-prefix-groupName",
         })
       );
     });

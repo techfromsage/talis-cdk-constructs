@@ -18,7 +18,7 @@ export class IamCfnRolePrefixer implements CfnResourcePrefixer {
 
   public prefix(): void {
     this.node.addPropertyOverride(
-      "roleName",
+      "RoleName",
       `${this.resourcePrefix}${this.node.roleName}`
     );
   }

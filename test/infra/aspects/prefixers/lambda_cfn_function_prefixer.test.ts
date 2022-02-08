@@ -31,7 +31,7 @@ describe("Lambda CfnFunction Prefixer", () => {
 
       expectCDK(stack).to(
         haveResource("AWS::Lambda::Function", {
-          functionName: "functionName",
+          FunctionName: "functionName",
         })
       );
     });
@@ -43,7 +43,7 @@ describe("Lambda CfnFunction Prefixer", () => {
 
       expectCDK(stack).to(
         haveResource("AWS::Lambda::Function", {
-          functionName: "test-prefix-functionName",
+          FunctionName: "test-prefix-functionName",
         })
       );
     });

@@ -27,7 +27,7 @@ describe("IAM CfnRole Prefixer", () => {
 
       expectCDK(stack).to(
         haveResource("AWS::IAM::Role", {
-          roleName: "roleName",
+          RoleName: "roleName",
         })
       );
     });
@@ -39,7 +39,7 @@ describe("IAM CfnRole Prefixer", () => {
 
       expectCDK(stack).to(
         haveResource("AWS::IAM::Role", {
-          roleName: "test-prefix-roleName",
+          RoleName: "test-prefix-roleName",
         })
       );
     });
