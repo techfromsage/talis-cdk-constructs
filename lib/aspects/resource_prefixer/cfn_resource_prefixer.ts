@@ -21,18 +21,16 @@ export abstract class CfnResourcePrefixerBase implements CfnResourcePrefixer {
     name: string | undefined,
     propertyPath: string
   ): void {
-    const logicalId = this.node.stack.getLogicalId(this.node);
-    console.log(`name: ${name}`);
-    console.log(`logicalId: ${logicalId}`);
     if (name) {
       this.node.addPropertyOverride(
         propertyPath,
         `${this.resourcePrefix}${name}`
       );
     } else {
+      const logicalId = this.node.stack.getLogicalId(this.node);
       this.node.addPropertyOverride(
         propertyPath,
-        `${this.resourcePrefix}${this.node.logicalId}`
+        `${this.resourcePrefix}${logicalId}`
       );
     }
   }
