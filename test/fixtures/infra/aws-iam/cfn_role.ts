@@ -1,7 +1,18 @@
 import { CfnRoleProps } from "@aws-cdk/aws-iam";
 
 export const CfnRoleProperties: CfnRoleProps = {
-  assumeRolePolicyDocument: assumeRolePolicyDocument,
+  assumeRolePolicyDocument: {
+    Version: "2012-10-17",
+    Statement: [
+      {
+        Effect: "Allow",
+        Principal: {
+          Service: ["ec2.amazonaws.com"],
+        },
+        Action: ["sts:AssumeRole"],
+      },
+    ],
+  },
 
   // the properties below are optional
   description: "description",
@@ -11,7 +22,16 @@ export const CfnRoleProperties: CfnRoleProps = {
   permissionsBoundary: "permissionsBoundary",
   policies: [
     {
-      policyDocument: PolicyDocument,
+      policyDocument: {
+        Version: "2012-10-17",
+        Statement: [
+          {
+            Effect: "Allow",
+            Action: "*",
+            Resource: "*",
+          },
+        ],
+      },
       policyName: "policyName",
     },
   ],
