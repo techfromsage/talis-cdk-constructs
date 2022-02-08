@@ -22,12 +22,14 @@ export abstract class CfnResourcePrefixerBase implements CfnResourcePrefixer {
     propertyPath: string
   ): void {
     if (name) {
+      console.log('Using name' + name);
       this.node.addPropertyOverride(
         propertyPath,
         `${this.resourcePrefix}${name}`
       );
     } else {
       const logicalId = this.node.stack.getLogicalId(this.node);
+      console.log('Using logicalId' + logicalId);
       this.node.addPropertyOverride(
         propertyPath,
         `${this.resourcePrefix}${logicalId}`
