@@ -21,6 +21,8 @@ export abstract class CfnResourcePrefixerBase implements CfnResourcePrefixer {
     name: string | undefined,
     propertyPath: string
   ): void {
+    console.log(`name: ${name}`);
+    console.log(`logicalId: ${this.node.logicalId}`);
     if (name) {
       this.node.addPropertyOverride(
         propertyPath,
