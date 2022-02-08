@@ -1,25 +1,27 @@
 import { CfnFunction } from "@aws-cdk/aws-lambda";
 import { IConstruct } from "@aws-cdk/core";
-import { CfnResourcePrefixer } from "../cfn_resource_prefixer";
+import {
+  CfnResourcePrefixer,
+  CfnResourcePrefixerBase,
+} from "../cfn_resource_prefixer";
+import { Ec2CfnSecurityPrefixer } from "./ec2_cfn_security_group_prefixer";
+import { CfnRole } from "@aws-cdk/aws-iam";
 
-export class LambdaCfnFunctionPrefixer implements CfnResourcePrefixer {
-  private node: CfnFunction;
-  private resourcePrefix: string;
-
+export class LambdaCfnFunctionPrefixer
+  extends CfnResourcePrefixerBase
+  implements CfnResourcePrefixer
+{
   constructor(node: IConstruct, resourcePrefix: string) {
     if (!(node instanceof CfnFunction)) {
       throw new Error(
         "Specified node is not an instance of CfnFunction and cannot be prefixed using this prefixer"
       );
     }
-    this.node = node;
-    this.resourcePrefix = resourcePrefix;
+    super(node, resourcePrefix);
   }
 
   public prefix(): void {
-    this.node.addPropertyOverride(
-      "FunctionName",
-      `${this.resourcePrefix}${this.node.functionName}`
-    );
+    const lambda = this.node as CfnFunction;
+    this.prefixResourceName(lambda.functionName, "FunctionName");
   }
 }

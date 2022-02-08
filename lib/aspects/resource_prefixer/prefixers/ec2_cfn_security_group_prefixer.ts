@@ -1,25 +1,25 @@
 import { CfnSecurityGroup } from "@aws-cdk/aws-ec2";
 import { IConstruct } from "@aws-cdk/core";
-import { CfnResourcePrefixer } from "../cfn_resource_prefixer";
+import {
+  CfnResourcePrefixer,
+  CfnResourcePrefixerBase,
+} from "../cfn_resource_prefixer";
 
-export class Ec2CfnSecurityPrefixer implements CfnResourcePrefixer {
-  private node: CfnSecurityGroup;
-  private resourcePrefix: string;
-
+export class Ec2CfnSecurityPrefixer
+  extends CfnResourcePrefixerBase
+  implements CfnResourcePrefixer
+{
   constructor(node: IConstruct, resourcePrefix: string) {
     if (!(node instanceof CfnSecurityGroup)) {
       throw new Error(
         "Specified node is not an instance of CfnSecurityGroup and cannot be prefixed using this prefixer"
       );
     }
-    this.node = node;
-    this.resourcePrefix = resourcePrefix;
+    super(node, resourcePrefix);
   }
 
   public prefix(): void {
-    this.node.addPropertyOverride(
-      "GroupName",
-      `${this.resourcePrefix}${this.node.groupName}`
-    );
+    const securityGroup = this.node as CfnSecurityGroup;
+    this.prefixResourceName(securityGroup.groupName, "GroupName");
   }
 }

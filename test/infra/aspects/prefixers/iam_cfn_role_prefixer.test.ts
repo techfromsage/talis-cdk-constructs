@@ -43,6 +43,34 @@ describe("IAM CfnRole Prefixer", () => {
         })
       );
     });
+
+    test("Adds prefix to the start of logical id if no role name given", () => {
+      const app = new cdk.App();
+      const stack = new cdk.Stack(app, "AspectTestStack", {});
+      const cfnRole = new iam.CfnRole(stack, "roleOther", {
+        assumeRolePolicyDocument: {
+          Version: "2012-10-17",
+          Statement: [
+            {
+              Effect: "Allow",
+              Principal: {
+                Service: ["ec2.amazonaws.com"],
+              },
+              Action: ["sts:AssumeRole"],
+            },
+          ],
+        },
+      });
+      const prefixer = new IamCfnRolePrefixer(cfnRole, "test-prefix-");
+
+      prefixer.prefix();
+
+      expectCDK(stack).to(
+        haveResource("AWS::IAM::Role", {
+          RoleName: "test-prefix-roleOther",
+        })
+      );
+    });
   });
 
   describe("Undefined Resource", () => {
