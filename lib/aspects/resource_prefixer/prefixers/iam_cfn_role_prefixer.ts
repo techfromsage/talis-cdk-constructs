@@ -1,5 +1,5 @@
 import { CfnRole } from "@aws-cdk/aws-iam";
-import { IConstruct } from "@aws-cdk/core";
+import {CfnResource, IConstruct} from "@aws-cdk/core";
 import {
   CfnResourcePrefixer,
   CfnResourcePrefixerBase,
@@ -15,7 +15,7 @@ export class IamCfnRolePrefixer
         "Specified node is not an instance of CfnRole and cannot be prefixed using this prefixer"
       );
     }
-    super(node, resourcePrefix);
+    super(node as CfnResource, resourcePrefix);
   }
 
   public prefix(): void {
