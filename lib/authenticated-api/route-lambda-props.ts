@@ -13,11 +13,11 @@ export interface RouteLambdaProps {
     entry: string;
     environment?: { [key: string]: string };
     handler: string;
-    policyStatements?: iam.PolicyStatement[];
+    policyStatements?: Array<iam.PolicyStatement>;
     timeout: cdk.Duration;
   };
 
   // By default there will be an alarm on the duration of the lambda handling
-  // this route of 1 second. This can be overriden by setting lamdaDurationAlarmThreshold
+  // this route of 1 second. This can be overridden by setting lambdaDurationAlarmThreshold
   lamdaDurationAlarmThreshold?: cdk.Duration;
 }

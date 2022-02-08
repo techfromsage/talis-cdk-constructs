@@ -12,7 +12,10 @@ export abstract class CfnResourcePrefixerBase implements CfnResourcePrefixer {
   protected node: CfnResource;
   protected resourcePrefix: string;
 
-  constructor(node: CfnResource, resourcePrefix: string) {
+  constructor(node: IConstruct, resourcePrefix: string) {
+    if (!CfnResource.isCfnResource(node)) {
+      throw new Error("Node is not a CfnResource")
+    }
     this.node = node;
     this.resourcePrefix = resourcePrefix;
   }
@@ -22,14 +25,12 @@ export abstract class CfnResourcePrefixerBase implements CfnResourcePrefixer {
     propertyPath: string
   ): void {
     if (!Token.isUnresolved(name)) {
-      console.log("Using name" + name);
       this.node.addPropertyOverride(
         propertyPath,
         `${this.resourcePrefix}${name}`
       );
     } else {
       const logicalId = this.node.stack.getLogicalId(this.node);
-      console.log("Using logicalId" + logicalId);
       this.node.addPropertyOverride(
         propertyPath,
         `${this.resourcePrefix}${logicalId}`

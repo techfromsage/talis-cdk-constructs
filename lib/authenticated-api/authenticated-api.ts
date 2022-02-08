@@ -3,6 +3,7 @@ import * as authorizers from "@aws-cdk/aws-apigatewayv2-authorizers";
 import * as cdk from "@aws-cdk/core";
 import * as cloudwatch from "@aws-cdk/aws-cloudwatch";
 import * as cloudwatchActions from "@aws-cdk/aws-cloudwatch-actions";
+import * as iam from "@aws-cdk/aws-iam";
 import * as integrations from "@aws-cdk/aws-apigatewayv2-integrations";
 import * as lambda from "@aws-cdk/aws-lambda";
 import * as lambdaNodeJs from "@aws-cdk/aws-lambda-nodejs";
@@ -83,10 +84,9 @@ export class AuthenticatedApi extends cdk.Construct {
       }
     );
 
-    const authorizer = new authorizers.HttpLambdaAuthorizer({
+    const authorizer = new authorizers.HttpLambdaAuthorizer("authorizer", authLambda, {
       authorizerName: `${props.prefix}${props.name}-http-lambda-authoriser`,
       responseTypes: [authorizers.HttpLambdaResponseType.SIMPLE], // Define if returns simple and/or iam response
-      handler: authLambda,
     });
 
     for (const routeProps of props.routes) {
@@ -113,13 +113,11 @@ export class AuthenticatedApi extends cdk.Construct {
 
       if (routeProps.lambdaProps.policyStatements) {
         for (const statement of routeProps.lambdaProps.policyStatements) {
-          routeLambda.role?.addToPolicy(statement);
+          routeLambda.role?.addToPrincipalPolicy(statement);
         }
       }
 
-      const integration = new integrations.LambdaProxyIntegration({
-        handler: routeLambda,
-      });
+      const integration = new integrations.HttpLambdaIntegration("handlerIntegration", routeLambda);
 
       for (const path of routeProps.paths) {
         if (routeProps.isPublic === true) {

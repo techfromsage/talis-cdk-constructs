@@ -28,16 +28,16 @@
     "@commitlint/config-conventional": "^12.1.4",
     "@types/jest": "^26.0.10",
     "@types/node": "10.17.27",
-    "@types/uuid": "^8.3.1",
+    "@types/uuid": "^8.3.4",
     "@typescript-eslint/eslint-plugin": "^4.28.3",
     "@typescript-eslint/parser": "^4.28.3",
-    "aws-sdk": "^2.1040.0",
+    "aws-sdk": "^2.1070.0",
     "axios": "^0.24.0",
-    "esbuild": "^0.13.8",
+    "esbuild": "^0.13.15",
     "eslint": "^7.30.0",
     "eslint-config-prettier": "^8.3.0",
     "jest": "^26.4.2",
-    "prettier": "^2.3.2",
+    "prettier": "^2.5.1",
     "semantic-release": "^17.4.4",
     "ts-jest": "^26.2.0",
     "typescript": "~3.9.7"
@@ -68,8 +68,8 @@
     "@aws-cdk/aws-sns-subscriptions": "1.143.0",
     "@aws-cdk/aws-sqs": "1.143.0",
     "@aws-cdk/core": "1.143.0",
-    "cdk-ecr-deployment": "0.0.80",
-    "talis-node": "https://github.com/talis/talis-node.git#v0.0.3",
+    "cdk-ecr-deployment": "1.0.2",
+    "talis-node": "git+https://github.com/talis/talis-node.git#v0.0.3",
     "uuid": "8.3.2"
   }
 }

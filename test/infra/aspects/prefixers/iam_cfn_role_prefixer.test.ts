@@ -5,6 +5,7 @@ import { expect as expectCDK, haveResource } from "@aws-cdk/assert";
 import { IamCfnRolePrefixer } from "../../../../lib";
 import { CfnRoleProperties } from "../../../fixtures/infra/aws-iam/cfn_role";
 import { EmptyResource } from "../../../fixtures/infra/empty_resource";
+import { Match, Template } from "@aws-cdk/assertions";
 
 describe("IAM CfnRole Prefixer", () => {
   let app: cdk.App;
@@ -65,11 +66,10 @@ describe("IAM CfnRole Prefixer", () => {
 
       prefixer.prefix();
 
-      expectCDK(stack).to(
-        haveResource("AWS::IAM::Role", {
-          RoleName: "test-prefix-roleOther",
-        })
-      );
+      const template = Template.fromStack(stack);
+      template.hasResourceProperties("AWS::IAM::Role", {
+        RoleName: Match.stringLikeRegexp("test-prefix-"),
+      });
     });
   });
 
