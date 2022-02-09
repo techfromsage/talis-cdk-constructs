@@ -1,23 +1,25 @@
-import { CfnStage } from "@aws-cdk/aws-apigatewayv2";
+import { CfnRole } from "@aws-cdk/aws-iam";
 import { IConstruct } from "@aws-cdk/core";
 import {
   CfnResourcePrefixer,
   CfnResourcePrefixerBase,
 } from "../cfn_resource_prefixer";
 
-export class Apigatewayv2CfnStagePrefixer
+export class IamCfnRolePrefixer
   extends CfnResourcePrefixerBase
   implements CfnResourcePrefixer
 {
   constructor(node: IConstruct, resourcePrefix: string) {
-    if (!(node instanceof CfnStage)) {
+    if (!(node instanceof CfnRole)) {
       throw new Error(
-        "Specified node is not an instance of CfnStage and cannot be prefixed using this prefixer"
+        "Specified node is not an instance of CfnRole and cannot be prefixed using this prefixer"
       );
     }
     super(node, resourcePrefix);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  public prefix(): void {}
+  public prefix(): void {
+    const role = this.node as CfnRole;
+    this.prefixResourceName(role.roleName, "RoleName");
+  }
 }

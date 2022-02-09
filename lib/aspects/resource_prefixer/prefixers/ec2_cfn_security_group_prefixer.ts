@@ -1,25 +1,25 @@
-import { CfnTable } from "@aws-cdk/aws-dynamodb";
+import { CfnSecurityGroup } from "@aws-cdk/aws-ec2";
 import { IConstruct } from "@aws-cdk/core";
 import {
   CfnResourcePrefixer,
   CfnResourcePrefixerBase,
 } from "../cfn_resource_prefixer";
 
-export class DynamoDbCfnTablePrefixer
+export class Ec2CfnSecurityGroupPrefixer
   extends CfnResourcePrefixerBase
   implements CfnResourcePrefixer
 {
   constructor(node: IConstruct, resourcePrefix: string) {
-    if (!(node instanceof CfnTable)) {
+    if (!(node instanceof CfnSecurityGroup)) {
       throw new Error(
-        "Specified node is not an instance of CfnTable and cannot be prefixed using this prefixer"
+        "Specified node is not an instance of CfnSecurityGroup and cannot be prefixed using this prefixer"
       );
     }
     super(node, resourcePrefix);
   }
 
   public prefix(): void {
-    const table = this.node as CfnTable;
-    this.prefixResourceName(table.tableName, "TableName");
+    const securityGroup = this.node as CfnSecurityGroup;
+    this.prefixResourceName(securityGroup.groupName, "GroupName");
   }
 }
