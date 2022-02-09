@@ -54,7 +54,9 @@ export class ResourcePrefixer implements IAspect {
       }
     }
 
-    throw new Error(`Undefined resource for resource prefixer: ${node.cfnResourceType}`);
+    throw new Error(
+      `Undefined resource for resource prefixer: ${node.cfnResourceType}`
+    );
   }
 
   private registerPrefixer(
