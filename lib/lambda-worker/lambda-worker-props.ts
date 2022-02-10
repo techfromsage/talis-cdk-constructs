@@ -25,7 +25,7 @@ export interface LambdaWorkerProps {
     policyStatements?: iam.PolicyStatement[];
     reservedConcurrentExecutions?: number;
     retryAttempts?: number;
-    securityGroup?: ec2.ISecurityGroup;
+    securityGroups?: Array<ec2.ISecurityGroup>;
     timeout: cdk.Duration;
     vpc: ec2.IVpc;
     vpcSubnets: ec2.SubnetSelection;

@@ -259,7 +259,7 @@ export class LambdaWorker extends cdk.Construct {
       reservedConcurrentExecutions:
         props.lambdaProps.reservedConcurrentExecutions,
       retryAttempts: props.lambdaProps.retryAttempts,
-      securityGroup: props.lambdaProps.securityGroup,
+      securityGroups: props.lambdaProps.securityGroups,
       timeout: props.lambdaProps.timeout,
       vpc: props.lambdaProps.vpc,
       vpcSubnets: props.lambdaProps.vpcSubnets,
@@ -304,7 +304,7 @@ export class LambdaWorker extends cdk.Construct {
       reservedConcurrentExecutions:
         props.lambdaProps.reservedConcurrentExecutions,
       retryAttempts: props.lambdaProps.retryAttempts,
-      securityGroup: props.lambdaProps.securityGroup,
+      securityGroups: props.lambdaProps.securityGroups,
       timeout: props.lambdaProps.timeout,
       filesystem: props.lambdaProps.filesystem,
       vpc: props.lambdaProps.vpc,
