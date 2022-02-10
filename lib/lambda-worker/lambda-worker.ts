@@ -132,9 +132,12 @@ export class LambdaWorker extends cdk.Construct {
     const alarmAction = new cloudwatchActions.SnsAction(props.alarmTopic);
 
     // Add an alarm on any messages appearing on the DLQ
-    const approximateNumberOfMessagesVisibleMetric = lambdaDLQ.metric(
-      "ApproximateNumberOfMessagesVisible"
-    );
+    const approximateNumberOfMessagesVisibleMetric = lambdaDLQ
+      .metric("ApproximateNumberOfMessagesVisible")
+      .with({
+        statistic: "sum",
+        period: cdk.Duration.minutes(1),
+      });
     const dlqMessagesVisable = new cloudwatch.Alarm(
       this,
       `${props.name}-dlq-messages-visible-alarm`,
@@ -143,8 +146,6 @@ export class LambdaWorker extends cdk.Construct {
         alarmDescription: `Alarm when the lambda worker fails to process a message and the message appears on the DLQ`,
         actionsEnabled: true,
         metric: approximateNumberOfMessagesVisibleMetric,
-        statistic: "sum",
-        period: cdk.Duration.minutes(1),
         evaluationPeriods: 1,
         threshold: 1,
         comparisonOperator:
@@ -158,9 +159,9 @@ export class LambdaWorker extends cdk.Construct {
     dlqMessagesVisable.addOkAction(alarmAction);
 
     // Add an alarm for the age of the oldest message on the LambdaWorkers main trigger queue
-    const approximateAgeOfOldestMessageMetric = lambdaDLQ.metric(
-      "ApproximateAgeOfOldestMessage"
-    );
+    const approximateAgeOfOldestMessageMetric = lambdaDLQ
+      .metric("ApproximateAgeOfOldestMessage")
+      .with({ statistic: "average", period: cdk.Duration.minutes(1) });
     const queueMessagesAge = new cloudwatch.Alarm(
       this,
       `${props.name}-queue-message-age-alarm`,
@@ -169,8 +170,6 @@ export class LambdaWorker extends cdk.Construct {
         alarmDescription: `Alarm when the lambda workers main trigger queue has messages older than ${approximateAgeOfOldestMessageThreshold.toSeconds()} seconds`,
         actionsEnabled: true,
         metric: approximateAgeOfOldestMessageMetric,
-        statistic: "average",
-        period: cdk.Duration.minutes(1),
         evaluationPeriods: 1,
         threshold: approximateAgeOfOldestMessageThreshold.toSeconds(),
         comparisonOperator:
@@ -192,8 +191,6 @@ export class LambdaWorker extends cdk.Construct {
         alarmDescription: `Alarm when the lambda workers main trigger queue has more than ${approximateNumberOfMessagesVisibleThreshold} messages on the queue`,
         actionsEnabled: true,
         metric: approximateNumberOfMessagesVisibleMetric,
-        statistic: "sum",
-        period: cdk.Duration.minutes(1),
         evaluationPeriods: 1,
         threshold: approximateNumberOfMessagesVisibleThreshold,
         comparisonOperator:
@@ -259,7 +256,7 @@ export class LambdaWorker extends cdk.Construct {
       reservedConcurrentExecutions:
         props.lambdaProps.reservedConcurrentExecutions,
       retryAttempts: props.lambdaProps.retryAttempts,
-      securityGroup: props.lambdaProps.securityGroup,
+      securityGroups: props.lambdaProps.securityGroups,
       timeout: props.lambdaProps.timeout,
       vpc: props.lambdaProps.vpc,
       vpcSubnets: props.lambdaProps.vpcSubnets,
@@ -304,7 +301,7 @@ export class LambdaWorker extends cdk.Construct {
       reservedConcurrentExecutions:
         props.lambdaProps.reservedConcurrentExecutions,
       retryAttempts: props.lambdaProps.retryAttempts,
-      securityGroup: props.lambdaProps.securityGroup,
+      securityGroups: props.lambdaProps.securityGroups,
       timeout: props.lambdaProps.timeout,
       filesystem: props.lambdaProps.filesystem,
       vpc: props.lambdaProps.vpc,

@@ -47,14 +47,16 @@ export class SimpleLambdaWorkerStack extends cdk.Stack {
     // one, the default group created will add significant time to deploy and destroy
     // steps in the build. This is not a problem IRL where the group will only be created
     // once instead of being created and destroyed on every build.
-    const lambdaSecurityGroup = ec2.SecurityGroup.fromSecurityGroupId(
-      this,
-      "a-talis-cdk-constructs-build",
-      "sg-0ac646f0077b5ce03",
-      {
-        mutable: false,
-      }
-    );
+    const lambdaSecurityGroups = [
+      ec2.SecurityGroup.fromSecurityGroupId(
+        this,
+        "a-talis-cdk-constructs-build",
+        "sg-0ac646f0077b5ce03",
+        {
+          mutable: false,
+        }
+      ),
+    ];
 
     // In this example, and to aid integration tests, after successfully processing
     // a message the lambda worker will send a new messages to an SQS queue.
@@ -79,7 +81,7 @@ export class SimpleLambdaWorkerStack extends cdk.Stack {
           entry: "src/lambda/simple-worker.js",
           handler: "simpleLambdaWorker",
           memorySize: 1024,
-          securityGroup: lambdaSecurityGroup,
+          securityGroups: lambdaSecurityGroups,
           timeout: cdk.Duration.seconds(30),
           vpc: vpc,
           vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT },

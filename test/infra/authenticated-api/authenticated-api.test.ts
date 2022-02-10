@@ -34,7 +34,7 @@ describe("AuthenticatedApi", () => {
         stageName: "development", // This should be development / staging / production as appropriate
         alarmTopic,
         vpc,
-        vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE },
+        vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT },
 
         persona: {
           host: "staging-users.talis.com",

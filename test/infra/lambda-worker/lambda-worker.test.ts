@@ -41,7 +41,7 @@ describe("LambdaWorker", () => {
             ],
             timeout: cdk.Duration.minutes(5),
             vpc: vpc,
-            vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE },
+            vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT },
           },
           queueProps: {},
           alarmTopic: alarmTopic,
