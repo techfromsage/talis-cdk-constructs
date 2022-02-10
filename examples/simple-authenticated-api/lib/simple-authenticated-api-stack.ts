@@ -36,14 +36,16 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
     // one, the default group created will add significant time to deploy and destroy
     // steps in the build. This is not a problem IRL where the group will only be created
     // once instead of being created and destroyed on every build.
-    const lambdaSecurityGroups = [ec2.SecurityGroup.fromSecurityGroupId(
-      this,
-      "a-talis-cdk-constructs-build",
-      "sg-0ac646f0077b5ce03",
-      {
-        mutable: false,
-      }
-    )];
+    const lambdaSecurityGroups = [
+      ec2.SecurityGroup.fromSecurityGroupId(
+        this,
+        "a-talis-cdk-constructs-build",
+        "sg-0ac646f0077b5ce03",
+        {
+          mutable: false,
+        }
+      ),
+    ];
 
     /* const api = */ new AuthenticatedApi(this, "simple-authenticated-api", {
       prefix,
