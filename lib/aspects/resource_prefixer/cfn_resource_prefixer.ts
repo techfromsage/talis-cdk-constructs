@@ -24,18 +24,18 @@ export abstract class CfnResourcePrefixerBase implements CfnResourcePrefixer {
     name: string | undefined,
     propertyPath: string
   ): void {
-    if (!Token.isUnresolved(name)) {
-      this.node.addPropertyOverride(
-        propertyPath,
-        `${this.resourcePrefix}${name}`
-      );
-    } else {
-      const logicalId = this.node.stack.getLogicalId(this.node);
-      this.node.addPropertyOverride(
-        propertyPath,
-        `${this.resourcePrefix}${logicalId}`
-      );
-    }
+    /* if (!Token.isUnresolved(name)) { */
+    /*   this.node.addPropertyOverride( */
+    /*     propertyPath, */
+    /*     `${this.resourcePrefix}${name}` */
+    /*   ); */
+    /* } else { */
+    /*   const logicalId = this.node.stack.getLogicalId(this.node); */
+    /*   this.node.addPropertyOverride( */
+    /*     propertyPath, */
+    /*     `${this.resourcePrefix}${logicalId}` */
+    /*   ); */
+    /* } */
   }
 
   public prefix() {
