@@ -148,7 +148,9 @@ export class AuthenticatedApi extends cdk.Construct {
       const durationThreshold = routeProps.lamdaDurationAlarmThreshold
         ? routeProps.lamdaDurationAlarmThreshold
         : DEFAULT_LAMBDA_DURATION_THRESHOLD;
-      const durationMetric = routeLambda.metric("Duration");
+      const durationMetric = routeLambda
+        .metric("Duration")
+        .with({ period: cdk.Duration.minutes(1), statistic: "sum" });
       const durationAlarm = new cloudwatch.Alarm(
         this,
         `${props.prefix}${props.name}-${routeProps.name}-duration-alarm`,
@@ -161,8 +163,6 @@ export class AuthenticatedApi extends cdk.Construct {
           } exceeds duration ${durationThreshold.toMilliseconds()} milliseconds`,
           actionsEnabled: true,
           metric: durationMetric,
-          statistic: "sum",
-          period: cdk.Duration.minutes(1),
           evaluationPeriods: 1,
           threshold: durationThreshold.toMilliseconds(),
           comparisonOperator:
@@ -180,7 +180,9 @@ export class AuthenticatedApi extends cdk.Construct {
     const latencyThreshold = props.apiLatencyAlarmThreshold
       ? props.apiLatencyAlarmThreshold
       : DEFAULT_API_LATENCY_THRESHOLD;
-    const metricLatency = httpApi.metricLatency(); //{
+    const metricLatency = httpApi
+      .metricLatency()
+      .with({ statistic: "sum", period: cdk.Duration.minutes(1) });
 
     const routeLatencyAlarm = new cloudwatch.Alarm(
       this,
@@ -192,8 +194,6 @@ export class AuthenticatedApi extends cdk.Construct {
         } exceeds ${latencyThreshold.toMilliseconds()} milliseconds`,
         actionsEnabled: true,
         metric: metricLatency,
-        statistic: "sum",
-        period: cdk.Duration.minutes(1),
         evaluationPeriods: 1,
         threshold: latencyThreshold.toMilliseconds(),
         comparisonOperator:

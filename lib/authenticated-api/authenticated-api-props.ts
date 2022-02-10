@@ -10,7 +10,7 @@ export interface AuthenticatedApiProps {
   description: string;
   stageName: string;
   routes: Array<RouteLambdaProps>;
-  securityGroups: Array<ec2.ISecurityGroup>;
+  securityGroups?: Array<ec2.ISecurityGroup>;
   vpc: ec2.IVpc;
   vpcSubnets: ec2.SubnetSelection;
 
