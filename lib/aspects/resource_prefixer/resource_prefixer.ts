@@ -2,6 +2,7 @@ import { CfnResource, IAspect, IConstruct } from "@aws-cdk/core";
 import {
   Apigatewayv2CfnApiPrefixer,
   Apigatewayv2CfnStagePrefixer,
+  Apigatewayv2CfnIntegrationPrefixer,
   DynamoDbCfnTablePrefixer,
   Ec2CfnSecurityGroupPrefixer,
   IamCfnRolePrefixer,
@@ -10,7 +11,7 @@ import {
 } from "./prefixers";
 import { CfnResourcePrefixer } from "./cfn_resource_prefixer";
 import { CfnTable } from "@aws-cdk/aws-dynamodb";
-import { CfnApi, CfnStage } from "@aws-cdk/aws-apigatewayv2";
+import { CfnApi, CfnStage, CfnIntegration } from "@aws-cdk/aws-apigatewayv2";
 import { CfnFunction, CfnPermission } from "@aws-cdk/aws-lambda";
 import { CfnSecurityGroup } from "@aws-cdk/aws-ec2";
 import { CfnRole } from "@aws-cdk/aws-iam";
@@ -34,11 +35,11 @@ export class ResourcePrefixer implements IAspect {
     this.registerPrefixer(CfnTable, DynamoDbCfnTablePrefixer);
     this.registerPrefixer(CfnApi, Apigatewayv2CfnApiPrefixer);
     this.registerPrefixer(CfnStage, Apigatewayv2CfnStagePrefixer);
+    this.registerPrefixer(CfnIntegration, Apigatewayv2CfnIntegrationPrefixer);
     this.registerPrefixer(CfnSecurityGroup, Ec2CfnSecurityGroupPrefixer);
     this.registerPrefixer(CfnRole, IamCfnRolePrefixer);
     this.registerPrefixer(CfnFunction, LambdaCfnFunctionPrefixer);
     this.registerPrefixer(CfnPermission, LambdaCfnPermissionPrefixer);
-    this.registerPrefixer(CfnRole, IamCfnRolePrefixer);
   }
 
   public visit(node: IConstruct): void {
