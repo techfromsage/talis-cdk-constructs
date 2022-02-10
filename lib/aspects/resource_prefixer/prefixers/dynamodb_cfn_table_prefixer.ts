@@ -1,5 +1,5 @@
 import { CfnTable } from "@aws-cdk/aws-dynamodb";
-import { IConstruct } from "@aws-cdk/core";
+import { IConstruct, CfnResource, Annotations } from "@aws-cdk/core";
 import {
   CfnResourcePrefixer,
   CfnResourcePrefixerBase,
@@ -10,9 +10,14 @@ export class DynamoDbCfnTablePrefixer
   implements CfnResourcePrefixer
 {
   constructor(node: IConstruct, resourcePrefix: string) {
-    if (!(node instanceof CfnTable)) {
-      throw new Error(
-        "Specified node is not an instance of CfnTable and cannot be prefixed using this prefixer"
+    if (
+      !(
+        (node as CfnResource).cfnResourceType ===
+        CfnTable.CFN_RESOURCE_TYPE_NAME
+      )
+    ) {
+      Annotations.of(node).addError(
+        "Node is not a CfnTable and cannot be prefixed using this prefixer"
       );
     }
     super(node, resourcePrefix);

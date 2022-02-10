@@ -1,26 +1,20 @@
-import { CfnStage } from "@aws-cdk/aws-apigatewayv2";
 import { IConstruct, CfnResource, Annotations } from "@aws-cdk/core";
 import {
   CfnResourcePrefixer,
   CfnResourcePrefixerBase,
 } from "../cfn_resource_prefixer";
 
-export class Apigatewayv2CfnStagePrefixer
+export class EmptyCfnResourcePrefixer
   extends CfnResourcePrefixerBase
   implements CfnResourcePrefixer
 {
-  constructor(node: IConstruct, resourcePrefix: string) {
-    if (
-      !(
-        (node as CfnResource).cfnResourceType ===
-        CfnStage.CFN_RESOURCE_TYPE_NAME
-      )
-    ) {
+  constructor(node: IConstruct) {
+    if (!CfnResource.isCfnResource(node)) {
       Annotations.of(node).addError(
-        "Node is not a CfnStage and cannot be prefixed using this prefixer"
+        "Node is not a CfnResource and cannot be prefixed using this prefixer"
       );
     }
-    super(node, resourcePrefix);
+    super(node, "");
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function

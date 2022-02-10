@@ -1,5 +1,5 @@
 import { CfnApi } from "@aws-cdk/aws-apigatewayv2";
-import { IConstruct } from "@aws-cdk/core";
+import { IConstruct, CfnResource, Annotations } from "@aws-cdk/core";
 import {
   CfnResourcePrefixer,
   CfnResourcePrefixerBase,
@@ -10,9 +10,11 @@ export class Apigatewayv2CfnApiPrefixer
   implements CfnResourcePrefixer
 {
   constructor(node: IConstruct, resourcePrefix: string) {
-    if (!(node instanceof CfnApi)) {
-      throw new Error(
-        "Specified node is not an instance of CfnApi and cannot be prefixed using this prefixer"
+    if (
+      !((node as CfnResource).cfnResourceType === CfnApi.CFN_RESOURCE_TYPE_NAME)
+    ) {
+      Annotations.of(node).addError(
+        "Node is not a CfnApi and cannot be prefixed using this prefixer"
       );
     }
     super(node, resourcePrefix);

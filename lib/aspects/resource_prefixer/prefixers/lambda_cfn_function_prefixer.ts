@@ -1,5 +1,5 @@
 import { CfnFunction } from "@aws-cdk/aws-lambda";
-import { IConstruct } from "@aws-cdk/core";
+import { IConstruct, CfnResource, Annotations } from "@aws-cdk/core";
 import {
   CfnResourcePrefixer,
   CfnResourcePrefixerBase,
@@ -10,9 +10,14 @@ export class LambdaCfnFunctionPrefixer
   implements CfnResourcePrefixer
 {
   constructor(node: IConstruct, resourcePrefix: string) {
-    if (!(node instanceof CfnFunction)) {
-      throw new Error(
-        "Specified node is not an instance of CfnFunction and cannot be prefixed using this prefixer"
+    if (
+      !(
+        (node as CfnResource).cfnResourceType ===
+        CfnFunction.CFN_RESOURCE_TYPE_NAME
+      )
+    ) {
+      Annotations.of(node).addError(
+        "Node is not a CfnFunction and cannot be prefixed using this prefixer"
       );
     }
     super(node, resourcePrefix);
