@@ -1,7 +1,7 @@
 import * as cdk from "@aws-cdk/core";
 
 import { expect as expectCDK, haveResource } from "@aws-cdk/assert";
-import { Template } from "@aws-cdk/assertions";
+import { Annotations, Template } from "@aws-cdk/assertions";
 import { ResourcePrefixer } from "../../../lib";
 import { Aspects } from "@aws-cdk/core";
 import { EmptyResource } from "../../fixtures/infra/empty_resource";
@@ -55,12 +55,13 @@ describe("Resource Prefixer", () => {
   });
 
   describe("Undefined Resources", () => {
-    test("Raises error if no prefixer registered for cloud formation resource", () => {
-      new EmptyResource(stack, "empty", { type: "Empty::Resource" });
+    test("Adds warning annotation if no prefixer registered for cloud formation resource", () => {
+      new EmptyResource(stack, "empty", { type: "Empty::Resource " });
       Aspects.of(stack).add(resourcePrefixer);
-      expect(() => {
-        Template.fromStack(stack);
-      }).toThrowError("Undefined resource for resource prefixer");
+      Annotations.fromStack(stack).hasWarning(
+        "/AspectTestStack/empty",
+        "No defined resource prefixer for: Empty::Resource "
+      );
     });
   });
 });
