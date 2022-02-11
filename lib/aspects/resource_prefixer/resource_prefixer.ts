@@ -1,7 +1,6 @@
 import { CfnResource, Construct, IAspect, IConstruct } from "@aws-cdk/core";
 import {
   Apigatewayv2CfnApiPrefixer,
-  Apigatewayv2CfnStagePrefixer,
   DynamoDbCfnTablePrefixer,
   Ec2CfnSecurityGroupPrefixer,
   IamCfnRolePrefixer,
@@ -39,7 +38,6 @@ export class ResourcePrefixer implements IAspect {
 
     this.registerPrefixer(CfnTable, DynamoDbCfnTablePrefixer);
     this.registerPrefixer(CfnApi, Apigatewayv2CfnApiPrefixer);
-    this.registerPrefixer(CfnStage, Apigatewayv2CfnStagePrefixer);
     this.registerPrefixer(CfnSecurityGroup, Ec2CfnSecurityGroupPrefixer);
     this.registerPrefixer(CfnRole, IamCfnRolePrefixer);
     this.registerPrefixer(CfnFunction, LambdaCfnFunctionPrefixer);
