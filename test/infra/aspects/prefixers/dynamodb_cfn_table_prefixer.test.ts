@@ -2,6 +2,7 @@ import * as dynamodb from "@aws-cdk/aws-dynamodb";
 import * as cdk from "@aws-cdk/core";
 
 import { expect as expectCDK, haveResource } from "@aws-cdk/assert";
+import { Annotations } from "@aws-cdk/assertions";
 import { DynamoDbCfnTablePrefixer } from "../../../../lib";
 import { CfnTableProperties } from "../../../fixtures/infra/aws-dynamodb/cfn_table";
 import { EmptyResource } from "../../../fixtures/infra/empty_resource";
@@ -47,15 +48,14 @@ describe("DynamoDB CfnTable Prefixer", () => {
   });
 
   describe("Undefined Resource", () => {
-    test("Raises error if no prefixer defined for resource", () => {
+    test("Adds error annotation if prefixer cannot be used for cloud formation resource", () => {
       const unknownResource = new EmptyResource(stack, "empty", {
         type: "EmptyResource",
       });
-
-      expect(() => {
-        new DynamoDbCfnTablePrefixer(unknownResource, "prefix");
-      }).toThrowError(
-        "Specified node is not an instance of CfnTable and cannot be prefixed using this prefixer"
+      new DynamoDbCfnTablePrefixer(unknownResource, "prefix");
+      Annotations.fromStack(stack).hasError(
+        "/AspectTestStack/empty",
+        "Node is not a CfnTable and cannot be prefixed using this prefixer"
       );
     });
   });

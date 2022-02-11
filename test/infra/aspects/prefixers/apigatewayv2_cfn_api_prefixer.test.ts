@@ -2,6 +2,7 @@ import * as apigatewayv2 from "@aws-cdk/aws-apigatewayv2";
 import * as cdk from "@aws-cdk/core";
 
 import { expect as expectCDK, haveResource } from "@aws-cdk/assert";
+import { Annotations } from "@aws-cdk/assertions";
 import { Apigatewayv2CfnApiPrefixer } from "../../../../lib";
 import { CfnApiProperties } from "../../../fixtures/infra/aws-apigatewayv2/cfn_api";
 import { EmptyResource } from "../../../fixtures/infra/empty_resource";
@@ -47,15 +48,14 @@ describe("Apigatewayv2 CfnApi Prefixer", () => {
   });
 
   describe("Undefined Resource", () => {
-    test("Raises error if no prefixer defined for resource", () => {
+    test("Adds error annotation if prefixer cannot be used for cloud formation resource", () => {
       const unknownResource = new EmptyResource(stack, "empty", {
         type: "EmptyResource",
       });
-
-      expect(() => {
-        new Apigatewayv2CfnApiPrefixer(unknownResource, "prefix");
-      }).toThrowError(
-        "Specified node is not an instance of CfnApi and cannot be prefixed using this prefixer"
+      new Apigatewayv2CfnApiPrefixer(unknownResource, "prefix");
+      Annotations.fromStack(stack).hasError(
+        "/AspectTestStack/empty",
+        "Node is not a CfnApi and cannot be prefixed using this prefixer"
       );
     });
   });
