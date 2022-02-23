@@ -3,7 +3,7 @@ export enum TalisRegion {
   EU = "eu-west-1",
   LOCAL = "local",
 }
-  
+
 export enum TalisShortRegion {
   CANADA = "ca",
   EU = "eu",
