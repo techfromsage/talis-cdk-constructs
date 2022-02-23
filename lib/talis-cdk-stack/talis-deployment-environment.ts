@@ -4,4 +4,5 @@ export enum TalisDeploymentEnvironment {
   BUILD = "build",
   STAGING = "staging",
   PRODUCTION = "production",
+  ONDEMAND = "ondemand",
 }
