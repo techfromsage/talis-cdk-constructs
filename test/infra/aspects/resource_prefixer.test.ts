@@ -2,6 +2,7 @@ import * as cdk from "@aws-cdk/core";
 
 import { expect as expectCDK, haveResource } from "@aws-cdk/assert";
 import { Annotations, Template } from "@aws-cdk/assertions";
+import { Role, ServicePrincipal } from "@aws-cdk/aws-iam";
 import { ResourcePrefixer } from "../../../lib";
 import { Aspects } from "@aws-cdk/core";
 import { EmptyResource } from "../../fixtures/infra/empty_resource";
@@ -52,6 +53,23 @@ describe("Resource Prefixer", () => {
         expectCDK(stack).to(haveResource(expectedType, expectedPropsPrefixed));
       }
     );
+  });
+
+  describe("Truncates long resource names", () => {
+    test("reduces name to 64 characters if longer", () => {
+      new Role(stack, "id", {
+        roleName:
+          "kYTwwGzerWgBAZEnEKbuUnvLzFnZhRiuDAWlmjpOZhebJYTNKOcxuJDvjwzthdiIKvjVbYmSAuIwprweKYTlOjhQtptvGPCMaFsdRuufBYBhvykpxISQbeGgDXLnFxYqZSkAjZMJchsj",
+        assumedBy: new ServicePrincipal("lambda.amazonaws.com"),
+      });
+      Aspects.of(stack).add(resourcePrefixer);
+      expectCDK(stack).to(
+        haveResource("AWS::IAM::Role", {
+          RoleName:
+            "test-prefix-kYTwwGzerWgBAZEnEKbuUnvLzFnZhRiuDAWlmjpOZhebJYTNKOcx",
+        })
+      );
+    });
   });
 
   describe("Undefined Resources", () => {
