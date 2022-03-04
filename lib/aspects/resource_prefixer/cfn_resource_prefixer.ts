@@ -1,7 +1,5 @@
 import { IConstruct, CfnResource, Token } from "@aws-cdk/core";
 
-const MAX_LENGTH = 64;
-
 export interface CfnResourcePrefixer {
   prefix(): void;
 }
@@ -26,18 +24,18 @@ export abstract class CfnResourcePrefixerBase implements CfnResourcePrefixer {
     name: string | undefined,
     propertyPath: string
   ): void {
-    let prefixedName;
     if (!Token.isUnresolved(name)) {
-      prefixedName = `${this.resourcePrefix}${name}`;
+      this.node.addPropertyOverride(
+        propertyPath,
+        `${this.resourcePrefix}${name}`
+      );
     } else {
       const logicalId = this.node.stack.getLogicalId(this.node);
-      prefixedName = `${this.resourcePrefix}${logicalId}`;
+      this.node.addPropertyOverride(
+        propertyPath,
+        `${this.resourcePrefix}${logicalId}`
+      );
     }
-
-    this.node.addPropertyOverride(
-      propertyPath,
-      prefixedName.substring(0, MAX_LENGTH)
-    );
   }
 
   public prefix() {
