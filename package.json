@@ -69,7 +69,7 @@
     "@aws-cdk/aws-sqs": "1.143.0",
     "@aws-cdk/core": "1.143.0",
     "cdk-ecr-deployment": "1.0.2",
-    "talis-node": "https://github.com/talis/talis-node.git#v0.0.3",
+    "talis-node": "https://github.com/talis/talis-node.git#v0.1.9",
     "uuid": "8.3.2"
   }
 }
