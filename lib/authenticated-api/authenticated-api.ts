@@ -93,36 +93,36 @@ export class AuthenticatedApi extends cdk.Construct {
     );
 
     for (const routeProps of props.routes) {
-      // Create the lambda
-      const routeLambda = new lambdaNodeJs.NodejsFunction(
-        this,
-        `${props.prefix}${routeProps.name}`,
-        {
-          functionName: `${props.prefix}${props.name}-${routeProps.name}`,
+      // // Create the lambda
+      // const routeLambda = new lambdaNodeJs.NodejsFunction(
+      //   this,
+      //   `${props.prefix}${routeProps.name}`,
+      //   {
+      //     functionName: `${props.prefix}${props.name}-${routeProps.name}`,
 
-          entry: routeProps.lambdaProps.entry,
-          environment: routeProps.lambdaProps.environment,
-          handler: routeProps.lambdaProps.handler,
+      //     entry: routeProps.lambdaProps.entry,
+      //     environment: routeProps.lambdaProps.environment,
+      //     handler: routeProps.lambdaProps.handler,
 
-          // Enforce the following properties
-          awsSdkConnectionReuse: true,
-          runtime: lambda.Runtime.NODEJS_14_X,
-          timeout: routeProps.lambdaProps.timeout,
-          securityGroups: props.securityGroups,
-          vpc: props.vpc,
-          vpcSubnets: props.vpcSubnets,
-        }
-      );
+      //     // Enforce the following properties
+      //     awsSdkConnectionReuse: true,
+      //     runtime: lambda.Runtime.NODEJS_14_X,
+      //     timeout: routeProps.lambdaProps.timeout,
+      //     securityGroups: props.securityGroups,
+      //     vpc: props.vpc,
+      //     vpcSubnets: props.vpcSubnets,
+      //   }
+      // );
 
-      if (routeProps.lambdaProps.policyStatements) {
-        for (const statement of routeProps.lambdaProps.policyStatements) {
-          routeLambda.role?.addToPrincipalPolicy(statement);
-        }
-      }
+      // if (routeProps.lambdaProps.policyStatements) {
+      //   for (const statement of routeProps.lambdaProps.policyStatements) {
+      //     routeLambda.role?.addToPrincipalPolicy(statement);
+      //   }
+      // }
 
       const integration = new integrations.HttpLambdaIntegration(
         "http-lambda-integration",
-        routeLambda
+        routeProps.lambda
       );
 
       for (const path of routeProps.paths) {
@@ -148,7 +148,7 @@ export class AuthenticatedApi extends cdk.Construct {
       const durationThreshold = routeProps.lamdaDurationAlarmThreshold
         ? routeProps.lamdaDurationAlarmThreshold
         : DEFAULT_LAMBDA_DURATION_THRESHOLD;
-      const durationMetric = routeLambda
+      const durationMetric = routeProps.lambda
         .metric("Duration")
         .with({ period: cdk.Duration.minutes(1), statistic: "sum" });
       const durationAlarm = new cloudwatch.Alarm(
