@@ -30,7 +30,7 @@ export class AuthenticatedApiFunction extends lambdaNode.NodejsFunction {
       awsSdkConnectionReuse: true,
       runtime: lambda.Runtime.NODEJS_14_X,
       timeout: props.timeout,
-      securityGroups: [props.securityGroup],
+      securityGroups: props.securityGroups,
       vpc: props.vpc,
       vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT },
     });

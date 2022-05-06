@@ -1,9 +1,12 @@
 import * as apigatewayv2 from "@aws-cdk/aws-apigatewayv2";
-import * as ec2 from "@aws-cdk/aws-ec2";
 import * as cdk from "@aws-cdk/core";
+import * as ec2 from "@aws-cdk/aws-ec2";
 import * as sns from "@aws-cdk/aws-sns";
 
-import { AuthenticatedApi } from "../../../lib";
+import { AuthenticatedApi, AuthenticatedApiFunction } from "../../../lib";
+
+export const STAGING_TALIS_TLS_CERT_ARN =
+  'arn:aws:acm:eu-west-1:302477901552:certificate/46e0fb43-bba8-4aa7-bf98-a3b2038cf760';
 
 export class SimpleAuthenticatedApiStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
@@ -47,15 +50,56 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
       ),
     ];
 
-    /* const api = */ new AuthenticatedApi(this, "simple-authenticated-api", {
+    // Create the lambda's to be passed into the AuthenticatedApi construct
+    const route1Handler = new AuthenticatedApiFunction(
+      this,
+      `${prefix}simple-authenticated-api-route1-handler`,
+      {
+        name: `${prefix}route1-handler`,
+        entry: "src/lambda/route1.js",
+        environment: {}, 
+        handler: 'route',
+        timeout: cdk.Duration.seconds(30),
+        securityGroups: lambdaSecurityGroups,
+        vpc: vpc,
+      },
+    );
+
+    const route2Handler = new AuthenticatedApiFunction(
+      this,
+      `${prefix}simple-authenticated-api-route2-handler`,
+      {
+        name: `${prefix}route2-handler`,
+        entry: "src/lambda/route2.js",
+        environment: {},
+        handler: 'route',
+        timeout: cdk.Duration.seconds(30),
+        securityGroups: lambdaSecurityGroups,
+        vpc: vpc,
+      },
+    );
+
+    /* const api = */ new AuthenticatedApi(this, `${prefix}simple-authenticated-api`, {
       prefix,
-      name: "simple-authenticated-api",
+      name: `${prefix}simple-authenticated-api`,
       description: "A simple example API",
       stageName: "development", // This should be development / staging / production as appropriate
       alarmTopic,
       vpc,
       vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT },
       securityGroups: lambdaSecurityGroups,
+      domainName: `${prefix}simple-authenticated-api.talis.com`,
+      // domainName: `${prefix}simple-authenticated-api`,
+      // domainName: `${prefix}auth-api`,
+      // domainName: `authapi`,
+      certificateArn: STAGING_TALIS_TLS_CERT_ARN,
+      corsDomain: [
+        'http://localhost:4200',
+        `https://${prefix}simple-authenticated-api.talis.com`,
+        // `https://${prefix}simple-authenticated-api`,
+        // `https://${prefix}auth-api`,
+        // `https://authapi`,
+      ],
 
       persona: {
         host: "staging-users.talis.com",
@@ -69,22 +113,14 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
           name: "route1",
           paths: ["/1/route1"],
           method: apigatewayv2.HttpMethod.GET,
-          lambdaProps: {
-            entry: "src/lambda/route1.js",
-            handler: "route",
-            timeout: cdk.Duration.seconds(30),
-          },
+          lambda: route1Handler,
           requiredScope: "analytics:admin",
         },
         {
           name: "route2",
           paths: ["/1/route2"],
           method: apigatewayv2.HttpMethod.GET,
-          lambdaProps: {
-            entry: "src/lambda/route2.js",
-            handler: "route",
-            timeout: cdk.Duration.seconds(30),
-          },
+          lambda: route2Handler,
           isPublic: true,
         },
       ],

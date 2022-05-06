@@ -38,7 +38,7 @@ export class AuthenticatedApi extends cdk.Construct {
       ),
     });
     const apiGatewayProps: apigatewayv2.HttpApiProps = {
-      apiName: `${props.prefix}${props.name}`,
+      apiName: props.name,
       defaultDomainMapping: { domainName: domainName },
       ...(props.corsDomain && {
         corsPreflight: {
@@ -52,7 +52,7 @@ export class AuthenticatedApi extends cdk.Construct {
 
     const httpApi = new apigatewayv2.HttpApi(
       this,
-      `${props.prefix}${props.name}`,
+      props.name,
       apiGatewayProps
     );
 
@@ -66,24 +66,23 @@ export class AuthenticatedApi extends cdk.Construct {
 
     const alarmAction = new cloudwatchActions.SnsAction(props.alarmTopic);
 
-//TODO Is this being removed?
     // Routes may contain required scopes. These scopes need to be in the config
     // of the authorization lambda. Create this config ahead of creating the authorization lambda
-    // const scopeConfig: { [k: string]: string } = {};
-    // for (const routeProps of props.routes) {
-    //   if (routeProps.requiredScope) {
-    //     for (const path of routeProps.paths) {
-    //       scopeConfig[`^${path}$`] = routeProps.requiredScope;
-    //     }
-    //   }
-    // }
+    const scopeConfig: { [k: string]: string } = {};
+    for (const routeProps of props.routes) {
+      if (routeProps.requiredScope) {
+        for (const path of routeProps.paths) {
+          scopeConfig[`^${path}$`] = routeProps.requiredScope;
+        }
+      }
+    }
 
     // Auth Lambda
     const authLambda = new lambdaNodeJs.NodejsFunction(
       this,
-      `${props.prefix}${props.name}-authoriser`,
+      `${props.name}-authoriser`,
       {
-        functionName: `${props.prefix}${props.name}-authoriser`,
+        functionName: `${props.name}-authoriser`,
 
         entry: `${path.resolve(__dirname)}/../../src/lambda/api/authorizer.js`,
         handler: "validateToken",
@@ -103,7 +102,7 @@ export class AuthenticatedApi extends cdk.Construct {
         },
 
         environment: {
-          PERSONA_CLIENT_NAME: `${props.prefix}${props.name}-authoriser`,
+          PERSONA_CLIENT_NAME: `${props.name}-authoriser`,
           PERSONA_HOST: props.persona.host,
           PERSONA_SCHEME: props.persona.scheme,
           PERSONA_PORT: props.persona.port,
@@ -124,7 +123,7 @@ export class AuthenticatedApi extends cdk.Construct {
       "lambda-authorizer",
       authLambda,
       {
-        authorizerName: `${props.prefix}${props.name}-http-lambda-authoriser`,
+        authorizerName: `${props.name}-http-lambda-authoriser`,
         responseTypes: [authorizers.HttpLambdaResponseType.SIMPLE], // Define if returns simple and/or iam response
       }
     );
@@ -191,9 +190,9 @@ export class AuthenticatedApi extends cdk.Construct {
         .with({ period: cdk.Duration.minutes(1), statistic: "sum" });
       const durationAlarm = new cloudwatch.Alarm(
         this,
-        `${props.prefix}${props.name}-${routeProps.name}-duration-alarm`,
+        `${props.name}-${routeProps.name}-duration-alarm`,
         {
-          alarmName: `${props.prefix}${props.name}-${routeProps.name}-duration-alarm`,
+          alarmName: `${props.name}-${routeProps.name}-duration-alarm`,
           alarmDescription: `Alarm if duration of lambda for route ${
             props.name
           }-${
@@ -219,10 +218,10 @@ export class AuthenticatedApi extends cdk.Construct {
 
       const errorsAlarm = new cloudwatch.Alarm(
         this,
-        `${props.prefix}${props.name}-${routeProps.name}-errors-alarm`,
+        `${props.name}-${routeProps.name}-errors-alarm`,
         {
-          alarmName: `${props.prefix}${props.name}-${routeProps.name}-errors-alarm`,
-          alarmDescription: `Alarm if errors on api ${props.prefix}${props.name}-${routeProps.name}`,
+          alarmName: `${props.name}-${routeProps.name}-errors-alarm`,
+          alarmDescription: `Alarm if errors on api ${props.name}-${routeProps.name}`,
           actionsEnabled: true,
           metric: errorsMetric,
           evaluationPeriods: 1,
@@ -248,9 +247,9 @@ export class AuthenticatedApi extends cdk.Construct {
 
     const routeLatencyAlarm = new cloudwatch.Alarm(
       this,
-      `${props.prefix}${props.name}-latency-alarm`,
+      `${props.name}-latency-alarm`,
       {
-        alarmName: `${props.prefix}${props.name}-latency-alarm`,
+        alarmName: `${props.name}-latency-alarm`,
         alarmDescription: `Alarm if latency on api ${
           props.name
         } exceeds ${latencyThreshold.toMilliseconds()} milliseconds`,

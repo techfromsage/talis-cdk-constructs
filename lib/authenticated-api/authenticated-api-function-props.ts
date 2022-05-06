@@ -8,7 +8,7 @@ export interface AuthenticatedApiFunctionProps {
   handler: string;
   timeout: cdk.Duration;
   vpc: ec2.IVpc;
-  securityGroup: ec2.SecurityGroup;
+  securityGroups: Array<ec2.ISecurityGroup>;
   memorySize?: number;
 }
 
