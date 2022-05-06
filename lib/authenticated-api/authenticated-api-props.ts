@@ -13,6 +13,9 @@ export interface AuthenticatedApiProps {
   securityGroups?: Array<ec2.ISecurityGroup>;
   vpc: ec2.IVpc;
   vpcSubnets: ec2.SubnetSelection;
+  domainName: string;
+  certificateArn: string;
+  corsDomain?: string[];
 
   // Persona props are all strings - even the port.
   // These are set as environment variables on the Auth Lambda.
