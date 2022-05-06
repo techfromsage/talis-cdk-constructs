@@ -1,4 +1,4 @@
-import * as acm from '@aws-cdk/aws-certificatemanager';
+import * as acm from "@aws-cdk/aws-certificatemanager";
 import * as apigatewayv2 from "@aws-cdk/aws-apigatewayv2";
 import * as authorizers from "@aws-cdk/aws-apigatewayv2-authorizers";
 import * as cdk from "@aws-cdk/core";
@@ -29,11 +29,11 @@ export class AuthenticatedApi extends cdk.Construct {
         `To use a custom domain name both certificateArn and domainName must be specified`
       );
     }
-    const domainName = new apigatewayv2.DomainName(this, 'domain-name', {
+    const domainName = new apigatewayv2.DomainName(this, "domain-name", {
       domainName: props.domainName,
       certificate: acm.Certificate.fromCertificateArn(
         this,
-        'cert',
+        "cert",
         props.certificateArn
       ),
     });
@@ -42,7 +42,7 @@ export class AuthenticatedApi extends cdk.Construct {
       defaultDomainMapping: { domainName: domainName },
       ...(props.corsDomain && {
         corsPreflight: {
-          allowHeaders: ['*'],
+          allowHeaders: ["*"],
           allowMethods: [apigatewayv2.CorsHttpMethod.ANY],
           allowCredentials: true,
           allowOrigins: props.corsDomain,
@@ -50,16 +50,12 @@ export class AuthenticatedApi extends cdk.Construct {
       }),
     };
 
-    const httpApi = new apigatewayv2.HttpApi(
-      this,
-      props.name,
-      apiGatewayProps
-    );
+    const httpApi = new apigatewayv2.HttpApi(this, props.name, apiGatewayProps);
 
     this.apiId = httpApi.apiId;
     this.httpApiId = httpApi.httpApiId;
 
-    new cdk.CfnOutput(this, 'apiGatewayEndpoint', {
+    new cdk.CfnOutput(this, "apiGatewayEndpoint", {
       exportName: `${props.name}-endpoint`,
       value: httpApi.apiEndpoint,
     });
@@ -129,7 +125,7 @@ export class AuthenticatedApi extends cdk.Construct {
     );
 
     for (const routeProps of props.routes) {
-// TODO Remove this lambda creation
+      // TODO Remove this lambda creation
       // // Create the lambda
       // const routeLambda = new lambdaNodeJs.NodejsFunction(
       //   this,
@@ -213,8 +209,8 @@ export class AuthenticatedApi extends cdk.Construct {
       durationAlarm.addOkAction(alarmAction);
 
       const errorsMetric = routeProps.lambda
-        .metric('Errors')
-        .with({ period: cdk.Duration.minutes(1), statistic: 'sum' });
+        .metric("Errors")
+        .with({ period: cdk.Duration.minutes(1), statistic: "sum" });
 
       const errorsAlarm = new cloudwatch.Alarm(
         this,

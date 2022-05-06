@@ -1,5 +1,5 @@
-import * as cdk from '@aws-cdk/core';
-import * as ec2 from '@aws-cdk/aws-ec2';
+import * as cdk from "@aws-cdk/core";
+import * as ec2 from "@aws-cdk/aws-ec2";
 
 export interface AuthenticatedApiFunctionProps {
   name: string;
@@ -11,4 +11,3 @@ export interface AuthenticatedApiFunctionProps {
   securityGroups: Array<ec2.ISecurityGroup>;
   memorySize?: number;
 }
-

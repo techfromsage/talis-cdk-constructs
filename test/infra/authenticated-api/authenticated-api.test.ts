@@ -7,7 +7,6 @@ import {
 import * as apigatewayv2 from "@aws-cdk/aws-apigatewayv2";
 import * as ec2 from "@aws-cdk/aws-ec2";
 import * as cdk from "@aws-cdk/core";
-import * as iam from "@aws-cdk/aws-iam";
 import * as path from "path";
 import * as sns from "@aws-cdk/aws-sns";
 
@@ -34,12 +33,12 @@ describe("AuthenticatedApi", () => {
         {
           name: `test-route1-handler`,
           entry: `${path.resolve(__dirname)}/routes/route1.js`,
-          environment: {}, 
-          handler: 'route',
+          environment: {},
+          handler: "route",
           timeout: cdk.Duration.seconds(30),
           securityGroups: [],
           vpc: vpc,
-        },
+        }
       );
 
       const route2Handler = new AuthenticatedApiFunction(
@@ -49,11 +48,11 @@ describe("AuthenticatedApi", () => {
           name: `test-route2-handler`,
           entry: `${path.resolve(__dirname)}/routes/route2.js`,
           environment: {},
-          handler: 'route',
+          handler: "route",
           timeout: cdk.Duration.seconds(30),
           securityGroups: [],
           vpc: vpc,
-        },
+        }
       );
 
       new AuthenticatedApi(stack, "MyTestAuthenticatedApi", {
@@ -66,9 +65,9 @@ describe("AuthenticatedApi", () => {
         vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT },
         domainName: `test-simple-authenticated-api.talis.com`,
         certificateArn:
-          'arn:aws:acm:eu-west-1:302477901552:certificate/46e0fb43-bba8-4aa7-bf98-a3b2038cf760',
+          "arn:aws:acm:eu-west-1:302477901552:certificate/46e0fb43-bba8-4aa7-bf98-a3b2038cf760",
         corsDomain: [
-          'http://localhost:4200',
+          "http://localhost:4200",
           `https://test-simple-authenticated-api.talis.com`,
         ],
 

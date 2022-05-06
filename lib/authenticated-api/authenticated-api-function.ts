@@ -1,9 +1,9 @@
-import * as cdk from '@aws-cdk/core';
-import * as ec2 from '@aws-cdk/aws-ec2';
-import * as lambda from '@aws-cdk/aws-lambda';
-import * as lambdaNode from '@aws-cdk/aws-lambda-nodejs';
+import * as cdk from "@aws-cdk/core";
+import * as ec2 from "@aws-cdk/aws-ec2";
+import * as lambda from "@aws-cdk/aws-lambda";
+import * as lambdaNode from "@aws-cdk/aws-lambda-nodejs";
 
-import { AuthenticatedApiFunctionProps } from './authenticated-api-function-props';
+import { AuthenticatedApiFunctionProps } from "./authenticated-api-function-props";
 
 export const MINIMUM_MEMORY_SIZE = 1024;
 
@@ -36,4 +36,3 @@ export class AuthenticatedApiFunction extends lambdaNode.NodejsFunction {
     });
   }
 }
-
