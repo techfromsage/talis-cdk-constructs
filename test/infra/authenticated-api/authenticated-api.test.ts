@@ -11,7 +11,7 @@ import * as iam from "@aws-cdk/aws-iam";
 import * as path from "path";
 import * as sns from "@aws-cdk/aws-sns";
 
-import { AuthenticatedApi } from "../../../lib";
+import { AuthenticatedApi, AuthenticatedApiFunction } from "../../../lib";
 
 describe("AuthenticatedApi", () => {
   describe("with only required props", () => {
@@ -27,6 +27,35 @@ describe("AuthenticatedApi", () => {
         cidr: "10.0.0.0/16",
       });
 
+      // Create the lambda's to be passed into the AuthenticatedApi construct
+      const route1Handler = new AuthenticatedApiFunction(
+        stack,
+        `test-simple-authenticated-api-route1-handler`,
+        {
+          name: `test-route1-handler`,
+          entry: `${path.resolve(__dirname)}/routes/route1.js`,
+          environment: {}, 
+          handler: 'route',
+          timeout: cdk.Duration.seconds(30),
+          securityGroups: [],
+          vpc: vpc,
+        },
+      );
+
+      const route2Handler = new AuthenticatedApiFunction(
+        stack,
+        `test-simple-authenticated-api-route2-handler`,
+        {
+          name: `test-route2-handler`,
+          entry: `${path.resolve(__dirname)}/routes/route2.js`,
+          environment: {},
+          handler: 'route',
+          timeout: cdk.Duration.seconds(30),
+          securityGroups: [],
+          vpc: vpc,
+        },
+      );
+
       new AuthenticatedApi(stack, "MyTestAuthenticatedApi", {
         prefix: `test-`,
         name: "MyTestAuthenticatedApi",
@@ -35,6 +64,13 @@ describe("AuthenticatedApi", () => {
         alarmTopic,
         vpc,
         vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT },
+        domainName: `test-simple-authenticated-api.talis.com`,
+        certificateArn:
+          'arn:aws:acm:eu-west-1:302477901552:certificate/46e0fb43-bba8-4aa7-bf98-a3b2038cf760',
+        corsDomain: [
+          'http://localhost:4200',
+          `https://test-simple-authenticated-api.talis.com`,
+        ],
 
         persona: {
           host: "staging-users.talis.com",
@@ -48,34 +84,36 @@ describe("AuthenticatedApi", () => {
             name: "route1",
             paths: ["/1/test-route-1"],
             method: apigatewayv2.HttpMethod.GET,
-            lambdaProps: {
-              entry: `${path.resolve(__dirname)}/routes/route1.js`,
-              environment: {
-                TALIS_ENV_VAR: "some value",
-              },
-              handler: "route",
-              policyStatements: [
-                new iam.PolicyStatement({
-                  effect: iam.Effect.ALLOW,
-                  actions: ["sqs:*"],
-                  resources: ["*"],
-                }),
-              ],
-              timeout: cdk.Duration.seconds(30),
-            },
+            lambda: route1Handler,
+            // lambdaProps: {
+            //   entry: `${path.resolve(__dirname)}/routes/route1.js`,
+            //   environment: {
+            //     TALIS_ENV_VAR: "some value",
+            //   },
+            //   handler: "route",
+            //   policyStatements: [
+            //     new iam.PolicyStatement({
+            //       effect: iam.Effect.ALLOW,
+            //       actions: ["sqs:*"],
+            //       resources: ["*"],
+            //     }),
+            //   ],
+            //   timeout: cdk.Duration.seconds(30),
+            // },
           },
           {
             name: "route2",
             paths: ["/1/test-route-2"],
             method: apigatewayv2.HttpMethod.GET,
-            lambdaProps: {
-              entry: `${path.resolve(__dirname)}/routes/route2.js`,
-              handler: "route",
-              timeout: cdk.Duration.seconds(30),
-              environment: {
-                TALIS_ENV_VAR: "some value",
-              },
-            },
+            lambda: route2Handler,
+            // lambdaProps: {
+            //   entry: `${path.resolve(__dirname)}/routes/route2.js`,
+            //   handler: "route",
+            //   timeout: cdk.Duration.seconds(30),
+            //   environment: {
+            //     TALIS_ENV_VAR: "some value",
+            //   },
+            // },
             isPublic: true,
           },
         ],

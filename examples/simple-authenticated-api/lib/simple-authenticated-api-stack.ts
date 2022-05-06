@@ -89,16 +89,10 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
       vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT },
       securityGroups: lambdaSecurityGroups,
       domainName: `${prefix}simple-authenticated-api.talis.com`,
-      // domainName: `${prefix}simple-authenticated-api`,
-      // domainName: `${prefix}auth-api`,
-      // domainName: `authapi`,
       certificateArn: STAGING_TALIS_TLS_CERT_ARN,
       corsDomain: [
         'http://localhost:4200',
         `https://${prefix}simple-authenticated-api.talis.com`,
-        // `https://${prefix}simple-authenticated-api`,
-        // `https://${prefix}auth-api`,
-        // `https://authapi`,
       ],
 
       persona: {
