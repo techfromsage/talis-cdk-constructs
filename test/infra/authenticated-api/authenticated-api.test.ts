@@ -7,11 +7,10 @@ import {
 import * as apigatewayv2 from "@aws-cdk/aws-apigatewayv2";
 import * as ec2 from "@aws-cdk/aws-ec2";
 import * as cdk from "@aws-cdk/core";
-import * as iam from "@aws-cdk/aws-iam";
 import * as path from "path";
 import * as sns from "@aws-cdk/aws-sns";
 
-import { AuthenticatedApi } from "../../../lib";
+import { AuthenticatedApi, AuthenticatedApiFunction } from "../../../lib";
 
 describe("AuthenticatedApi", () => {
   describe("with only required props", () => {
@@ -27,6 +26,35 @@ describe("AuthenticatedApi", () => {
         cidr: "10.0.0.0/16",
       });
 
+      // Create the lambda's to be passed into the AuthenticatedApi construct
+      const route1Handler = new AuthenticatedApiFunction(
+        stack,
+        `test-simple-authenticated-api-route1-handler`,
+        {
+          name: `test-route1-handler`,
+          entry: `${path.resolve(__dirname)}/routes/route1.js`,
+          environment: {},
+          handler: "route",
+          timeout: cdk.Duration.seconds(30),
+          securityGroups: [],
+          vpc: vpc,
+        }
+      );
+
+      const route2Handler = new AuthenticatedApiFunction(
+        stack,
+        `test-simple-authenticated-api-route2-handler`,
+        {
+          name: `test-route2-handler`,
+          entry: `${path.resolve(__dirname)}/routes/route2.js`,
+          environment: {},
+          handler: "route",
+          timeout: cdk.Duration.seconds(30),
+          securityGroups: [],
+          vpc: vpc,
+        }
+      );
+
       new AuthenticatedApi(stack, "MyTestAuthenticatedApi", {
         prefix: `test-`,
         name: "MyTestAuthenticatedApi",
@@ -35,6 +63,13 @@ describe("AuthenticatedApi", () => {
         alarmTopic,
         vpc,
         vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT },
+        domainName: `test-simple-authenticated-api.talis.com`,
+        certificateArn:
+          "arn:aws:acm:eu-west-1:302477901552:certificate/46e0fb43-bba8-4aa7-bf98-a3b2038cf760",
+        corsDomain: [
+          "http://localhost:4200",
+          `https://test-simple-authenticated-api.talis.com`,
+        ],
 
         persona: {
           host: "staging-users.talis.com",
@@ -48,34 +83,13 @@ describe("AuthenticatedApi", () => {
             name: "route1",
             paths: ["/1/test-route-1"],
             method: apigatewayv2.HttpMethod.GET,
-            lambdaProps: {
-              entry: `${path.resolve(__dirname)}/routes/route1.js`,
-              environment: {
-                TALIS_ENV_VAR: "some value",
-              },
-              handler: "route",
-              policyStatements: [
-                new iam.PolicyStatement({
-                  effect: iam.Effect.ALLOW,
-                  actions: ["sqs:*"],
-                  resources: ["*"],
-                }),
-              ],
-              timeout: cdk.Duration.seconds(30),
-            },
+            lambda: route1Handler,
           },
           {
             name: "route2",
             paths: ["/1/test-route-2"],
             method: apigatewayv2.HttpMethod.GET,
-            lambdaProps: {
-              entry: `${path.resolve(__dirname)}/routes/route2.js`,
-              handler: "route",
-              timeout: cdk.Duration.seconds(30),
-              environment: {
-                TALIS_ENV_VAR: "some value",
-              },
-            },
+            lambda: route2Handler,
             isPublic: true,
           },
         ],
@@ -137,37 +151,27 @@ describe("AuthenticatedApi", () => {
       expectCDK(stack).to(countResources("AWS::Lambda::Function", 3));
       expectCDK(stack).to(
         haveResourceLike("AWS::Lambda::Function", {
-          FunctionName: "test-MyTestAuthenticatedApi-route1",
+          FunctionName: "test-route1-handler",
           Timeout: 30,
           Handler: "index.route",
           Runtime: "nodejs14.x",
-          Environment: {
-            Variables: {
-              TALIS_ENV_VAR: "some value",
-              AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1",
-            },
-          },
+          Environment: {},
         })
       );
 
       expectCDK(stack).to(
         haveResourceLike("AWS::Lambda::Function", {
-          FunctionName: "test-MyTestAuthenticatedApi-route2",
+          FunctionName: "test-route2-handler",
           Timeout: 30,
           Handler: "index.route",
           Runtime: "nodejs14.x",
-          Environment: {
-            Variables: {
-              TALIS_ENV_VAR: "some value",
-              AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1",
-            },
-          },
+          Environment: {},
         })
       );
     });
 
-    test("provisions three alarms", () => {
-      expectCDK(stack).to(countResources("AWS::CloudWatch::Alarm", 3));
+    test("provisions five alarms", () => {
+      expectCDK(stack).to(countResources("AWS::CloudWatch::Alarm", 5));
     });
 
     test("provisions alarm to warn of latency on the api", () => {
@@ -175,7 +179,7 @@ describe("AuthenticatedApi", () => {
         haveResourceLike("AWS::CloudWatch::Alarm", {
           AlarmName: "test-MyTestAuthenticatedApi-latency-alarm",
           AlarmDescription:
-            "Alarm if latency on api MyTestAuthenticatedApi exceeds 60000 milliseconds",
+            "Alarm if latency on api test-MyTestAuthenticatedApi exceeds 60000 milliseconds",
           Namespace: "AWS/ApiGateway",
           MetricName: "Latency",
           Dimensions: [
@@ -187,7 +191,7 @@ describe("AuthenticatedApi", () => {
             },
           ],
           Period: 60,
-          Statistic: "Sum",
+          Statistic: "Average",
           Threshold: 60000,
           ComparisonOperator: "GreaterThanOrEqualToThreshold",
           TreatMissingData: "ignore",
@@ -196,45 +200,19 @@ describe("AuthenticatedApi", () => {
       );
     });
 
-    test("provisions alarm to warn of latency on the api", () => {
-      expectCDK(stack).to(
-        haveResourceLike("AWS::CloudWatch::Alarm", {
-          AlarmName: "test-MyTestAuthenticatedApi-latency-alarm",
-          AlarmDescription:
-            "Alarm if latency on api MyTestAuthenticatedApi exceeds 60000 milliseconds",
-          Namespace: "AWS/ApiGateway",
-          MetricName: "Latency",
-          Dimensions: [
-            {
-              Name: "ApiId",
-              Value: {
-                Ref: "MyTestAuthenticatedApitestMyTestAuthenticatedApi09BBF2A7",
-              },
-            },
-          ],
-          Period: 60,
-          Statistic: "Sum",
-          Threshold: 60000,
-          ComparisonOperator: "GreaterThanOrEqualToThreshold",
-          TreatMissingData: "ignore",
-          OKActions: [{ Ref: "TestAlarm5A9EF6BD" }],
-        })
-      );
-    });
-
-    test("provisions alarms on latency of lambda's", () => {
+    test("provisions alarms on duration of lambda's", () => {
       expectCDK(stack).to(
         haveResourceLike("AWS::CloudWatch::Alarm", {
           AlarmName: "test-MyTestAuthenticatedApi-route1-duration-alarm",
           AlarmDescription:
-            "Alarm if duration of lambda for route MyTestAuthenticatedApi-route1 exceeds duration 60000 milliseconds",
+            "Alarm if duration of lambda for route test-MyTestAuthenticatedApi-route1 exceeds duration 60000 milliseconds",
           Namespace: "AWS/Lambda",
           MetricName: "Duration",
           Dimensions: [
             {
               Name: "FunctionName",
               Value: {
-                Ref: "MyTestAuthenticatedApitestroute12C3166DA",
+                Ref: "testsimpleauthenticatedapiroute1handler9C009052",
               },
             },
           ],
@@ -251,20 +229,70 @@ describe("AuthenticatedApi", () => {
         haveResourceLike("AWS::CloudWatch::Alarm", {
           AlarmName: "test-MyTestAuthenticatedApi-route2-duration-alarm",
           AlarmDescription:
-            "Alarm if duration of lambda for route MyTestAuthenticatedApi-route2 exceeds duration 60000 milliseconds",
+            "Alarm if duration of lambda for route test-MyTestAuthenticatedApi-route2 exceeds duration 60000 milliseconds",
           Namespace: "AWS/Lambda",
           MetricName: "Duration",
           Dimensions: [
             {
               Name: "FunctionName",
               Value: {
-                Ref: "MyTestAuthenticatedApitestroute279F05FB4",
+                Ref: "testsimpleauthenticatedapiroute2handlerA618DED6",
               },
             },
           ],
           Period: 60,
           Statistic: "Sum",
           Threshold: 60000,
+          ComparisonOperator: "GreaterThanOrEqualToThreshold",
+          TreatMissingData: "ignore",
+          OKActions: [{ Ref: "TestAlarm5A9EF6BD" }],
+        })
+      );
+    });
+
+    test("provisions alarms on errors of lambda's", () => {
+      expectCDK(stack).to(
+        haveResourceLike("AWS::CloudWatch::Alarm", {
+          AlarmName: "test-MyTestAuthenticatedApi-route1-errors-alarm",
+          AlarmDescription:
+            "Alarm if errors on api test-MyTestAuthenticatedApi-route1",
+          Namespace: "AWS/Lambda",
+          MetricName: "Errors",
+          Dimensions: [
+            {
+              Name: "FunctionName",
+              Value: {
+                Ref: "testsimpleauthenticatedapiroute1handler9C009052",
+              },
+            },
+          ],
+          Period: 60,
+          Statistic: "Sum",
+          Threshold: 1,
+          ComparisonOperator: "GreaterThanOrEqualToThreshold",
+          TreatMissingData: "ignore",
+          OKActions: [{ Ref: "TestAlarm5A9EF6BD" }],
+        })
+      );
+
+      expectCDK(stack).to(
+        haveResourceLike("AWS::CloudWatch::Alarm", {
+          AlarmName: "test-MyTestAuthenticatedApi-route2-errors-alarm",
+          AlarmDescription:
+            "Alarm if errors on api test-MyTestAuthenticatedApi-route2",
+          Namespace: "AWS/Lambda",
+          MetricName: "Errors",
+          Dimensions: [
+            {
+              Name: "FunctionName",
+              Value: {
+                Ref: "testsimpleauthenticatedapiroute2handlerA618DED6",
+              },
+            },
+          ],
+          Period: 60,
+          Statistic: "Sum",
+          Threshold: 1,
           ComparisonOperator: "GreaterThanOrEqualToThreshold",
           TreatMissingData: "ignore",
           OKActions: [{ Ref: "TestAlarm5A9EF6BD" }],
