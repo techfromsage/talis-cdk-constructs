@@ -84,7 +84,7 @@ export class AuthenticatedApi extends cdk.Construct {
       {
         functionName: `${props.prefix}${props.name}-authoriser`,
 
-        entry: `${path.resolve(__dirname)}/../../src/lambda/api/authorizer.js`,
+        entry: `${path.resolve(__dirname)}/../../src/lambda/api/authorizer.ts`,
         handler: "validateToken",
 
         bundling: {

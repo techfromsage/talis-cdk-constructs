@@ -1,7 +1,7 @@
-import { _ } from "lodash";
-
-import { persona } from "talis-node";
-
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const _ = require("lodash");
+const talis_node_1 = require("talis-node");
 // Constants used by parseMethodArn:
 //
 // Example MethodARN:
@@ -16,205 +16,177 @@ const EXECUTE_INDEX = 2;
 const REGION_INDEX = 3;
 const ACCOUNT_ID_INDEX = 4;
 const API_GATEWAY_ARN_INDEX = 5;
-
 const METHOD_ARN_INDEXES = [
-  ARN_INDEX,
-  AWS_INDEX,
-  EXECUTE_INDEX,
-  REGION_INDEX,
-  ACCOUNT_ID_INDEX,
-  API_GATEWAY_ARN_INDEX,
+    ARN_INDEX,
+    AWS_INDEX,
+    EXECUTE_INDEX,
+    REGION_INDEX,
+    ACCOUNT_ID_INDEX,
+    API_GATEWAY_ARN_INDEX,
 ];
-
 const API_ID_INDEX = 0;
 const STAGE_INDEX = 1;
 const METHOD_INDEX = 2;
 const RESOURCE_PATH_INDEX = 3;
-
 const API_GATEWAY_ARN_INDEXES = [
-  API_ID_INDEX,
-  STAGE_INDEX,
-  METHOD_INDEX,
-  RESOURCE_PATH_INDEX,
+    API_ID_INDEX,
+    STAGE_INDEX,
+    METHOD_INDEX,
+    RESOURCE_PATH_INDEX,
 ];
-
 class PersonaAuthorizer {
-  constructor(event, context) {
-    this.event = event;
-    this.context = context;
-
-    this.personaClient;
-  }
-
-  async handle() {
-    console.log("Received event", this.event);
-
-    if (this.event.headers.authorization == null) {
-      console.log("Missing auth token");
-      return this.context.fail("Unauthorized");
+    constructor(event, context) {
+        this.event = event;
+        this.context = context;
+        this.personaClient = undefined;
     }
-
-    const parsedMethodArn = this.parseMethodArn(this.event.routeArn);
-    console.log(`Parsed Method Arn: ${JSON.stringify(parsedMethodArn)}`);
-
-    const scope = this.getScope(parsedMethodArn);
-    console.log(`Method has scope: ${scope}`);
-
-    let validationOpts = {
-      token: _.replace(this.event.headers.authorization, "Bearer", "").trim(),
-    };
-    if (scope != null) {
-      validationOpts = _.merge(validationOpts, { scope });
-    }
-    console.log(`Validation ops: ${JSON.stringify(validationOpts)}`);
-
-    console.log(
-      "validating token against request",
-      `${parsedMethodArn.resourcePath}`
-    );
-
-    if (!validationOpts.token || validationOpts.token.length === 0) {
-      console.log("token missing");
-      return this.context.fail("Unauthorized");
-    }
-
-    try {
-      await this.validateToken(validationOpts);
-      const success = {
-        isAuthorized: true,
-        context: {
-          exampleKey: "exampleValue",
-        },
-      };
-      return this.context.succeed(success);
-    } catch (error) {
-      console.log("token validation failed", error);
-      if (error === persona.errorTypes.INSUFFICIENT_SCOPE) {
-        const insuffcientScope = {
-          isAuthorized: false,
-          context: {
-            decsription: "Insufficient Scope",
-            exampleKey: "exampleValue",
-          },
-        };
-        return this.context.succeed(insuffcientScope);
-      }
-
-      const failure = {
-        isAuthorized: false,
-        context: {
-          exampleKey: "exampleValue",
-        },
-      };
-      return this.context.succeed(failure);
-    }
-  }
-
-  validateToken(validationOpts) {
-    const client = this.getPersonaClient();
-    return new Promise(function (resolve, reject) {
-      client.validateToken(validationOpts, (error) => {
-        if (error) {
-          reject(error);
+    async handle() {
+        var _a;
+        console.log('Received event', this.event);
+        if (!((_a = this.event) === null || _a === void 0 ? void 0 : _a.headers) || this.event.headers['authorization'] == null) {
+            console.log('Missing auth token');
+            return this.context.fail('Unauthorized');
         }
-        resolve();
-      });
-    });
-  }
-
-  /**
-   * Break down an API gateway method ARN into it's constituent parts.
-   * Method ARNs take the following format:
-   *
-   *   arn:aws:execute-api:<Region id>:<Account id>:<API id>/<Stage>/<Method>/<Resource path>
-   *
-   * e.g:
-   *
-   *   arn:aws:execute-api:eu-west-1:123:abc/development/GET/2/works
-   *
-   * @param methodArn {string} The method ARN provided by the event handed to a Lambda function
-   * @returns {{
-   *   method: string,
-   *   resourcePath: string,
-   *   apiOptions: {
-   *     region: string,
-   *     restApiId: string,
-   *     stage: string
-   *   },
-   *   awsAccountId: string
-   *   }}
-   */
-  parseMethodArn(methodArn) {
-    const methodArnParts = methodArn.split(":");
-    console.log(`Method ARN Parts: ${JSON.stringify(methodArnParts)}`);
-    let apiGatewayArn = methodArnParts[API_GATEWAY_ARN_INDEX];
-    // If the split created more than the expected number of parts, then the
-    // apiGatewayArn must have had one or more :'s in it. Recreate the apiGateway arn.
-    for (
-      let index = METHOD_ARN_INDEXES.length;
-      index < methodArnParts.length;
-      index += 1
-    ) {
-      apiGatewayArn += `:${methodArnParts[index]}`;
+        const parsedMethodArn = this.parseMethodArn(this.event.routeArn);
+        console.log(`Parsed Method Arn: ${JSON.stringify(parsedMethodArn)}`);
+        const scope = this.getScope(parsedMethodArn);
+        console.log(`Method has scope: ${scope}`);
+        let validationOpts = {
+            token: _.replace(this.event.headers['authorization'], 'Bearer', '').trim(),
+        };
+        if (scope != null) {
+            validationOpts = _.merge(validationOpts, { scope });
+        }
+        console.log(`Validation ops: ${JSON.stringify(validationOpts)}`);
+        console.log('validating token against request', `${parsedMethodArn.resourcePath}`);
+        if (!validationOpts.token || validationOpts.token.length === 0) {
+            console.log('token missing');
+            return this.context.fail('Unauthorized');
+        }
+        try {
+            const token = await this.validateToken(validationOpts);
+            const success = {
+                isAuthorized: true,
+                context: {
+                    clientId: token['sub'],
+                },
+            };
+            return this.context.succeed(success);
+        }
+        catch (err) {
+            console.log('token validation failed', err);
+            const error = err;
+            if (error.error === talis_node_1.persona.errorTypes.INSUFFICIENT_SCOPE) {
+                const insufficientScope = {
+                    isAuthorized: false,
+                    context: {
+                        description: 'Insufficient Scope',
+                        clientId: (error === null || error === void 0 ? void 0 : error.token) ? error.token['sub'] : '',
+                    },
+                };
+                return this.context.succeed(insufficientScope);
+            }
+            const failure = {
+                isAuthorized: false,
+                context: {
+                    clientId: (error === null || error === void 0 ? void 0 : error.token) ? error.token['sub'] : '',
+                },
+            };
+            return this.context.succeed(failure);
+        }
     }
-
-    const apiGatewayArnParts = apiGatewayArn.split("/");
-    console.log(`api gateway arn parts: ${JSON.stringify(apiGatewayArnParts)}`);
-
-    // If the split created more than the expected number of parts, then the
-    // resource path must have had one or more /'s in it. Recreate the resource path.
-    let resourcePath = "";
-    for (
-      let i = API_GATEWAY_ARN_INDEXES.length - 1;
-      i < apiGatewayArnParts.length;
-      i += 1
-    ) {
-      resourcePath += `/${apiGatewayArnParts[i]}`;
+    validateToken(validationOpts) {
+        const client = this.getPersonaClient();
+        return new Promise(function (resolve, reject) {
+            client.validateToken(validationOpts, (error, ok, decodedToken) => {
+                if (error) {
+                    reject({
+                        error: error,
+                        token: decodedToken,
+                    });
+                }
+                resolve(decodedToken);
+            });
+        });
     }
-    console.log(`resource path: ${JSON.stringify(resourcePath)}`);
-    return {
-      method: apiGatewayArnParts[METHOD_INDEX],
-      resourcePath,
-      apiOptions: {
-        region: methodArnParts[REGION_INDEX],
-        restApiId: apiGatewayArnParts[API_ID_INDEX],
-        stage: apiGatewayArnParts[STAGE_INDEX],
-      },
-      awsAccountId: methodArnParts[ACCOUNT_ID_INDEX],
-    };
-  }
-
-  getScope(parsedMethodArn) {
-    const conf = JSON.parse(process.env.SCOPE_CONFIG);
-
-    for (const pathRegEx of Object.keys(conf)) {
-      if (parsedMethodArn.resourcePath.match(pathRegEx)) {
-        return conf[pathRegEx];
-      }
+    /**
+     * Break down an API gateway method ARN into it's constituent parts.
+     * Method ARNs take the following format:
+     *
+     *   arn:aws:execute-api:<Region id>:<Account id>:<API id>/<Stage>/<Method>/<Resource path>
+     *
+     * e.g:
+     *
+     *   arn:aws:execute-api:eu-west-1:123:abc/development/GET/2/works
+     *
+     * @param methodArn {string} The method ARN provided by the event handed to a Lambda function
+     * @returns {{
+     *   method: string,
+     *   resourcePath: string,
+     *   apiOptions: {
+     *     region: string,
+     *     restApiId: string,
+     *     stage: string
+     *   },
+     *   awsAccountId: string
+     *   }}
+     */
+    parseMethodArn(methodArn) {
+        const methodArnParts = methodArn.split(':');
+        console.log(`Method ARN Parts: ${JSON.stringify(methodArnParts)}`);
+        let apiGatewayArn = methodArnParts[API_GATEWAY_ARN_INDEX];
+        // If the split created more than the expected number of parts, then the
+        // apiGatewayArn must have had one or more :'s in it. Recreate the apiGateway arn.
+        for (let index = METHOD_ARN_INDEXES.length; index < methodArnParts.length; index += 1) {
+            apiGatewayArn += `:${methodArnParts[index]}`;
+        }
+        const apiGatewayArnParts = apiGatewayArn.split('/');
+        console.log(`api gateway arn parts: ${JSON.stringify(apiGatewayArnParts)}`);
+        // If the split created more than the expected number of parts, then the
+        // resource path must have had one or more /'s in it. Recreate the resource path.
+        let resourcePath = '';
+        for (let i = API_GATEWAY_ARN_INDEXES.length - 1; i < apiGatewayArnParts.length; i += 1) {
+            resourcePath += `/${apiGatewayArnParts[i]}`;
+        }
+        console.log(`resource path: ${JSON.stringify(resourcePath)}`);
+        return {
+            method: apiGatewayArnParts[METHOD_INDEX],
+            resourcePath,
+            apiOptions: {
+                region: methodArnParts[REGION_INDEX],
+                restApiId: apiGatewayArnParts[API_ID_INDEX],
+                stage: apiGatewayArnParts[STAGE_INDEX],
+            },
+            awsAccountId: methodArnParts[ACCOUNT_ID_INDEX],
+        };
     }
-    return null;
-  }
-
-  getPersonaClient() {
-    if (this.personaClient == null) {
-      const personaConfig = {
-        persona_host: process.env.PERSONA_HOST,
-        persona_scheme: process.env.PERSONA_SCHEME,
-        persona_port: process.env.PERSONA_PORT,
-        persona_oauth_route: process.env.PERSONA_OAUTH_ROUTE,
-      };
-
-      this.personaClient = persona.createClient(
-        `${process.env.PERSONA_CLIENT_NAME} (lambda; NODE_ENV=${process.env.NODE_ENV})`,
-        _.merge(personaConfig, {})
-      );
+    getScope(parsedMethodArn) {
+        const scopeConfig = process.env['SCOPE_CONFIG'];
+        if (scopeConfig != undefined) {
+            const conf = JSON.parse(scopeConfig);
+            for (const pathRegEx of Object.keys(conf)) {
+                if (parsedMethodArn.resourcePath.match(pathRegEx)) {
+                    return conf[pathRegEx];
+                }
+            }
+        }
+        return null;
     }
-
-    return this.personaClient;
-  }
+    getPersonaClient() {
+        if (this.personaClient == null) {
+            const personaConfig = {
+                persona_host: process.env['PERSONA_HOST'],
+                persona_scheme: process.env['PERSONA_SCHEME'],
+                persona_port: process.env['PERSONA_PORT'],
+                persona_oauth_route: process.env['PERSONA_OAUTH_ROUTE'],
+            };
+            this.personaClient = talis_node_1.persona.createClient(`${process.env['PERSONA_CLIENT_NAME']} (lambda; NODE_ENV=${process.env['NODE_ENV']})`, _.merge(personaConfig, {}));
+        }
+        return this.personaClient;
+    }
 }
-
 module.exports.validateToken = async (event, context) => {
-  const route = new PersonaAuthorizer(event, context);
-  return await route.handle();
+    const route = new PersonaAuthorizer(event, context);
+    return await route.handle();
 };
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiYXV0aG9yaXplci5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbImF1dGhvcml6ZXIudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7QUFBQSw0QkFBNEI7QUFDNUIsMkNBQW9EO0FBYXBELG9DQUFvQztBQUNwQyxFQUFFO0FBQ0YscUJBQXFCO0FBQ3JCLDZGQUE2RjtBQUM3RixvRUFBb0U7QUFDcEUsOEZBQThGO0FBQzlGLEVBQUU7QUFDRixFQUFFO0FBQ0YsTUFBTSxTQUFTLEdBQUcsQ0FBQyxDQUFDO0FBQ3BCLE1BQU0sU0FBUyxHQUFHLENBQUMsQ0FBQztBQUNwQixNQUFNLGFBQWEsR0FBRyxDQUFDLENBQUM7QUFDeEIsTUFBTSxZQUFZLEdBQUcsQ0FBQyxDQUFDO0FBQ3ZCLE1BQU0sZ0JBQWdCLEdBQUcsQ0FBQyxDQUFDO0FBQzNCLE1BQU0scUJBQXFCLEdBQUcsQ0FBQyxDQUFDO0FBRWhDLE1BQU0sa0JBQWtCLEdBQUc7SUFDekIsU0FBUztJQUNULFNBQVM7SUFDVCxhQUFhO0lBQ2IsWUFBWTtJQUNaLGdCQUFnQjtJQUNoQixxQkFBcUI7Q0FDdEIsQ0FBQztBQUVGLE1BQU0sWUFBWSxHQUFHLENBQUMsQ0FBQztBQUN2QixNQUFNLFdBQVcsR0FBRyxDQUFDLENBQUM7QUFDdEIsTUFBTSxZQUFZLEdBQUcsQ0FBQyxDQUFDO0FBQ3ZCLE1BQU0sbUJBQW1CLEdBQUcsQ0FBQyxDQUFDO0FBRTlCLE1BQU0sdUJBQXVCLEdBQUc7SUFDOUIsWUFBWTtJQUNaLFdBQVc7SUFDWCxZQUFZO0lBQ1osbUJBQW1CO0NBQ3BCLENBQUM7QUFFRixNQUFNLGlCQUFpQjtJQUtyQixZQUFZLEtBQVUsRUFBRSxPQUFZO1FBQ2xDLElBQUksQ0FBQyxLQUFLLEdBQUcsS0FBSyxDQUFDO1FBQ25CLElBQUksQ0FBQyxPQUFPLEdBQUcsT0FBTyxDQUFDO1FBRXZCLElBQUksQ0FBQyxhQUFhLEdBQUcsU0FBUyxDQUFDO0lBQ2pDLENBQUM7SUFFRCxLQUFLLENBQUMsTUFBTTs7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LEtBQVUsRUFBRSxPQUFZLEVBQUUsRUFBRTtJQUNoRSxNQUFNLEtBQUssR0FBRyxJQUFJLGlCQUFpQixDQUFDLEtBQUssRUFBRSxPQUFPLENBQUMsQ0FBQztJQUNwRCxPQUFPLE1BQU0sS0FBSyxDQUFDLE1BQU0sRUFBRSxDQUFDO0FBQzlCLENBQUMsQ0FBQyIsInNvdXJjZXNDb250ZW50IjpbImltcG9ydCAqIGFzIF8gZnJvbSAnbG9kYXNoJztcbmltcG9ydCB7IHBlcnNvbmEsIFBlcnNvbmFDbGllbnQgfSBmcm9tICd0YWxpcy1ub2RlJztcblxudHlwZSBQYXJzZWRBcm4gPSB7XG4gIG1ldGhvZDogc3RyaW5nO1xuICByZXNvdXJjZVBhdGg6IHN0cmluZztcbiAgYXBpT3B0aW9uczoge1xuICAgIHJlZ2lvbjogc3RyaW5nO1xuICAgIHJlc3RBcGlJZDogc3RyaW5nO1xuICAgIHN0YWdlOiBzdHJpbmc7XG4gIH07XG4gIGF3c0FjY291bnRJZDogc3RyaW5nO1xufTtcblxuLy8gQ29uc3RhbnRzIHVzZWQgYnkgcGFyc2VNZXRob2RBcm46XG4vL1xuLy8gRXhhbXBsZSBNZXRob2RBUk46XG4vLyAgIFwiYXJuOmF3czpleGVjdXRlLWFwaTo8UmVnaW9uIGlkPjo8QWNjb3VudCBpZD46PEFQSSBpZD4vPFN0YWdlPi88TWV0aG9kPi88UmVzb3VyY2UgcGF0aD5cIlxuLy8gTWV0aG9kIEFSTiBJbmRleDogIDAgICAxICAgMiAgICAgICAgICAgMyAgICAgICAgICAgNCAgICAgICAgICAgIDVcbi8vIEFQSSBHYXRld2F5IEFSTiBJbmRleDogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAwICAgICAgICAxICAgICAgIDIgICAgICAgIDNcbi8vXG4vL1xuY29uc3QgQVJOX0lOREVYID0gMDtcbmNvbnN0IEFXU19JTkRFWCA9IDE7XG5jb25zdCBFWEVDVVRFX0lOREVYID0gMjtcbmNvbnN0IFJFR0lPTl9JTkRFWCA9IDM7XG5jb25zdCBBQ0NPVU5UX0lEX0lOREVYID0gNDtcbmNvbnN0IEFQSV9HQVRFV0FZX0FSTl9JTkRFWCA9IDU7XG5cbmNvbnN0IE1FVEhPRF9BUk5fSU5ERVhFUyA9IFtcbiAgQVJOX0lOREVYLFxuICBBV1NfSU5ERVgsXG4gIEVYRUNVVEVfSU5ERVgsXG4gIFJFR0lPTl9JTkRFWCxcbiAgQUNDT1VOVF9JRF9JTkRFWCxcbiAgQVBJX0dBVEVXQVlfQVJOX0lOREVYLFxuXTtcblxuY29uc3QgQVBJX0lEX0lOREVYID0gMDtcbmNvbnN0IFNUQUdFX0lOREVYID0gMTtcbmNvbnN0IE1FVEhPRF9JTkRFWCA9IDI7XG5jb25zdCBSRVNPVVJDRV9QQVRIX0lOREVYID0gMztcblxuY29uc3QgQVBJX0dBVEVXQVlfQVJOX0lOREVYRVMgPSBbXG4gIEFQSV9JRF9JTkRFWCxcbiAgU1RBR0VfSU5ERVgsXG4gIE1FVEhPRF9JTkRFWCxcbiAgUkVTT1VSQ0VfUEFUSF9JTkRFWCxcbl07XG5cbmNsYXNzIFBlcnNvbmFBdXRob3JpemVyIHtcbiAgZXZlbnQ6IGFueTtcbiAgY29udGV4dDogYW55O1xuICBwZXJzb25hQ2xpZW50OiBQZXJzb25hQ2xpZW50IHwgdW5kZWZpbmVkO1xuXG4gIGNvbnN0cnVjdG9yKGV2ZW50OiBhbnksIGNvbnRleHQ6IGFueSkge1xuICAgIHRoaXMuZXZlbnQgPSBldmVudDtcbiAgICB0aGlzLmNvbnRleHQgPSBjb250ZXh0O1xuXG4gICAgdGhpcy5wZXJzb25hQ2xpZW50ID0gdW5kZWZpbmVkO1xuICB9XG5cbiAgYXN5bmMgaGFuZGxlKCkge1xuICAgIGNvbnNvbGUubG9nKCdSZWNlaXZlZCBldmVudCcsIHRoaXMuZXZlbnQpO1xuXG4gICAgaWYgKCF0aGlzLmV2ZW50Py5oZWFkZXJzIHx8IHRoaXMuZXZlbnQuaGVhZGVyc1snYXV0aG9yaXphdGlvbiddID09IG51bGwpIHtcbiAgICAgIGNvbnNvbGUubG9nKCdNaXNzaW5nIGF1dGggdG9rZW4nKTtcbiAgICAgIHJldHVybiB0aGlzLmNvbnRleHQuZmFpbCgnVW5hdXRob3JpemVkJyk7XG4gICAgfVxuXG4gICAgY29uc3QgcGFyc2VkTWV0aG9kQXJuID0gdGhpcy5wYXJzZU1ldGhvZEFybih0aGlzLmV2ZW50LnJvdXRlQXJuKTtcbiAgICBjb25zb2xlLmxvZyhgUGFyc2VkIE1ldGhvZCBBcm46ICR7SlNPTi5zdHJpbmdpZnkocGFyc2VkTWV0aG9kQXJuKX1gKTtcblxuICAgIGNvbnN0IHNjb3BlID0gdGhpcy5nZXRTY29wZShwYXJzZWRNZXRob2RBcm4pO1xuICAgIGNvbnNvbGUubG9nKGBNZXRob2QgaGFzIHNjb3BlOiAke3Njb3BlfWApO1xuXG4gICAgbGV0IHZhbGlkYXRpb25PcHRzID0ge1xuICAgICAgdG9rZW46IF8ucmVwbGFjZShcbiAgICAgICAgdGhpcy5ldmVudC5oZWFkZXJzWydhdXRob3JpemF0aW9uJ10sXG4gICAgICAgICdCZWFyZXInLFxuICAgICAgICAnJ1xuICAgICAgKS50cmltKCksXG4gICAgfTtcbiAgICBpZiAoc2NvcGUgIT0gbnVsbCkge1xuICAgICAgdmFsaWRhdGlvbk9wdHMgPSBfLm1lcmdlKHZhbGlkYXRpb25PcHRzLCB7IHNjb3BlIH0pO1xuICAgIH1cbiAgICBjb25zb2xlLmxvZyhgVmFsaWRhdGlvbiBvcHM6ICR7SlNPTi5zdHJpbmdpZnkodmFsaWRhdGlvbk9wdHMpfWApO1xuXG4gICAgY29uc29sZS5sb2coXG4gICAgICAndmFsaWRhdGluZyB0b2tlbiBhZ2FpbnN0IHJlcXVlc3QnLFxuICAgICAgYCR7cGFyc2VkTWV0aG9kQXJuLnJlc291cmNlUGF0aH1gXG4gICAgKTtcblxuICAgIGlmICghdmFsaWRhdGlvbk9wdHMudG9rZW4gfHwgdmFsaWRhdGlvbk9wdHMudG9rZW4ubGVuZ3RoID09PSAwKSB7XG4gICAgICBjb25zb2xlLmxvZygndG9rZW4gbWlzc2luZycpO1xuICAgICAgcmV0dXJuIHRoaXMuY29udGV4dC5mYWlsKCdVbmF1dGhvcml6ZWQnKTtcbiAgICB9XG5cbiAgICB0cnkge1xuICAgICAgY29uc3QgdG9rZW4gPSBhd2FpdCB0aGlzLnZhbGlkYXRlVG9rZW4odmFsaWRhdGlvbk9wdHMpO1xuICAgICAgY29uc3Qgc3VjY2VzcyA9IHtcbiAgICAgICAgaXNBdXRob3JpemVkOiB0cnVlLFxuICAgICAgICBjb250ZXh0OiB7XG4gICAgICAgICAgY2xpZW50SWQ6IHRva2VuWydzdWInXSxcbiAgICAgICAgfSxcbiAgICAgIH07XG4gICAgICByZXR1cm4gdGhpcy5jb250ZXh0LnN1Y2NlZWQoc3VjY2Vzcyk7XG4gICAgfSBjYXRjaCAoZXJyKSB7XG4gICAgICBjb25zb2xlLmxvZygndG9rZW4gdmFsaWRhdGlvbiBmYWlsZWQnLCBlcnIpO1xuXG4gICAgICBjb25zdCBlcnJvciA9IGVyciBhcyB7IGVycm9yOiBhbnk7IHRva2VuOiBSZWNvcmQ8c3RyaW5nLCBhbnk+IH07XG5cbiAgICAgIGlmIChlcnJvci5lcnJvciA9PT0gcGVyc29uYS5lcnJvclR5cGVzLklOU1VGRklDSUVOVF9TQ09QRSkge1xuICAgICAgICBjb25zdCBpbnN1ZmZpY2llbnRTY29wZSA9IHtcbiAgICAgICAgICBpc0F1dGhvcml6ZWQ6IGZhbHNlLFxuICAgICAgICAgIGNvbnRleHQ6IHtcbiAgICAgICAgICAgIGRlc2NyaXB0aW9uOiAnSW5zdWZmaWNpZW50IFNjb3BlJyxcbiAgICAgICAgICAgIGNsaWVudElkOiBlcnJvcj8udG9rZW4gPyBlcnJvci50b2tlblsnc3ViJ10gOiAnJyxcbiAgICAgICAgICB9LFxuICAgICAgICB9O1xuICAgICAgICByZXR1cm4gdGhpcy5jb250ZXh0LnN1Y2NlZWQoaW5zdWZmaWNpZW50U2NvcGUpO1xuICAgICAgfVxuXG4gICAgICBjb25zdCBmYWlsdXJlID0ge1xuICAgICAgICBpc0F1dGhvcml6ZWQ6IGZhbHNlLFxuICAgICAgICBjb250ZXh0OiB7XG4gICAgICAgICAgY2xpZW50SWQ6IGVycm9yPy50b2tlbiA/IGVycm9yLnRva2VuWydzdWInXSA6ICcnLFxuICAgICAgICB9LFxuICAgICAgfTtcbiAgICAgIHJldHVybiB0aGlzLmNvbnRleHQuc3VjY2VlZChmYWlsdXJlKTtcbiAgICB9XG4gIH1cblxuICB2YWxpZGF0ZVRva2VuKHZhbGlkYXRpb25PcHRzOiBhbnkpOiBQcm9taXNlPFJlY29yZDxzdHJpbmcsIGFueT4+IHtcbiAgICBjb25zdCBjbGllbnQgPSB0aGlzLmdldFBlcnNvbmFDbGllbnQoKTtcbiAgICByZXR1cm4gbmV3IFByb21pc2UoZnVuY3Rpb24gKHJlc29sdmUsIHJlamVjdCkge1xuICAgICAgY2xpZW50LnZhbGlkYXRlVG9rZW4oXG4gICAgICAgIHZhbGlkYXRpb25PcHRzLFxuICAgICAgICAoZXJyb3I6IGFueSwgb2s6IGFueSwgZGVjb2RlZFRva2VuOiBhbnkpID0+IHtcbiAgICAgICAgICBpZiAoZXJyb3IpIHtcbiAgICAgICAgICAgIHJlamVjdCh7XG4gICAgICAgICAgICAgIGVycm9yOiBlcnJvcixcbiAgICAgICAgICAgICAgdG9rZW46IGRlY29kZWRUb2tlbixcbiAgICAgICAgICAgIH0pO1xuICAgICAgICAgIH1cbiAgICAgICAgICByZXNvbHZlKGRlY29kZWRUb2tlbik7XG4gICAgICAgIH1cbiAgICAgICk7XG4gICAgfSk7XG4gIH1cblxuICAvKipcbiAgICogQnJlYWsgZG93biBhbiBBUEkgZ2F0ZXdheSBtZXRob2QgQVJOIGludG8gaXQncyBjb25zdGl0dWVudCBwYXJ0cy5cbiAgICogTWV0aG9kIEFSTnMgdGFrZSB0aGUgZm9sbG93aW5nIGZvcm1hdDpcbiAgICpcbiAgICogICBhcm46YXdzOmV4ZWN1dGUtYXBpOjxSZWdpb24gaWQ+OjxBY2NvdW50IGlkPjo8QVBJIGlkPi88U3RhZ2U+LzxNZXRob2Q+LzxSZXNvdXJjZSBwYXRoPlxuICAgKlxuICAgKiBlLmc6XG4gICAqXG4gICAqICAgYXJuOmF3czpleGVjdXRlLWFwaTpldS13ZXN0LTE6MTIzOmFiYy9kZXZlbG9wbWVudC9HRVQvMi93b3Jrc1xuICAgKlxuICAgKiBAcGFyYW0gbWV0aG9kQXJuIHtzdHJpbmd9IFRoZSBtZXRob2QgQVJOIHByb3ZpZGVkIGJ5IHRoZSBldmVudCBoYW5kZWQgdG8gYSBMYW1iZGEgZnVuY3Rpb25cbiAgICogQHJldHVybnMge3tcbiAgICogICBtZXRob2Q6IHN0cmluZyxcbiAgICogICByZXNvdXJjZVBhdGg6IHN0cmluZyxcbiAgICogICBhcGlPcHRpb25zOiB7XG4gICAqICAgICByZWdpb246IHN0cmluZyxcbiAgICogICAgIHJlc3RBcGlJZDogc3RyaW5nLFxuICAgKiAgICAgc3RhZ2U6IHN0cmluZ1xuICAgKiAgIH0sXG4gICAqICAgYXdzQWNjb3VudElkOiBzdHJpbmdcbiAgICogICB9fVxuICAgKi9cbiAgcGFyc2VNZXRob2RBcm4obWV0aG9kQXJuOiBzdHJpbmcpOiBQYXJzZWRBcm4ge1xuICAgIGNvbnN0IG1ldGhvZEFyblBhcnRzID0gbWV0aG9kQXJuLnNwbGl0KCc6Jyk7XG4gICAgY29uc29sZS5sb2coYE1ldGhvZCBBUk4gUGFydHM6ICR7SlNPTi5zdHJpbmdpZnkobWV0aG9kQXJuUGFydHMpfWApO1xuICAgIGxldCBhcGlHYXRld2F5QXJuID0gbWV0aG9kQXJuUGFydHNbQVBJX0dBVEVXQVlfQVJOX0lOREVYXTtcbiAgICAvLyBJZiB0aGUgc3BsaXQgY3JlYXRlZCBtb3JlIHRoYW4gdGhlIGV4cGVjdGVkIG51bWJlciBvZiBwYXJ0cywgdGhlbiB0aGVcbiAgICAvLyBhcGlHYXRld2F5QXJuIG11c3QgaGF2ZSBoYWQgb25lIG9yIG1vcmUgOidzIGluIGl0LiBSZWNyZWF0ZSB0aGUgYXBpR2F0ZXdheSBhcm4uXG4gICAgZm9yIChcbiAgICAgIGxldCBpbmRleCA9IE1FVEhPRF9BUk5fSU5ERVhFUy5sZW5ndGg7XG4gICAgICBpbmRleCA8IG1ldGhvZEFyblBhcnRzLmxlbmd0aDtcbiAgICAgIGluZGV4ICs9IDFcbiAgICApIHtcbiAgICAgIGFwaUdhdGV3YXlBcm4gKz0gYDoke21ldGhvZEFyblBhcnRzW2luZGV4XX1gO1xuICAgIH1cblxuICAgIGNvbnN0IGFwaUdhdGV3YXlBcm5QYXJ0cyA9IGFwaUdhdGV3YXlBcm4uc3BsaXQoJy8nKTtcbiAgICBjb25zb2xlLmxvZyhgYXBpIGdhdGV3YXkgYXJuIHBhcnRzOiAke0pTT04uc3RyaW5naWZ5KGFwaUdhdGV3YXlBcm5QYXJ0cyl9YCk7XG5cbiAgICAvLyBJZiB0aGUgc3BsaXQgY3JlYXRlZCBtb3JlIHRoYW4gdGhlIGV4cGVjdGVkIG51bWJlciBvZiBwYXJ0cywgdGhlbiB0aGVcbiAgICAvLyByZXNvdXJjZSBwYXRoIG11c3QgaGF2ZSBoYWQgb25lIG9yIG1vcmUgLydzIGluIGl0LiBSZWNyZWF0ZSB0aGUgcmVzb3VyY2UgcGF0aC5cbiAgICBsZXQgcmVzb3VyY2VQYXRoID0gJyc7XG4gICAgZm9yIChcbiAgICAgIGxldCBpID0gQVBJX0dBVEVXQVlfQVJOX0lOREVYRVMubGVuZ3RoIC0gMTtcbiAgICAgIGkgPCBhcGlHYXRld2F5QXJuUGFydHMubGVuZ3RoO1xuICAgICAgaSArPSAxXG4gICAgKSB7XG4gICAgICByZXNvdXJjZVBhdGggKz0gYC8ke2FwaUdhdGV3YXlBcm5QYXJ0c1tpXX1gO1xuICAgIH1cbiAgICBjb25zb2xlLmxvZyhgcmVzb3VyY2UgcGF0aDogJHtKU09OLnN0cmluZ2lmeShyZXNvdXJjZVBhdGgpfWApO1xuICAgIHJldHVybiB7XG4gICAgICBtZXRob2Q6IGFwaUdhdGV3YXlBcm5QYXJ0c1tNRVRIT0RfSU5ERVhdLFxuICAgICAgcmVzb3VyY2VQYXRoLFxuICAgICAgYXBpT3B0aW9uczoge1xuICAgICAgICByZWdpb246IG1ldGhvZEFyblBhcnRzW1JFR0lPTl9JTkRFWF0sXG4gICAgICAgIHJlc3RBcGlJZDogYXBpR2F0ZXdheUFyblBhcnRzW0FQSV9JRF9JTkRFWF0sXG4gICAgICAgIHN0YWdlOiBhcGlHYXRld2F5QXJuUGFydHNbU1RBR0VfSU5ERVhdLFxuICAgICAgfSxcbiAgICAgIGF3c0FjY291bnRJZDogbWV0aG9kQXJuUGFydHNbQUNDT1VOVF9JRF9JTkRFWF0sXG4gICAgfTtcbiAgfVxuXG4gIGdldFNjb3BlKHBhcnNlZE1ldGhvZEFybjogUGFyc2VkQXJuKSB7XG4gICAgY29uc3Qgc2NvcGVDb25maWcgPSBwcm9jZXNzLmVudlsnU0NPUEVfQ09ORklHJ107XG4gICAgaWYgKHNjb3BlQ29uZmlnICE9IHVuZGVmaW5lZCkge1xuICAgICAgY29uc3QgY29uZiA9IEpTT04ucGFyc2Uoc2NvcGVDb25maWcpO1xuICAgICAgZm9yIChjb25zdCBwYXRoUmVnRXggb2YgT2JqZWN0LmtleXMoY29uZikpIHtcbiAgICAgICAgaWYgKHBhcnNlZE1ldGhvZEFybi5yZXNvdXJjZVBhdGgubWF0Y2gocGF0aFJlZ0V4KSkge1xuICAgICAgICAgIHJldHVybiBjb25mW3BhdGhSZWdFeF07XG4gICAgICAgIH1cbiAgICAgIH1cbiAgICB9XG4gICAgcmV0dXJuIG51bGw7XG4gIH1cblxuICBnZXRQZXJzb25hQ2xpZW50KCkge1xuICAgIGlmICh0aGlzLnBlcnNvbmFDbGllbnQgPT0gbnVsbCkge1xuICAgICAgY29uc3QgcGVyc29uYUNvbmZpZyA9IHtcbiAgICAgICAgcGVyc29uYV9ob3N0OiBwcm9jZXNzLmVudlsnUEVSU09OQV9IT1NUJ10sXG4gICAgICAgIHBlcnNvbmFfc2NoZW1lOiBwcm9jZXNzLmVudlsnUEVSU09OQV9TQ0hFTUUnXSxcbiAgICAgICAgcGVyc29uYV9wb3J0OiBwcm9jZXNzLmVudlsnUEVSU09OQV9QT1JUJ10sXG4gICAgICAgIHBlcnNvbmFfb2F1dGhfcm91dGU6IHByb2Nlc3MuZW52WydQRVJTT05BX09BVVRIX1JPVVRFJ10sXG4gICAgICB9O1xuXG4gICAgICB0aGlzLnBlcnNvbmFDbGllbnQgPSBwZXJzb25hLmNyZWF0ZUNsaWVudChcbiAgICAgICAgYCR7cHJvY2Vzcy5lbnZbJ1BFUlNPTkFfQ0xJRU5UX05BTUUnXX0gKGxhbWJkYTsgTk9ERV9FTlY9JHtwcm9jZXNzLmVudlsnTk9ERV9FTlYnXX0pYCxcbiAgICAgICAgXy5tZXJnZShwZXJzb25hQ29uZmlnLCB7fSlcbiAgICAgICk7XG4gICAgfVxuXG4gICAgcmV0dXJuIHRoaXMucGVyc29uYUNsaWVudDtcbiAgfVxufVxuXG5tb2R1bGUuZXhwb3J0cy52YWxpZGF0ZVRva2VuID0gYXN5bmMgKGV2ZW50OiBhbnksIGNvbnRleHQ6IGFueSkgPT4ge1xuICBjb25zdCByb3V0ZSA9IG5ldyBQZXJzb25hQXV0aG9yaXplcihldmVudCwgY29udGV4dCk7XG4gIHJldHVybiBhd2FpdCByb3V0ZS5oYW5kbGUoKTtcbn07XG4iXX0=
