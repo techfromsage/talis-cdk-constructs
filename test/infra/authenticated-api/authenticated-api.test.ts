@@ -155,7 +155,7 @@ describe("AuthenticatedApi", () => {
           Timeout: 30,
           Handler: "index.route",
           Runtime: "nodejs14.x",
-          Environment: { },
+          Environment: {},
         })
       );
 
@@ -165,7 +165,7 @@ describe("AuthenticatedApi", () => {
           Timeout: 30,
           Handler: "index.route",
           Runtime: "nodejs14.x",
-          Environment: { },
+          Environment: {},
         })
       );
     });

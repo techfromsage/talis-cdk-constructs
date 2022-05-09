@@ -50,7 +50,11 @@ export class AuthenticatedApi extends cdk.Construct {
       }),
     };
 
-    const httpApi = new apigatewayv2.HttpApi(this, `${props.prefix}${props.name}`, apiGatewayProps);
+    const httpApi = new apigatewayv2.HttpApi(
+      this,
+      `${props.prefix}${props.name}`,
+      apiGatewayProps
+    );
 
     this.apiId = httpApi.apiId;
     this.httpApiId = httpApi.httpApiId;
@@ -163,9 +167,7 @@ export class AuthenticatedApi extends cdk.Construct {
           alarmName: `${props.prefix}${props.name}-${routeProps.name}-duration-alarm`,
           alarmDescription: `Alarm if duration of lambda for route ${
             props.prefix
-          }${
-            props.name
-          }-${
+          }${props.name}-${
             routeProps.name
           } exceeds duration ${durationThreshold.toMilliseconds()} milliseconds`,
           actionsEnabled: true,
@@ -220,9 +222,7 @@ export class AuthenticatedApi extends cdk.Construct {
       `${props.prefix}${props.name}-latency-alarm`,
       {
         alarmName: `${props.prefix}${props.name}-latency-alarm`,
-        alarmDescription: `Alarm if latency on api ${
-          props.prefix
-        }${
+        alarmDescription: `Alarm if latency on api ${props.prefix}${
           props.name
         } exceeds ${latencyThreshold.toMilliseconds()} milliseconds`,
         actionsEnabled: true,
