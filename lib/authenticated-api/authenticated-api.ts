@@ -38,7 +38,7 @@ export class AuthenticatedApi extends cdk.Construct {
       ),
     });
     const apiGatewayProps: apigatewayv2.HttpApiProps = {
-      apiName: props.name,
+      apiName: `${props.prefix}${props.name}`,
       defaultDomainMapping: { domainName: domainName },
       ...(props.corsDomain && {
         corsPreflight: {
@@ -50,7 +50,7 @@ export class AuthenticatedApi extends cdk.Construct {
       }),
     };
 
-    const httpApi = new apigatewayv2.HttpApi(this, props.name, apiGatewayProps);
+    const httpApi = new apigatewayv2.HttpApi(this, `${props.prefix}${props.name}`, apiGatewayProps);
 
     this.apiId = httpApi.apiId;
     this.httpApiId = httpApi.httpApiId;
@@ -76,9 +76,9 @@ export class AuthenticatedApi extends cdk.Construct {
     // Auth Lambda
     const authLambda = new lambdaNodeJs.NodejsFunction(
       this,
-      `${props.name}-authoriser`,
+      `${props.prefix}${props.name}-authoriser`,
       {
-        functionName: `${props.name}-authoriser`,
+        functionName: `${props.prefix}${props.name}-authoriser`,
 
         entry: `${path.resolve(__dirname)}/../../src/lambda/api/authorizer.js`,
         handler: "validateToken",
@@ -98,7 +98,7 @@ export class AuthenticatedApi extends cdk.Construct {
         },
 
         environment: {
-          PERSONA_CLIENT_NAME: `${props.name}-authoriser`,
+          PERSONA_CLIENT_NAME: `${props.prefix}${props.name}-authoriser`,
           PERSONA_HOST: props.persona.host,
           PERSONA_SCHEME: props.persona.scheme,
           PERSONA_PORT: props.persona.port,
@@ -119,40 +119,12 @@ export class AuthenticatedApi extends cdk.Construct {
       "lambda-authorizer",
       authLambda,
       {
-        authorizerName: `${props.name}-http-lambda-authoriser`,
+        authorizerName: `${props.prefix}${props.name}-http-lambda-authoriser`,
         responseTypes: [authorizers.HttpLambdaResponseType.SIMPLE], // Define if returns simple and/or iam response
       }
     );
 
     for (const routeProps of props.routes) {
-      // TODO Remove this lambda creation
-      // // Create the lambda
-      // const routeLambda = new lambdaNodeJs.NodejsFunction(
-      //   this,
-      //   `${props.prefix}${routeProps.name}`,
-      //   {
-      //     functionName: `${props.prefix}${props.name}-${routeProps.name}`,
-
-      //     entry: routeProps.lambdaProps.entry,
-      //     environment: routeProps.lambdaProps.environment,
-      //     handler: routeProps.lambdaProps.handler,
-
-      //     // Enforce the following properties
-      //     awsSdkConnectionReuse: true,
-      //     runtime: lambda.Runtime.NODEJS_14_X,
-      //     timeout: routeProps.lambdaProps.timeout,
-      //     securityGroups: props.securityGroups,
-      //     vpc: props.vpc,
-      //     vpcSubnets: props.vpcSubnets,
-      //   }
-      // );
-
-      // if (routeProps.lambdaProps.policyStatements) {
-      //   for (const statement of routeProps.lambdaProps.policyStatements) {
-      //     routeLambda.role?.addToPrincipalPolicy(statement);
-      //   }
-      // }
-
       const integration = new integrations.HttpLambdaIntegration(
         "http-lambda-integration",
         routeProps.lambda
@@ -186,10 +158,12 @@ export class AuthenticatedApi extends cdk.Construct {
         .with({ period: cdk.Duration.minutes(1), statistic: "sum" });
       const durationAlarm = new cloudwatch.Alarm(
         this,
-        `${props.name}-${routeProps.name}-duration-alarm`,
+        `${props.prefix}${props.name}-${routeProps.name}-duration-alarm`,
         {
-          alarmName: `${props.name}-${routeProps.name}-duration-alarm`,
+          alarmName: `${props.prefix}${props.name}-${routeProps.name}-duration-alarm`,
           alarmDescription: `Alarm if duration of lambda for route ${
+            props.prefix
+          }${
             props.name
           }-${
             routeProps.name
@@ -214,10 +188,10 @@ export class AuthenticatedApi extends cdk.Construct {
 
       const errorsAlarm = new cloudwatch.Alarm(
         this,
-        `${props.name}-${routeProps.name}-errors-alarm`,
+        `${props.prefix}${props.name}-${routeProps.name}-errors-alarm`,
         {
-          alarmName: `${props.name}-${routeProps.name}-errors-alarm`,
-          alarmDescription: `Alarm if errors on api ${props.name}-${routeProps.name}`,
+          alarmName: `${props.prefix}${props.name}-${routeProps.name}-errors-alarm`,
+          alarmDescription: `Alarm if errors on api ${props.prefix}${props.name}-${routeProps.name}`,
           actionsEnabled: true,
           metric: errorsMetric,
           evaluationPeriods: 1,
@@ -243,10 +217,12 @@ export class AuthenticatedApi extends cdk.Construct {
 
     const routeLatencyAlarm = new cloudwatch.Alarm(
       this,
-      `${props.name}-latency-alarm`,
+      `${props.prefix}${props.name}-latency-alarm`,
       {
-        alarmName: `${props.name}-latency-alarm`,
+        alarmName: `${props.prefix}${props.name}-latency-alarm`,
         alarmDescription: `Alarm if latency on api ${
+          props.prefix
+        }${
           props.name
         } exceeds ${latencyThreshold.toMilliseconds()} milliseconds`,
         actionsEnabled: true,
