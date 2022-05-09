@@ -15,7 +15,7 @@
     "integration-test": "npm run build && npm run jest-integration-test",
     "jest-integration-test": "jest test/integration/",
     "lint:prettier": "prettier --check .",
-    "lint:eslint": "eslint . --ext .js,.ts",
+    "lint:eslint": "eslint . --ext .ts",
     "lint": "npm run lint:prettier && npm run lint:eslint",
     "format:prettier": "prettier --write .",
     "format": "npm run format:prettier",
