@@ -1,5 +1,5 @@
-import * as _ from 'lodash';
-import { persona, PersonaClient } from 'talis-node';
+import * as _ from "lodash";
+import { persona, PersonaClient } from "talis-node";
 
 type ParsedArn = {
   method: string;
@@ -61,11 +61,11 @@ class PersonaAuthorizer {
   }
 
   async handle() {
-    console.log('Received event', this.event);
+    console.log("Received event", this.event);
 
-    if (!this.event?.headers || this.event.headers['authorization'] == null) {
-      console.log('Missing auth token');
-      return this.context.fail('Unauthorized');
+    if (!this.event?.headers || this.event.headers["authorization"] == null) {
+      console.log("Missing auth token");
+      return this.context.fail("Unauthorized");
     }
 
     const parsedMethodArn = this.parseMethodArn(this.event.routeArn);
@@ -76,9 +76,9 @@ class PersonaAuthorizer {
 
     let validationOpts = {
       token: _.replace(
-        this.event.headers['authorization'],
-        'Bearer',
-        ''
+        this.event.headers["authorization"],
+        "Bearer",
+        ""
       ).trim(),
     };
     if (scope != null) {
@@ -87,13 +87,13 @@ class PersonaAuthorizer {
     console.log(`Validation ops: ${JSON.stringify(validationOpts)}`);
 
     console.log(
-      'validating token against request',
+      "validating token against request",
       `${parsedMethodArn.resourcePath}`
     );
 
     if (!validationOpts.token || validationOpts.token.length === 0) {
-      console.log('token missing');
-      return this.context.fail('Unauthorized');
+      console.log("token missing");
+      return this.context.fail("Unauthorized");
     }
 
     try {
@@ -101,12 +101,12 @@ class PersonaAuthorizer {
       const success = {
         isAuthorized: true,
         context: {
-          clientId: token['sub'],
+          clientId: token["sub"],
         },
       };
       return this.context.succeed(success);
     } catch (err) {
-      console.log('token validation failed', err);
+      console.log("token validation failed", err);
 
       const error = err as { error: any; token: Record<string, any> };
 
@@ -114,8 +114,8 @@ class PersonaAuthorizer {
         const insufficientScope = {
           isAuthorized: false,
           context: {
-            description: 'Insufficient Scope',
-            clientId: error?.token ? error.token['sub'] : '',
+            description: "Insufficient Scope",
+            clientId: error?.token ? error.token["sub"] : "",
           },
         };
         return this.context.succeed(insufficientScope);
@@ -124,7 +124,7 @@ class PersonaAuthorizer {
       const failure = {
         isAuthorized: false,
         context: {
-          clientId: error?.token ? error.token['sub'] : '',
+          clientId: error?.token ? error.token["sub"] : "",
         },
       };
       return this.context.succeed(failure);
@@ -172,7 +172,7 @@ class PersonaAuthorizer {
    *   }}
    */
   parseMethodArn(methodArn: string): ParsedArn {
-    const methodArnParts = methodArn.split(':');
+    const methodArnParts = methodArn.split(":");
     console.log(`Method ARN Parts: ${JSON.stringify(methodArnParts)}`);
     let apiGatewayArn = methodArnParts[API_GATEWAY_ARN_INDEX];
     // If the split created more than the expected number of parts, then the
@@ -185,12 +185,12 @@ class PersonaAuthorizer {
       apiGatewayArn += `:${methodArnParts[index]}`;
     }
 
-    const apiGatewayArnParts = apiGatewayArn.split('/');
+    const apiGatewayArnParts = apiGatewayArn.split("/");
     console.log(`api gateway arn parts: ${JSON.stringify(apiGatewayArnParts)}`);
 
     // If the split created more than the expected number of parts, then the
     // resource path must have had one or more /'s in it. Recreate the resource path.
-    let resourcePath = '';
+    let resourcePath = "";
     for (
       let i = API_GATEWAY_ARN_INDEXES.length - 1;
       i < apiGatewayArnParts.length;
@@ -212,7 +212,7 @@ class PersonaAuthorizer {
   }
 
   getScope(parsedMethodArn: ParsedArn) {
-    const scopeConfig = process.env['SCOPE_CONFIG'];
+    const scopeConfig = process.env["SCOPE_CONFIG"];
     if (scopeConfig != undefined) {
       const conf = JSON.parse(scopeConfig);
       for (const pathRegEx of Object.keys(conf)) {
@@ -227,14 +227,14 @@ class PersonaAuthorizer {
   getPersonaClient() {
     if (this.personaClient == null) {
       const personaConfig = {
-        persona_host: process.env['PERSONA_HOST'],
-        persona_scheme: process.env['PERSONA_SCHEME'],
-        persona_port: process.env['PERSONA_PORT'],
-        persona_oauth_route: process.env['PERSONA_OAUTH_ROUTE'],
+        persona_host: process.env["PERSONA_HOST"],
+        persona_scheme: process.env["PERSONA_SCHEME"],
+        persona_port: process.env["PERSONA_PORT"],
+        persona_oauth_route: process.env["PERSONA_OAUTH_ROUTE"],
       };
 
       this.personaClient = persona.createClient(
-        `${process.env['PERSONA_CLIENT_NAME']} (lambda; NODE_ENV=${process.env['NODE_ENV']})`,
+        `${process.env["PERSONA_CLIENT_NAME"]} (lambda; NODE_ENV=${process.env["NODE_ENV"]})`,
         _.merge(personaConfig, {})
       );
     }
