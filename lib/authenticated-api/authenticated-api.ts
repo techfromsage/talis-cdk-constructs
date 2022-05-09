@@ -60,7 +60,7 @@ export class AuthenticatedApi extends cdk.Construct {
     this.httpApiId = httpApi.httpApiId;
 
     new cdk.CfnOutput(this, "apiGatewayEndpoint", {
-      exportName: `${props.name}-endpoint`,
+      exportName: `${props.prefix}${props.name}-endpoint`,
       value: httpApi.apiEndpoint,
     });
 
