@@ -84,7 +84,7 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
       `${prefix}simple-authenticated-api`,
       {
         prefix,
-        name: `${prefix}simple-authenticated-api`,
+        name: `simple-authenticated-api`,
         description: "A simple example API",
         stageName: "development", // This should be development / staging / production as appropriate
         alarmTopic,
