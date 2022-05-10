@@ -29,9 +29,10 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
       { topicName: `${prefix}simple-authenticated-api-alarm` }
     );
 
-    const vpc = ec2.Vpc.fromLookup(this, `${prefix}-vpc`, {
-      vpcId: "vpc-0155db5e1ab5c28b6",
-    });
+    // VPC is optional. To use one, you would look it up as follows:
+    // const vpc = ec2.Vpc.fromLookup(this, `${prefix}-vpc`, {
+    //   vpcId: "vpc-0155db5e1ab5c28b6",
+    // });
 
     // Setting a security group is an option. This is an example of importing and using a
     // pre existing security group. This one is defined in terraform.
@@ -61,7 +62,9 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
         handler: "route",
         timeout: cdk.Duration.seconds(30),
         securityGroups: lambdaSecurityGroups,
-        vpc: vpc,
+        // A VPC is optional. If you need to specify one, you would do so here:
+        // vpc: vpc,
+        // vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT },
       }
     );
 
@@ -75,7 +78,9 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
         handler: "route",
         timeout: cdk.Duration.seconds(30),
         securityGroups: lambdaSecurityGroups,
-        vpc: vpc,
+        // A VPC is optional. If you need to specify one, you would do so here:
+        // vpc: vpc,
+        // vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT },
       }
     );
 
@@ -88,8 +93,9 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
         description: "A simple example API",
         stageName: "development", // This should be development / staging / production as appropriate
         alarmTopic,
-        vpc,
-        vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT },
+        // A VPC is optional. If you need to specify one, you would do so here:
+        // vpc: vpc,
+        // vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT },
         securityGroups: lambdaSecurityGroups,
         domainName: `${prefix}simple-authenticated-api.talis.com`,
         certificateArn: STAGING_TALIS_TLS_CERT_ARN,

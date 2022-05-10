@@ -27,8 +27,8 @@ export interface LambdaWorkerProps {
     retryAttempts?: number;
     securityGroups?: Array<ec2.ISecurityGroup>;
     timeout: cdk.Duration;
-    vpc: ec2.IVpc;
-    vpcSubnets: ec2.SubnetSelection;
+    vpc?: ec2.IVpc;
+    vpcSubnets?: ec2.SubnetSelection;
   };
 
   // Queue Properties
