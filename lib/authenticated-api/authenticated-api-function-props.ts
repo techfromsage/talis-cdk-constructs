@@ -7,8 +7,7 @@ export interface AuthenticatedApiFunctionProps {
   environment?: { [key: string]: string };
   handler: string;
   timeout: cdk.Duration;
-  vpc?: ec2.IVpc;
-  vpcSubnets?: ec2.SubnetSelection;
+  vpc: ec2.IVpc;
   securityGroups: Array<ec2.ISecurityGroup>;
   memorySize?: number;
 }
