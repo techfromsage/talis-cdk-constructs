@@ -37,9 +37,10 @@ export class SimpleLambdaWorkerStack extends cdk.Stack {
       { topicName: `${prefix}simple-lambda-worker-alarm` }
     );
 
-    const vpc = ec2.Vpc.fromLookup(this, `${prefix}-vpc`, {
-      vpcId: "vpc-0155db5e1ab5c28b6",
-    });
+    // VPC is optional. To use one, you would look it up as follows:
+    // const vpc = ec2.Vpc.fromLookup(this, `${prefix}-vpc`, {
+    //   vpcId: "vpc-0155db5e1ab5c28b6",
+    // });
 
     // Setting a security group is an option. This is an example of importing and using a
     // pre existing security group. This one is defined in terraform.
@@ -83,8 +84,9 @@ export class SimpleLambdaWorkerStack extends cdk.Stack {
           memorySize: 1024,
           securityGroups: lambdaSecurityGroups,
           timeout: cdk.Duration.seconds(30),
-          vpc: vpc,
-          vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT },
+          // A VPC is optional. If you need to specify one, you would do so here:
+          // vpc: vpc,
+          // vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT },
           policyStatements: [
             new iam.PolicyStatement({
               effect: iam.Effect.ALLOW,
