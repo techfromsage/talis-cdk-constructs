@@ -32,7 +32,7 @@ export class AuthenticatedApiFunction extends lambdaNode.NodejsFunction {
       timeout: props.timeout,
       securityGroups: props.securityGroups,
       vpc: props.vpc,
-      vpcSubnets: props.vpcSubnets,
+      vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT },
     });
   }
 }
