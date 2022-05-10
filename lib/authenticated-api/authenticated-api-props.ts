@@ -11,8 +11,8 @@ export interface AuthenticatedApiProps {
   stageName: string;
   routes: Array<RouteLambdaProps>;
   securityGroups?: Array<ec2.ISecurityGroup>;
-  vpc: ec2.IVpc;
-  vpcSubnets: ec2.SubnetSelection;
+  vpc?: ec2.IVpc;
+  vpcSubnets?: ec2.SubnetSelection;
   domainName: string;
   certificateArn: string;
   corsDomain?: string[];
