@@ -4,7 +4,9 @@
   "files": [
     "lib/**/*.d.ts",
     "lib/**/*.js",
-    "src/**/*.js"
+    "src/**/*.js",
+    "src/lambda/api/authorizer.ts",
+    "src/lambda/api/authorizer.d.ts"
   ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
