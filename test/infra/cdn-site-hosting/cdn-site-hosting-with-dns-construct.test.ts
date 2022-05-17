@@ -175,8 +175,11 @@ describe("CdnSiteHostingWithDnsConstruct", () => {
         domainName: fakeDomain,
         removalPolicy: RemovalPolicy.DESTROY,
         isRoutedSpa: true,
-        sources: [s3deploy.Source.asset("./")],
+        sources: [s3deploy.Source.asset("./", { exclude: ["index.html"] })],
         websiteIndexDocument: "index.html",
+        websiteIndexDocumentAsset: s3deploy.Source.asset("./", {
+          exclude: ["*", "!index.html"],
+        }),
       });
     });
 
@@ -218,9 +221,12 @@ describe("CdnSiteHostingWithDnsConstruct", () => {
         domainName: fakeDomain,
         removalPolicy: RemovalPolicy.DESTROY,
         isRoutedSpa: true,
-        sources: [s3deploy.Source.asset("./")],
+        sources: [s3deploy.Source.asset("./", { exclude: ["index.html"] })],
         websiteErrorDocument: "error.html",
         websiteIndexDocument: "index.html",
+        websiteIndexDocumentAsset: s3deploy.Source.asset("./", {
+          exclude: ["*", "!index.html"],
+        }),
       });
     });
 

@@ -159,7 +159,7 @@ describe("CdnSiteHostingConstruct", () => {
             websiteErrorDocument: "error.html",
             websiteIndexDocument: "/index.html",
           })
-      ).toThrow("leading slashes are not allowed in websiteIndexDocument");
+      ).toThrow("Leading slashes are not allowed in websiteIndexDocument");
     });
   });
 
@@ -175,8 +175,11 @@ describe("CdnSiteHostingConstruct", () => {
         domainName: fakeDomain,
         removalPolicy: RemovalPolicy.DESTROY,
         isRoutedSpa: true,
-        sources: [s3deploy.Source.asset("./")],
+        sources: [s3deploy.Source.asset("./", { exclude: ["index.html"] })],
         websiteIndexDocument: "index.html",
+        websiteIndexDocumentAsset: s3deploy.Source.asset("./", {
+          exclude: ["*", "!index.html"],
+        }),
       });
     });
 
@@ -195,6 +198,7 @@ describe("CdnSiteHostingConstruct", () => {
         })
       );
     });
+
     test("configures an error document in S3", () => {
       expectCDK(stack).to(
         haveResourceLike("AWS::S3::Bucket", {
@@ -219,9 +223,12 @@ describe("CdnSiteHostingConstruct", () => {
         domainName: fakeDomain,
         removalPolicy: RemovalPolicy.DESTROY,
         isRoutedSpa: true,
-        sources: [s3deploy.Source.asset("./")],
+        sources: [s3deploy.Source.asset("./", { exclude: ["index.html"] })],
         websiteErrorDocument: "error.html",
         websiteIndexDocument: "index.html",
+        websiteIndexDocumentAsset: s3deploy.Source.asset("./", {
+          exclude: ["*", "!index.html"],
+        }),
       });
     });
 
@@ -240,6 +247,7 @@ describe("CdnSiteHostingConstruct", () => {
         })
       );
     });
+
     test("configures an error document in S3", () => {
       expectCDK(stack).to(
         haveResourceLike("AWS::S3::Bucket", {

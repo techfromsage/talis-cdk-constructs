@@ -31,10 +31,6 @@ export class CdnSiteHostingConstruct extends cdk.Construct {
   ) {
     super(scope, id);
 
-    if (props.websiteIndexDocument.startsWith("/")) {
-      throw Error("leading slashes are not allowed in websiteIndexDocument");
-    }
-
     validateProps(props);
 
     const siteDomain = getSiteDomain(props);
@@ -109,7 +105,7 @@ export class CdnSiteHostingConstruct extends cdk.Construct {
         props.sourcesWithDeploymentOptions.length === 1;
 
       // multiple sources with granular cache and invalidation control
-      props.sourcesWithDeploymentOptions.forEach(
+      const deployments = props.sourcesWithDeploymentOptions.map(
         (
           { name, sources, distributionPathsToInvalidate, cacheControl },
           index
@@ -120,20 +116,47 @@ export class CdnSiteHostingConstruct extends cdk.Construct {
 
           const nameOrIndex = name ? name : `${index}`;
 
-          new s3deploy.BucketDeployment(this, `CustomDeploy${nameOrIndex}`, {
-            cacheControl,
-            sources: sources,
-            prune: isSingleDeploymentStep,
-            destinationBucket: this.s3Bucket,
-            distribution: isInvalidationRequired
-              ? this.cloudfrontWebDistribution
-              : undefined,
-            distributionPaths: isInvalidationRequired
-              ? distributionPathsToInvalidate
-              : undefined,
-          });
+          return new s3deploy.BucketDeployment(
+            this,
+            `CustomDeploy${nameOrIndex}`,
+            {
+              cacheControl,
+              sources: sources,
+              prune: isSingleDeploymentStep,
+              destinationBucket: this.s3Bucket,
+              distribution: isInvalidationRequired
+                ? this.cloudfrontWebDistribution
+                : undefined,
+              distributionPaths: isInvalidationRequired
+                ? distributionPathsToInvalidate
+                : undefined,
+            }
+          );
         }
       );
+
+      // For routed SPAs, we need to wait for all other assets to sync
+      // before updating and invalidating the websiteIndexDocument
+      if (props.isRoutedSpa && props.websiteIndexDocumentAsset) {
+        const websiteIndexDocumentDeployment = new s3deploy.BucketDeployment(
+          this,
+          "CustomDeployWebsiteIndexDocument",
+          {
+            cacheControl: [
+              s3deploy.CacheControl.noCache(),
+              s3deploy.CacheControl.maxAge(cdk.Duration.seconds(0)),
+            ],
+            sources: [props.websiteIndexDocumentAsset],
+            prune: false,
+            destinationBucket: this.s3Bucket,
+            distribution: this.cloudfrontWebDistribution,
+            distributionPaths: [`/${props.websiteIndexDocument}`],
+          }
+        );
+        deployments.forEach((deployment) => {
+          websiteIndexDocumentDeployment.node.addDependency(deployment);
+        });
+      }
     } else if (props.sources) {
       // multiple sources, with default cache-control and wholesale invalidation
       new s3deploy.BucketDeployment(this, "DeployAndInvalidate", {
@@ -147,9 +170,15 @@ export class CdnSiteHostingConstruct extends cdk.Construct {
 }
 
 function validateProps(props: CdnSiteHostingConstructProps): void {
-  const { sources, sourcesWithDeploymentOptions } = props;
+  const {
+    sources,
+    sourcesWithDeploymentOptions,
+    isRoutedSpa,
+    websiteIndexDocument,
+    websiteIndexDocumentAsset,
+  } = props;
 
-  // validate source specfications
+  // validate source specifications
   if (!sources && !sourcesWithDeploymentOptions) {
     throw new Error(
       "Either `sources` or `sourcesWithDeploymentOptions` must be specified"
@@ -172,5 +201,13 @@ function validateProps(props: CdnSiteHostingConstructProps): void {
     throw new Error("`sourcesWithDeploymentOptions.sources` cannot be empty");
   } else if (sources && sources.length === 0) {
     throw new Error("If specified, `sources` cannot be empty");
+  }
+
+  // validate website index document path and asset
+  if (websiteIndexDocument.startsWith("/")) {
+    throw Error("Leading slashes are not allowed in websiteIndexDocument");
+  }
+  if (isRoutedSpa && !websiteIndexDocumentAsset) {
+    throw Error("Routed SPAs must specify a websiteIndexDocumentAsset");
   }
 }

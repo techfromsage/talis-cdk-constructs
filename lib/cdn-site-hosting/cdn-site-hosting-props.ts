@@ -17,4 +17,5 @@ export interface CommonCdnSiteHostingProps {
   sourcesWithDeploymentOptions?: SourcesWithDeploymentOptions[];
   websiteErrorDocument?: string;
   websiteIndexDocument: string;
+  websiteIndexDocumentAsset?: s3deploy.ISource;
 }
