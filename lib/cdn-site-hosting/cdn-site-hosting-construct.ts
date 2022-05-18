@@ -109,7 +109,7 @@ export class CdnSiteHostingConstruct extends cdk.Construct {
         props.sourcesWithDeploymentOptions.length === 1;
 
       // multiple sources with granular cache and invalidation control
-      props.sourcesWithDeploymentOptions.forEach(
+      const deployments = props.sourcesWithDeploymentOptions.map(
         (
           { name, sources, distributionPathsToInvalidate, cacheControl },
           index
@@ -120,20 +120,30 @@ export class CdnSiteHostingConstruct extends cdk.Construct {
 
           const nameOrIndex = name ? name : `${index}`;
 
-          new s3deploy.BucketDeployment(this, `CustomDeploy${nameOrIndex}`, {
-            cacheControl,
-            sources: sources,
-            prune: isSingleDeploymentStep,
-            destinationBucket: this.s3Bucket,
-            distribution: isInvalidationRequired
-              ? this.cloudfrontWebDistribution
-              : undefined,
-            distributionPaths: isInvalidationRequired
-              ? distributionPathsToInvalidate
-              : undefined,
-          });
+          return new s3deploy.BucketDeployment(
+            this,
+            `CustomDeploy${nameOrIndex}`,
+            {
+              cacheControl,
+              sources: sources,
+              prune: isSingleDeploymentStep,
+              destinationBucket: this.s3Bucket,
+              distribution: isInvalidationRequired
+                ? this.cloudfrontWebDistribution
+                : undefined,
+              distributionPaths: isInvalidationRequired
+                ? distributionPathsToInvalidate
+                : undefined,
+            }
+          );
         }
       );
+
+      deployments.forEach((deployment, deploymentIndex) => {
+        if (deploymentIndex > 0) {
+          deployment.node.addDependency(deployments[deploymentIndex - 1]);
+        }
+      });
     } else if (props.sources) {
       // multiple sources, with default cache-control and wholesale invalidation
       new s3deploy.BucketDeployment(this, "DeployAndInvalidate", {
