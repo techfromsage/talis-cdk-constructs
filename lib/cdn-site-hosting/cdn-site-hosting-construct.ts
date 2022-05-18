@@ -155,7 +155,7 @@ export class CdnSiteHostingConstruct extends cdk.Construct {
 function validateProps(props: CdnSiteHostingConstructProps): void {
   const { sources, sourcesWithDeploymentOptions, websiteIndexDocument } = props;
 
-  // validate source specfications
+  // validate source specifications
   if (!sources && !sourcesWithDeploymentOptions) {
     throw new Error(
       "Either `sources` or `sourcesWithDeploymentOptions` must be specified"
