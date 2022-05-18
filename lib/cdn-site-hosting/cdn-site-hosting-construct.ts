@@ -31,10 +31,6 @@ export class CdnSiteHostingConstruct extends cdk.Construct {
   ) {
     super(scope, id);
 
-    if (props.websiteIndexDocument.startsWith("/")) {
-      throw Error("leading slashes are not allowed in websiteIndexDocument");
-    }
-
     validateProps(props);
 
     const siteDomain = getSiteDomain(props);
@@ -157,7 +153,7 @@ export class CdnSiteHostingConstruct extends cdk.Construct {
 }
 
 function validateProps(props: CdnSiteHostingConstructProps): void {
-  const { sources, sourcesWithDeploymentOptions } = props;
+  const { sources, sourcesWithDeploymentOptions, websiteIndexDocument } = props;
 
   // validate source specfications
   if (!sources && !sourcesWithDeploymentOptions) {
@@ -182,5 +178,9 @@ function validateProps(props: CdnSiteHostingConstructProps): void {
     throw new Error("`sourcesWithDeploymentOptions.sources` cannot be empty");
   } else if (sources && sources.length === 0) {
     throw new Error("If specified, `sources` cannot be empty");
+  }
+
+  if (websiteIndexDocument.startsWith("/")) {
+    throw Error("leading slashes are not allowed in websiteIndexDocument");
   }
 }
