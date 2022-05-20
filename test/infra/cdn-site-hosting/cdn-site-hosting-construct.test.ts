@@ -8,6 +8,7 @@ import * as cdk from "@aws-cdk/core";
 import { Environment, RemovalPolicy, Stack } from "@aws-cdk/core";
 import * as s3deploy from "@aws-cdk/aws-s3-deployment";
 import { CdnSiteHostingConstruct } from "../../../lib/cdn-site-hosting";
+import { Template } from "@aws-cdk/assertions";
 
 // hosted-zone requires an environment be attached to the Stack
 const testEnv: Environment = {
@@ -249,6 +250,61 @@ describe("CdnSiteHostingConstruct", () => {
           },
         })
       );
+    });
+  });
+
+  describe("When sourcesWithDeploymentOptions is provided", () => {
+    let stack: Stack;
+
+    beforeAll(() => {
+      const app = new cdk.App();
+      stack = new cdk.Stack(app, "TestRoutedSPAStack", { env: testEnv });
+      new CdnSiteHostingConstruct(stack, "MyTestConstruct", {
+        certificateArn: fakeCertificateArn,
+        siteSubDomain: fakeSiteSubDomain,
+        domainName: fakeDomain,
+        removalPolicy: RemovalPolicy.DESTROY,
+        isRoutedSpa: true,
+        sourcesWithDeploymentOptions: [
+          {
+            name: "source1",
+            sources: [s3deploy.Source.asset("./", { exclude: ["index.html"] })],
+          },
+          {
+            name: "source2",
+            sources: [
+              s3deploy.Source.asset("./", { exclude: ["*", "!index.html"] }),
+            ],
+          },
+        ],
+        websiteIndexDocument: "index.html",
+      });
+    });
+
+    test("provisions a single S3 bucket with website hosting configured", () => {
+      expectCDK(stack).to(countResources("AWS::S3::Bucket", 1));
+      expectCDK(stack).to(
+        haveResource("AWS::S3::Bucket", {
+          BucketName: fakeFqdn,
+          WebsiteConfiguration: {
+            IndexDocument: "index.html",
+            ErrorDocument: "index.html",
+          },
+        })
+      );
+    });
+
+    test("configures all S3 deployments sequentially, with each deployment depending on the previous one", () => {
+      const template = Template.fromStack(stack);
+      const deployments = Object.entries(
+        template.findResources("Custom::CDKBucketDeployment")
+      );
+      expect(deployments.length).toBe(2);
+      const [[firstDeploymentId, firstDeployment], [, secondDeployment]] =
+        deployments;
+      expect(firstDeployment.DependsOn).toBeUndefined();
+      expect(secondDeployment.DependsOn).toBeDefined();
+      expect(secondDeployment.DependsOn).toContain(firstDeploymentId);
     });
   });
 });

@@ -31,10 +31,6 @@ export class CdnSiteHostingConstruct extends cdk.Construct {
   ) {
     super(scope, id);
 
-    if (props.websiteIndexDocument.startsWith("/")) {
-      throw Error("leading slashes are not allowed in websiteIndexDocument");
-    }
-
     validateProps(props);
 
     const siteDomain = getSiteDomain(props);
@@ -109,7 +105,7 @@ export class CdnSiteHostingConstruct extends cdk.Construct {
         props.sourcesWithDeploymentOptions.length === 1;
 
       // multiple sources with granular cache and invalidation control
-      props.sourcesWithDeploymentOptions.forEach(
+      const deployments = props.sourcesWithDeploymentOptions.map(
         (
           { name, sources, distributionPathsToInvalidate, cacheControl },
           index
@@ -120,20 +116,30 @@ export class CdnSiteHostingConstruct extends cdk.Construct {
 
           const nameOrIndex = name ? name : `${index}`;
 
-          new s3deploy.BucketDeployment(this, `CustomDeploy${nameOrIndex}`, {
-            cacheControl,
-            sources: sources,
-            prune: isSingleDeploymentStep,
-            destinationBucket: this.s3Bucket,
-            distribution: isInvalidationRequired
-              ? this.cloudfrontWebDistribution
-              : undefined,
-            distributionPaths: isInvalidationRequired
-              ? distributionPathsToInvalidate
-              : undefined,
-          });
+          return new s3deploy.BucketDeployment(
+            this,
+            `CustomDeploy${nameOrIndex}`,
+            {
+              cacheControl,
+              sources: sources,
+              prune: isSingleDeploymentStep,
+              destinationBucket: this.s3Bucket,
+              distribution: isInvalidationRequired
+                ? this.cloudfrontWebDistribution
+                : undefined,
+              distributionPaths: isInvalidationRequired
+                ? distributionPathsToInvalidate
+                : undefined,
+            }
+          );
         }
       );
+
+      deployments.forEach((deployment, deploymentIndex) => {
+        if (deploymentIndex > 0) {
+          deployment.node.addDependency(deployments[deploymentIndex - 1]);
+        }
+      });
     } else if (props.sources) {
       // multiple sources, with default cache-control and wholesale invalidation
       new s3deploy.BucketDeployment(this, "DeployAndInvalidate", {
@@ -147,9 +153,9 @@ export class CdnSiteHostingConstruct extends cdk.Construct {
 }
 
 function validateProps(props: CdnSiteHostingConstructProps): void {
-  const { sources, sourcesWithDeploymentOptions } = props;
+  const { sources, sourcesWithDeploymentOptions, websiteIndexDocument } = props;
 
-  // validate source specfications
+  // validate source specifications
   if (!sources && !sourcesWithDeploymentOptions) {
     throw new Error(
       "Either `sources` or `sourcesWithDeploymentOptions` must be specified"
@@ -172,5 +178,9 @@ function validateProps(props: CdnSiteHostingConstructProps): void {
     throw new Error("`sourcesWithDeploymentOptions.sources` cannot be empty");
   } else if (sources && sources.length === 0) {
     throw new Error("If specified, `sources` cannot be empty");
+  }
+
+  if (websiteIndexDocument.startsWith("/")) {
+    throw Error("leading slashes are not allowed in websiteIndexDocument");
   }
 }
