@@ -152,7 +152,12 @@ workflows:
   build:
     jobs:
       - fan_out
-      - commit-lint-branch
+      - commit-lint-branch:
+          filters:
+            branches:
+              ignore:
+                - main
+                - /^dependabot-.*$/
       - be_kind_to_your_colleagues:
           type: approval
           filters:
