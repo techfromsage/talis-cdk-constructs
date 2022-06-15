@@ -52,8 +52,12 @@ jobs:
       - run:
           name: Lint all commits on the branch
           command: |
-            FIRST_COMMIT=$(git log main..$CIRCLE_BRANCH --oneline | tail -1 | awk '{ print $1 }')
-            npx commitlint --from $FIRST_COMMIT --to $CIRCLE_SHA1 --verbose
+            # FIRST_COMMIT=$(git log main..$CIRCLE_BRANCH --oneline | tail -1 | awk '{ print $1 }')
+            FIRST_COMMIT=$(git merge-base main $CIRCLE_BRANCH)
+            LAST_COMMIT=$(git rev-parse HEAD)
+            echo "FIRST COMMIT: $FIRST_COMMIT"
+            echo "LAST COMMIT : $LAST_COMMIT"
+            npx commitlint --from $FIRST_COMMIT --to $LAST_COMMIT --verbose
   build:
     executor: default_executor
     steps:
