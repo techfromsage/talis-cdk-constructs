@@ -41,7 +41,22 @@ jobs:
       - run:
           command: echo "starting build"
       - save_root_build_number
-
+  commit-lint-branch:
+    executor: default_executor
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "ee:b4:00:e6:23:5b:55:bb:fd:07:bc:73:9e:f7:89:9c" # shared.aspire@talis.com 'talis-cdk-constructs Deploy Key'
+      - checkout
+      - node/install-packages
+      - run:
+          name: Lint all commits on the branch
+          command: |
+            FIRST_COMMIT=$(git merge-base main $CIRCLE_BRANCH)
+            LAST_COMMIT=$(git rev-parse HEAD)
+            echo "FIRST COMMIT: $FIRST_COMMIT"
+            echo "LAST COMMIT : $LAST_COMMIT"
+            npx commitlint --from $FIRST_COMMIT --to $LAST_COMMIT --verbose
   build:
     executor: default_executor
     steps:
@@ -137,6 +152,12 @@ workflows:
   build:
     jobs:
       - fan_out
+      - commit-lint-branch:
+          filters:
+            branches:
+              ignore:
+                - main
+                - /^dependabot-.*$/
       - be_kind_to_your_colleagues:
           type: approval
           filters:
