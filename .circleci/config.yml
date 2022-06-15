@@ -52,7 +52,6 @@ jobs:
       - run:
           name: Lint all commits on the branch
           command: |
-            # FIRST_COMMIT=$(git log main..$CIRCLE_BRANCH --oneline | tail -1 | awk '{ print $1 }')
             FIRST_COMMIT=$(git merge-base main $CIRCLE_BRANCH)
             LAST_COMMIT=$(git rev-parse HEAD)
             echo "FIRST COMMIT: $FIRST_COMMIT"
