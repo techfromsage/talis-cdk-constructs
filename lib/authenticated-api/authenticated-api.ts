@@ -10,8 +10,8 @@ import * as lambdaNodeJs from "@aws-cdk/aws-lambda-nodejs";
 import * as path from "path";
 
 import { AuthenticatedApiProps } from "./authenticated-api-props";
-import {RouteLambdaProps} from "./route-lambda-props";
-import {IAlarmAction} from "@aws-cdk/aws-cloudwatch";
+import { RouteLambdaProps } from "./route-lambda-props";
+import { IAlarmAction } from "@aws-cdk/aws-cloudwatch";
 
 const DEFAULT_API_LATENCY_THRESHOLD = cdk.Duration.minutes(1);
 const DEFAULT_LAMBDA_DURATION_THRESHOLD = cdk.Duration.minutes(1);
@@ -200,55 +200,55 @@ export class AuthenticatedApi extends cdk.Construct {
     const durationThreshold = routeProps.lamdaDurationAlarmThreshold
       ? routeProps.lamdaDurationAlarmThreshold
       : DEFAULT_LAMBDA_DURATION_THRESHOLD;
-      const durationMetric = routeProps.lambda
+    const durationMetric = routeProps.lambda
       .metric("Duration")
       .with({ period: cdk.Duration.minutes(1), statistic: "sum" });
-      const durationAlarm = new cloudwatch.Alarm(
-        this,
-        `${this.props.prefix}${this.props.name}-${routeProps.name}-duration-alarm`,
-        {
-          alarmName: `${this.props.prefix}${this.props.name}-${routeProps.name}-duration-alarm`,
-          alarmDescription: `Alarm if duration of lambda for route ${
-            this.props.prefix
-          }${this.props.name}-${
-            routeProps.name
-          } exceeds duration ${durationThreshold.toMilliseconds()} milliseconds`,
-          actionsEnabled: true,
-          metric: durationMetric,
-          evaluationPeriods: 1,
-          threshold: durationThreshold.toMilliseconds(),
-          comparisonOperator:
-            cloudwatch.ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
-          // Set treatMissingData to IGNORE
-          // Stops alarms with minimal data having false alarms when they transition to this state
-          treatMissingData: cloudwatch.TreatMissingData.IGNORE,
-        }
-      );
-      durationAlarm.addAlarmAction(this.alarmAction);
-      durationAlarm.addOkAction(this.alarmAction);
+    const durationAlarm = new cloudwatch.Alarm(
+      this,
+      `${this.props.prefix}${this.props.name}-${routeProps.name}-duration-alarm`,
+      {
+        alarmName: `${this.props.prefix}${this.props.name}-${routeProps.name}-duration-alarm`,
+        alarmDescription: `Alarm if duration of lambda for route ${
+          this.props.prefix
+        }${this.props.name}-${
+          routeProps.name
+        } exceeds duration ${durationThreshold.toMilliseconds()} milliseconds`,
+        actionsEnabled: true,
+        metric: durationMetric,
+        evaluationPeriods: 1,
+        threshold: durationThreshold.toMilliseconds(),
+        comparisonOperator:
+          cloudwatch.ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+        // Set treatMissingData to IGNORE
+        // Stops alarms with minimal data having false alarms when they transition to this state
+        treatMissingData: cloudwatch.TreatMissingData.IGNORE,
+      }
+    );
+    durationAlarm.addAlarmAction(this.alarmAction);
+    durationAlarm.addOkAction(this.alarmAction);
 
-      const errorsMetric = routeProps.lambda
+    const errorsMetric = routeProps.lambda
       .metric("Errors")
       .with({ period: cdk.Duration.minutes(1), statistic: "sum" });
 
-      const errorsAlarm = new cloudwatch.Alarm(
-        this,
-        `${this.props.prefix}${this.props.name}-${routeProps.name}-errors-alarm`,
-        {
-          alarmName: `${this.props.prefix}${this.props.name}-${routeProps.name}-errors-alarm`,
-          alarmDescription: `Alarm if errors on api ${this.props.prefix}${this.props.name}-${routeProps.name}`,
-          actionsEnabled: true,
-          metric: errorsMetric,
-          evaluationPeriods: 1,
-          threshold: 1,
-          comparisonOperator:
-            cloudwatch.ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
-          // Set treatMissingData to IGNORE
-          // Stops alarms with minimal data having false alarms when they transition to this state
-          treatMissingData: cloudwatch.TreatMissingData.IGNORE,
-        }
-      );
-      errorsAlarm.addAlarmAction(this.alarmAction);
-      errorsAlarm.addOkAction(this.alarmAction);
+    const errorsAlarm = new cloudwatch.Alarm(
+      this,
+      `${this.props.prefix}${this.props.name}-${routeProps.name}-errors-alarm`,
+      {
+        alarmName: `${this.props.prefix}${this.props.name}-${routeProps.name}-errors-alarm`,
+        alarmDescription: `Alarm if errors on api ${this.props.prefix}${this.props.name}-${routeProps.name}`,
+        actionsEnabled: true,
+        metric: errorsMetric,
+        evaluationPeriods: 1,
+        threshold: 1,
+        comparisonOperator:
+          cloudwatch.ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+        // Set treatMissingData to IGNORE
+        // Stops alarms with minimal data having false alarms when they transition to this state
+        treatMissingData: cloudwatch.TreatMissingData.IGNORE,
+      }
+    );
+    errorsAlarm.addAlarmAction(this.alarmAction);
+    errorsAlarm.addOkAction(this.alarmAction);
   }
 }
