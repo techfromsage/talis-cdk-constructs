@@ -10,13 +10,18 @@ import * as lambdaNodeJs from "@aws-cdk/aws-lambda-nodejs";
 import * as path from "path";
 
 import { AuthenticatedApiProps } from "./authenticated-api-props";
+import {RouteLambdaProps} from "./route-lambda-props";
+import {ITopic} from "@aws-cdk/aws-sns";
+import {IAlarmAction} from "@aws-cdk/aws-cloudwatch";
 
 const DEFAULT_API_LATENCY_THRESHOLD = cdk.Duration.minutes(1);
 const DEFAULT_LAMBDA_DURATION_THRESHOLD = cdk.Duration.minutes(1);
 
 export class AuthenticatedApi extends cdk.Construct {
   readonly apiId: string;
+  readonly httpApi: apigatewayv2.HttpApi;
   readonly httpApiId: string;
+  readonly authorizer: apigatewayv2.IHttpRouteAuthorizer;
 
   constructor(scope: cdk.Construct, id: string, props: AuthenticatedApiProps) {
     super(scope, id);
@@ -50,18 +55,18 @@ export class AuthenticatedApi extends cdk.Construct {
       }),
     };
 
-    const httpApi = new apigatewayv2.HttpApi(
+    this.httpApi = new apigatewayv2.HttpApi(
       this,
       `${props.prefix}${props.name}`,
       apiGatewayProps
     );
 
-    this.apiId = httpApi.apiId;
-    this.httpApiId = httpApi.httpApiId;
+    this.apiId = this.httpApi.apiId;
+    this.httpApiId = this.httpApi.httpApiId;
 
     new cdk.CfnOutput(this, "apiGatewayEndpoint", {
       exportName: `${props.prefix}${props.name}-endpoint`,
-      value: httpApi.apiEndpoint,
+      value: this.httpApi.apiEndpoint,
     });
 
     const alarmAction = new cloudwatchActions.SnsAction(props.alarmTopic);
@@ -119,7 +124,7 @@ export class AuthenticatedApi extends cdk.Construct {
       }
     );
 
-    const authorizer = new authorizers.HttpLambdaAuthorizer(
+    this.authorizer = new authorizers.HttpLambdaAuthorizer(
       "lambda-authorizer",
       authLambda,
       {
@@ -136,17 +141,17 @@ export class AuthenticatedApi extends cdk.Construct {
 
       for (const path of routeProps.paths) {
         if (routeProps.isPublic === true) {
-          httpApi.addRoutes({
+          this.httpApi.addRoutes({
             path: path,
             methods: [routeProps.method],
             integration,
           });
         } else {
-          httpApi.addRoutes({
+          this.httpApi.addRoutes({
             path: path,
             methods: [routeProps.method],
             integration,
-            authorizer,
+            authorizer: this.authorizer,
           });
         }
       }
@@ -213,7 +218,7 @@ export class AuthenticatedApi extends cdk.Construct {
     const latencyThreshold = props.apiLatencyAlarmThreshold
       ? props.apiLatencyAlarmThreshold
       : DEFAULT_API_LATENCY_THRESHOLD;
-    const metricLatency = httpApi
+    const metricLatency = this.httpApi
       .metricLatency()
       .with({ statistic: "average", period: cdk.Duration.minutes(1) });
 
@@ -238,5 +243,86 @@ export class AuthenticatedApi extends cdk.Construct {
     );
     routeLatencyAlarm.addAlarmAction(alarmAction);
     routeLatencyAlarm.addOkAction(alarmAction);
+  }
+
+  addLambdaRoute(props: AuthenticatedApiProps, routeProps: RouteLambdaProps, alarmAction: IAlarmAction) {
+    const integration = new integrations.HttpLambdaIntegration(
+      "http-lambda-integration",
+      routeProps.lambda
+    );
+
+    for (const path of routeProps.paths) {
+      if (routeProps.isPublic === true) {
+        this.httpApi.addRoutes({
+          path: path,
+          methods: [routeProps.method],
+          integration,
+        });
+      } else {
+        this.httpApi.addRoutes({
+          path: path,
+          methods: [routeProps.method],
+          integration,
+          authorizer: this.authorizer,
+        });
+      }
+    }
+
+    // Add Cloudwatch alarms for this route
+
+    // Add an alarm on the duration of the lambda dealing with the HTTP Request
+    const durationThreshold = routeProps.lamdaDurationAlarmThreshold
+      ? routeProps.lamdaDurationAlarmThreshold
+      : DEFAULT_LAMBDA_DURATION_THRESHOLD;
+      const durationMetric = routeProps.lambda
+      .metric("Duration")
+      .with({ period: cdk.Duration.minutes(1), statistic: "sum" });
+      const durationAlarm = new cloudwatch.Alarm(
+        this,
+        `${props.prefix}${props.name}-${routeProps.name}-duration-alarm`,
+        {
+          alarmName: `${props.prefix}${props.name}-${routeProps.name}-duration-alarm`,
+          alarmDescription: `Alarm if duration of lambda for route ${
+            props.prefix
+          }${props.name}-${
+            routeProps.name
+          } exceeds duration ${durationThreshold.toMilliseconds()} milliseconds`,
+          actionsEnabled: true,
+          metric: durationMetric,
+          evaluationPeriods: 1,
+          threshold: durationThreshold.toMilliseconds(),
+          comparisonOperator:
+            cloudwatch.ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+          // Set treatMissingData to IGNORE
+          // Stops alarms with minimal data having false alarms when they transition to this state
+          treatMissingData: cloudwatch.TreatMissingData.IGNORE,
+        }
+      );
+      durationAlarm.addAlarmAction(alarmAction);
+      durationAlarm.addOkAction(alarmAction);
+
+      const errorsMetric = routeProps.lambda
+      .metric("Errors")
+      .with({ period: cdk.Duration.minutes(1), statistic: "sum" });
+
+      const errorsAlarm = new cloudwatch.Alarm(
+        this,
+        `${props.prefix}${props.name}-${routeProps.name}-errors-alarm`,
+        {
+          alarmName: `${props.prefix}${props.name}-${routeProps.name}-errors-alarm`,
+          alarmDescription: `Alarm if errors on api ${props.prefix}${props.name}-${routeProps.name}`,
+          actionsEnabled: true,
+          metric: errorsMetric,
+          evaluationPeriods: 1,
+          threshold: 1,
+          comparisonOperator:
+            cloudwatch.ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+          // Set treatMissingData to IGNORE
+          // Stops alarms with minimal data having false alarms when they transition to this state
+          treatMissingData: cloudwatch.TreatMissingData.IGNORE,
+        }
+      );
+      errorsAlarm.addAlarmAction(alarmAction);
+      errorsAlarm.addOkAction(alarmAction);
   }
 }
