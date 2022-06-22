@@ -1,5 +1,6 @@
 import * as acm from "@aws-cdk/aws-certificatemanager";
 import * as apigatewayv2 from "@aws-cdk/aws-apigatewayv2";
+import * as apigateway2Integrations from '@aws-cdk/aws-apigatewayv2-integrations';
 import * as authorizers from "@aws-cdk/aws-apigatewayv2-authorizers";
 import * as cdk from "@aws-cdk/core";
 import * as cloudwatch from "@aws-cdk/aws-cloudwatch";
@@ -11,6 +12,7 @@ import * as path from "path";
 
 import { AuthenticatedApiProps } from "./authenticated-api-props";
 import { RouteLambdaProps } from "./route-lambda-props";
+import { RouteUrlProps } from "./route-url-props";
 import { IAlarmAction } from "@aws-cdk/aws-cloudwatch";
 
 const DEFAULT_API_LATENCY_THRESHOLD = cdk.Duration.minutes(1);
@@ -77,11 +79,9 @@ export class AuthenticatedApi extends cdk.Construct {
     // Routes may contain required scopes. These scopes need to be in the config
     // of the authorization lambda. Create this config ahead of creating the authorization lambda
     const scopeConfig: { [k: string]: string } = {};
-    for (const routeProps of this.props.routes) {
+    for (const routeProps of this.props.lambdaRoutes) {
       if (routeProps.requiredScope) {
-        for (const path of routeProps.paths) {
-          scopeConfig[`^${path}$`] = routeProps.requiredScope;
-        }
+        scopeConfig[`^${routeProps.path}$`] = routeProps.requiredScope;
       }
     }
 
@@ -136,8 +136,12 @@ export class AuthenticatedApi extends cdk.Construct {
       }
     );
 
-    for (const routeProps of this.props.routes) {
+    for (const routeProps of this.props.lambdaRoutes) {
       this.addLambdaRoute(routeProps);
+    }
+
+    for (const routeProps of this.props.urlRoutes) {
+      this.addUrlRoute(routeProps);
     }
 
     // Add a cloudwatch alarm for the latency of the api - this is all routes within the api
@@ -177,21 +181,19 @@ export class AuthenticatedApi extends cdk.Construct {
       routeProps.lambda
     );
 
-    for (const path of routeProps.paths) {
-      if (routeProps.isPublic === true) {
-        this.httpApi.addRoutes({
-          path: path,
-          methods: [routeProps.method],
-          integration,
-        });
-      } else {
-        this.httpApi.addRoutes({
-          path: path,
-          methods: [routeProps.method],
-          integration,
-          authorizer: this.authorizer,
-        });
-      }
+    if (routeProps.isPublic === true) {
+      this.httpApi.addRoutes({
+        path: routeProps.path,
+        methods: [routeProps.method],
+        integration,
+      });
+    } else {
+      this.httpApi.addRoutes({
+        path: routeProps.path,
+        methods: [routeProps.method],
+        integration,
+        authorizer: this.authorizer,
+      });
     }
 
     // Add Cloudwatch alarms for this route
@@ -250,5 +252,19 @@ export class AuthenticatedApi extends cdk.Construct {
     );
     errorsAlarm.addAlarmAction(this.alarmAction);
     errorsAlarm.addOkAction(this.alarmAction);
+  }
+
+  addUrlRoute(routeProps: RouteUrlProps) {
+    this.httpApi.addRoutes({
+      path: routeProps.path,
+      methods: [routeProps.method],
+      integration: new apigateway2Integrations.HttpUrlIntegration(
+        routeProps.name,
+        `${routeProps.baseUrl}/api-documentation/index.html`,
+        {
+          method: routeProps.method,
+        }
+      ),
+    });
   }
 }

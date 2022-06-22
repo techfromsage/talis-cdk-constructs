@@ -3,13 +3,15 @@ import * as ec2 from "@aws-cdk/aws-ec2";
 import * as sns from "@aws-cdk/aws-sns";
 
 import { RouteLambdaProps } from "./route-lambda-props";
+import { RouteUrlProps } from "./route-url-props";
 
 export interface AuthenticatedApiProps {
   prefix: string;
   name: string;
   description: string;
   stageName: string;
-  routes: Array<RouteLambdaProps>;
+  lambdaRoutes: Array<RouteLambdaProps>;
+  urlRoutes: Array<RouteUrlProps>;
   securityGroups?: Array<ec2.ISecurityGroup>;
   vpc?: ec2.IVpc;
   vpcSubnets?: ec2.SubnetSelection;
