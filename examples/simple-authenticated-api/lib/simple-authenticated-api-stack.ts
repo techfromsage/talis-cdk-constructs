@@ -135,19 +135,23 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
     // This example is creating a bucket which will host documentation as a website.
     // A route is then added to the api to point to the bucket.
     // Note: The construct does not add the content to the bucket - you must do this yourself.
-    const documentationBucket = new s3.Bucket(this, `${prefix}simple-authenticated-api-docs`, {
-      bucketName: `${prefix}simple-authenticated-api-docs`,
-      publicReadAccess: true,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
-      websiteIndexDocument: 'index.html',
-    });
+    const documentationBucket = new s3.Bucket(
+      this,
+      `${prefix}simple-authenticated-api-docs`,
+      {
+        bucketName: `${prefix}simple-authenticated-api-docs`,
+        publicReadAccess: true,
+        removalPolicy: cdk.RemovalPolicy.DESTROY,
+        websiteIndexDocument: "index.html",
+      }
+    );
 
     // Url Routes can be added in the initial props of the api construct, but they can also be
     // added using the following method
     api.addUrlRoute({
-      name: 'simple authenticated api docs',
+      name: "simple authenticated api docs",
       baseUrl: `${documentationBucket.bucketWebsiteUrl}/api-documentation/index.html`,
-      path: '/api-documentation',
+      path: "/api-documentation",
       method: apigatewayv2.HttpMethod.GET,
     });
   }

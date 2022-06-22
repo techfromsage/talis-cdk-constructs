@@ -69,18 +69,22 @@ describe("AuthenticatedApi", () => {
   }
 
   async function uploadExampleDocumentation() {
-    await s3.putObject({
-      Bucket: `${process.env.AWS_PREFIX}simple-authenticated-api-docs`,
-      Key: `api-documentation/index.html`,
-      Body: 'Simple Authenticated Api Documentation'
-    }).promise();
+    await s3
+      .putObject({
+        Bucket: `${process.env.AWS_PREFIX}simple-authenticated-api-docs`,
+        Key: `api-documentation/index.html`,
+        Body: "Simple Authenticated Api Documentation",
+      })
+      .promise();
   }
 
   async function deleteExampleDocumentation() {
-    await s3.deleteObject({
-      Bucket: `${process.env.AWS_PREFIX}simple-authenticated-api-docs`,
-      Key: `api-documentation/index.html`,
-    }).promise();
+    await s3
+      .deleteObject({
+        Bucket: `${process.env.AWS_PREFIX}simple-authenticated-api-docs`,
+        Key: `api-documentation/index.html`,
+      })
+      .promise();
   }
 
   beforeAll(async () => {
