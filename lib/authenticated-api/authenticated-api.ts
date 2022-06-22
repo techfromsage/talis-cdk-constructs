@@ -262,7 +262,7 @@ export class AuthenticatedApi extends cdk.Construct {
       methods: [routeProps.method],
       integration: new apigateway2Integrations.HttpUrlIntegration(
         routeProps.name,
-        `${routeProps.baseUrl}/api-documentation/index.html`,
+        routeProps.baseUrl,
         {
           method: routeProps.method,
         }

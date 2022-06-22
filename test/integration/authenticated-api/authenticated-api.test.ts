@@ -1,5 +1,5 @@
 import axios from "axios";
-import { ApiGatewayV2 } from "aws-sdk";
+import { ApiGatewayV2, S3 } from "aws-sdk";
 
 const api = new ApiGatewayV2();
 
@@ -11,6 +11,8 @@ const TALIS_CDK_AUTH_API_VALID_CLIENT =
   process.env.TALIS_CDK_AUTH_API_VALID_CLIENT ?? "";
 const TALIS_CDK_AUTH_API_VALID_SECRET =
   process.env.TALIS_CDK_AUTH_API_VALID_SECRET ?? "";
+
+const s3 = new S3();
 
 describe("AuthenticatedApi", () => {
   // Increase the timeout We are making http calls which might have to spin up a cold lambda
@@ -66,8 +68,28 @@ describe("AuthenticatedApi", () => {
     return response.data.access_token;
   }
 
+  async function uploadExampleDocumentation() {
+    await s3.putObject({
+      Bucket: `${process.env.AWS_PREFIX}simple-authenticated-api-docs`,
+      Key: `api-documentation/index.html`,
+      Body: 'Simple Authenticated Api Documentation'
+    }).promise();
+  }
+
+  async function deleteExampleDocumentation() {
+    await s3.deleteObject({
+      Bucket: `${process.env.AWS_PREFIX}simple-authenticated-api-docs`,
+      Key: `api-documentation/index.html`,
+    }).promise();
+  }
+
   beforeAll(async () => {
     apiGatewayId = await findApiGatewayId();
+    await uploadExampleDocumentation();
+  });
+
+  afterAll(async () => {
+    await deleteExampleDocumentation();
   });
 
   test("returns 200 for unauthenticated route", async () => {
@@ -120,5 +142,14 @@ describe("AuthenticatedApi", () => {
     const response = await axiosAuthInstance.get("route1");
     expect(response.status).toBe(200);
     expect(response.data).toBe("route 1");
+  });
+
+  test("returns 200 when routing to a url", async () => {
+    const axiosAuthInstance = axios.create({
+      baseURL: `https://${apiGatewayId}.execute-api.eu-west-1.amazonaws.com/`,
+    });
+    const response = await axiosAuthInstance.get("api-documentation");
+    expect(response.status).toBe(200);
+    expect(response.data).toBe("Simple Authenticated Api Documentation");
   });
 });
