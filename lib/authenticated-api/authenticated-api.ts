@@ -181,7 +181,10 @@ export class AuthenticatedApi extends cdk.Construct {
     routeLatencyAlarm.addOkAction(this.alarmAction);
   }
 
-  addLambdaRoute(routeProps: RouteLambdaProps) {
+  // Before this can be made public - we need to resolve how to add
+  // any scopes for this route to the authorizer lambda which has already 
+  // been created in the constructor
+  private addLambdaRoute(routeProps: RouteLambdaProps) {
     const integration = new integrations.HttpLambdaIntegration(
       "http-lambda-integration",
       routeProps.lambda
