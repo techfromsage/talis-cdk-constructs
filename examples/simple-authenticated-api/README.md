@@ -7,7 +7,6 @@ The AuthenticatedApi:
 - creates an ApiGateway (v2)
 - creates an authorisation lambda which authenticates tokens against persona
 - creates any number of routes, each with a lambda to handle requests.
-- creates any number of routes redirecting to a given url.
 - allows authentication to be configured either on all routes or on individual routes
 - triggers an alarm if the response time on any route in the api exceeds a configurable duration
 - triggers an alarm if the duration of a lambda dealing with the api requests exceeds a configurable duration
