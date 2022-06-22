@@ -1,6 +1,6 @@
 import * as acm from "@aws-cdk/aws-certificatemanager";
 import * as apigatewayv2 from "@aws-cdk/aws-apigatewayv2";
-import * as apigateway2Integrations from '@aws-cdk/aws-apigatewayv2-integrations';
+import * as apigateway2Integrations from "@aws-cdk/aws-apigatewayv2-integrations";
 import * as authorizers from "@aws-cdk/aws-apigatewayv2-authorizers";
 import * as cdk from "@aws-cdk/core";
 import * as cloudwatch from "@aws-cdk/aws-cloudwatch";
