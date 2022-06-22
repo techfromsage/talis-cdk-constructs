@@ -78,16 +78,16 @@ describe("AuthenticatedApi", () => {
           oauth_route: "/oauth/tokens/",
         },
 
-        routes: [
+        lambdaRoutes: [
           {
             name: "route1",
-            paths: ["/1/test-route-1"],
+            path: "/1/test-route-1",
             method: apigatewayv2.HttpMethod.GET,
             lambda: route1Handler,
           },
           {
             name: "route2",
-            paths: ["/1/test-route-2"],
+            path: "/1/test-route-2",
             method: apigatewayv2.HttpMethod.GET,
             lambda: route2Handler,
             isPublic: true,

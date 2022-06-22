@@ -79,9 +79,11 @@ export class AuthenticatedApi extends cdk.Construct {
     // Routes may contain required scopes. These scopes need to be in the config
     // of the authorization lambda. Create this config ahead of creating the authorization lambda
     const scopeConfig: { [k: string]: string } = {};
-    for (const routeProps of this.props.lambdaRoutes) {
-      if (routeProps.requiredScope) {
-        scopeConfig[`^${routeProps.path}$`] = routeProps.requiredScope;
+    if (this.props.lambdaRoutes) {
+      for (const routeProps of this.props.lambdaRoutes) {
+        if (routeProps.requiredScope) {
+          scopeConfig[`^${routeProps.path}$`] = routeProps.requiredScope;
+        }
       }
     }
 
@@ -136,12 +138,16 @@ export class AuthenticatedApi extends cdk.Construct {
       }
     );
 
-    for (const routeProps of this.props.lambdaRoutes) {
-      this.addLambdaRoute(routeProps);
+    if (this.props.lambdaRoutes) {
+      for (const routeProps of this.props.lambdaRoutes) {
+        this.addLambdaRoute(routeProps);
+      }
     }
 
-    for (const routeProps of this.props.urlRoutes) {
-      this.addUrlRoute(routeProps);
+    if (this.props.urlRoutes) {
+      for (const routeProps of this.props.urlRoutes) {
+        this.addUrlRoute(routeProps);
+      }
     }
 
     // Add a cloudwatch alarm for the latency of the api - this is all routes within the api

@@ -111,17 +111,17 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
           oauth_route: "/oauth/tokens/",
         },
 
-        routes: [
+        lambdaRoutes: [
           {
             name: "route1",
-            paths: ["/1/route1"],
+            path: "/1/route1",
             method: apigatewayv2.HttpMethod.GET,
             lambda: route1Handler,
             requiredScope: "analytics:admin",
           },
           {
             name: "route2",
-            paths: ["/1/route2"],
+            path: "/1/route2",
             method: apigatewayv2.HttpMethod.GET,
             lambda: route2Handler,
             isPublic: true,
