@@ -20,9 +20,10 @@ const DEFAULT_LAMBDA_DURATION_THRESHOLD = cdk.Duration.minutes(1);
 export class AuthenticatedApi extends cdk.Construct {
   readonly apiId: string;
   readonly httpApiId: string;
-  readonly httpApi: apigatewayv2.HttpApi;
-  readonly authorizer: apigatewayv2.IHttpRouteAuthorizer;
-  readonly alarmAction: IAlarmAction;
+
+  private httpApi: apigatewayv2.HttpApi;
+  private authorizer: apigatewayv2.IHttpRouteAuthorizer;
+  private alarmAction: IAlarmAction;
 
   constructor(scope: cdk.Construct, id: string, props: AuthenticatedApiProps) {
     super(scope, id);
