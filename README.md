@@ -74,3 +74,4 @@ To run the integration tests locally:
 - Following the instruction to deploy the `simple-authenticated-api` in the examples readme.
 - `npm run integration-test`
 
+END
