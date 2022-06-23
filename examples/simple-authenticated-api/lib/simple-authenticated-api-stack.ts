@@ -1,5 +1,6 @@
 import * as apigatewayv2 from "@aws-cdk/aws-apigatewayv2";
 import * as cdk from "@aws-cdk/core";
+import * as s3 from "@aws-cdk/aws-s3";
 import * as ec2 from "@aws-cdk/aws-ec2";
 import * as sns from "@aws-cdk/aws-sns";
 
@@ -84,7 +85,7 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
       }
     );
 
-    /* const api = */ new AuthenticatedApi(
+    const api = new AuthenticatedApi(
       this,
       `${prefix}simple-authenticated-api`,
       {
@@ -111,17 +112,17 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
           oauth_route: "/oauth/tokens/",
         },
 
-        routes: [
+        lambdaRoutes: [
           {
             name: "route1",
-            paths: ["/1/route1"],
+            path: "/1/route1",
             method: apigatewayv2.HttpMethod.GET,
             lambda: route1Handler,
             requiredScope: "analytics:admin",
           },
           {
             name: "route2",
-            paths: ["/1/route2"],
+            path: "/1/route2",
             method: apigatewayv2.HttpMethod.GET,
             lambda: route2Handler,
             isPublic: true,
@@ -129,5 +130,29 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
         ],
       }
     );
+
+    // It's common to want to route to static content, for example api documentation.
+    // This example is creating a bucket which will host documentation as a website.
+    // A route is then added to the api to point to the bucket.
+    // Note: The construct does not add the content to the bucket - you must do this yourself.
+    const documentationBucket = new s3.Bucket(
+      this,
+      `${prefix}simple-authenticated-api-docs`,
+      {
+        bucketName: `${prefix}simple-authenticated-api-docs`,
+        publicReadAccess: true,
+        removalPolicy: cdk.RemovalPolicy.DESTROY,
+        websiteIndexDocument: "index.html",
+      }
+    );
+
+    // Url Routes can be added in the initial props of the api construct, but they can also be
+    // added using the following method
+    api.addUrlRoute({
+      name: "simple authenticated api docs",
+      baseUrl: `${documentationBucket.bucketWebsiteUrl}/api-documentation/index.html`,
+      path: "/api-documentation",
+      method: apigatewayv2.HttpMethod.GET,
+    });
   }
 }

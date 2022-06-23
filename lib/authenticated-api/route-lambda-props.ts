@@ -5,7 +5,7 @@ import { AuthenticatedApiFunction } from "./authenticated-api-function";
 
 export interface RouteLambdaProps {
   name: string;
-  paths: Array<string>;
+  path: string;
   method: apigatewayv2.HttpMethod;
   isPublic?: boolean; // Defaults to false
   requiredScope?: string;
