@@ -20,6 +20,7 @@ const DEFAULT_LAMBDA_DURATION_THRESHOLD = cdk.Duration.minutes(1);
 export class AuthenticatedApi extends cdk.Construct {
   readonly apiId: string;
   readonly httpApiId: string;
+  readonly domainName: apigatewayv2.DomainName
 
   private httpApi: apigatewayv2.HttpApi;
   private authorizer: apigatewayv2.IHttpRouteAuthorizer;
@@ -36,7 +37,7 @@ export class AuthenticatedApi extends cdk.Construct {
         `To use a custom domain name both certificateArn and domainName must be specified`
       );
     }
-    const domainName = new apigatewayv2.DomainName(this, "domain-name", {
+    this.domainName = new apigatewayv2.DomainName(this, "domain-name", {
       domainName: props.domainName,
       certificate: acm.Certificate.fromCertificateArn(
         this,
@@ -46,7 +47,7 @@ export class AuthenticatedApi extends cdk.Construct {
     });
     const apiGatewayProps: apigatewayv2.HttpApiProps = {
       apiName: `${props.prefix}${props.name}`,
-      defaultDomainMapping: { domainName: domainName },
+      defaultDomainMapping: { domainName: this.domainName },
       ...(props.corsDomain && {
         corsPreflight: {
           allowHeaders: ["*"],

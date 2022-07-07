@@ -154,5 +154,8 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
       path: "/api-documentation",
       method: apigatewayv2.HttpMethod.GET,
     });
+
+    console.log(`Regional domain name: ${api.domainName.regionalDomainName}`);
+    console.log(`Regional hosted zone id: ${api.domainName.regionalHostedZoneId}`);
   }
 }
