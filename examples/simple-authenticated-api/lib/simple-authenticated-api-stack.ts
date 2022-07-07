@@ -156,6 +156,8 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
     });
 
     console.log(`Regional domain name: ${api.domainName.regionalDomainName}`);
-    console.log(`Regional hosted zone id: ${api.domainName.regionalHostedZoneId}`);
+    console.log(
+      `Regional hosted zone id: ${api.domainName.regionalHostedZoneId}`
+    );
   }
 }
