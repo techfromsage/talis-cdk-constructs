@@ -216,11 +216,14 @@ class PersonaAuthorizer {
     if (scopeConfig != undefined) {
       const conf = JSON.parse(scopeConfig);
       for (const pathRegEx of Object.keys(conf)) {
+        console.log(`Looping: pathRegEx: ${pathRegEx} parsedMethodArn.resourcePath: ${parsedMethodArn.resourcePath}`);
         if (parsedMethodArn.resourcePath.match(pathRegEx)) {
+          console.log(`Scope required: ${conf[pathRegEx]}`)
           return conf[pathRegEx];
         }
       }
     }
+    console.log('No scope');
     return null;
   }
 

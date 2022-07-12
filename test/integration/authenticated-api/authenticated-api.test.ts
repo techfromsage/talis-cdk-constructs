@@ -156,4 +156,49 @@ describe("AuthenticatedApi", () => {
     expect(response.status).toBe(200);
     expect(response.data).toBe("Simple Authenticated Api Documentation");
   });
+
+  test("returns 200 when routing to a url terminating in an id", async () => {
+    const token = await getOAuthToken(
+      TALIS_CDK_AUTH_API_VALID_CLIENT,
+      TALIS_CDK_AUTH_API_VALID_SECRET
+    );
+    const axiosAuthInstance = axios.create({
+      headers: { Authorization: `Bearer ${token}` },
+      baseURL: `https://${apiGatewayId}.execute-api.eu-west-1.amazonaws.com/1/`,
+    });
+    const response = await axiosAuthInstance.get("route3/1234");
+    expect(response.status).toBe(200);
+    expect(response.data).toBe("route 3");
+  });
+
+  test.only("returns 200 when routing to a url containing an id", async () => {
+    const token = await getOAuthToken(
+      TALIS_CDK_AUTH_API_VALID_CLIENT,
+      TALIS_CDK_AUTH_API_VALID_SECRET
+    );
+    const axiosAuthInstance = axios.create({
+      headers: { Authorization: `Bearer ${token}` },
+      baseURL: `https://${apiGatewayId}.execute-api.eu-west-1.amazonaws.com/1/`,
+    });
+    const response = await axiosAuthInstance.get("route4/1234/route4");
+    expect(response.status).toBe(200);
+    expect(response.data).toBe("route 4");
+  });
+
+  test.only("returns 403 when routing to a url containing an id", async () => {
+    const token = await getOAuthToken(
+      TALIS_CDK_AUTH_API_MISSING_SCOPE_CLIENT,
+      TALIS_CDK_AUTH_API_MISSING_SCOPE_SECRET
+    );
+    try {
+      const axiosBadAuthInstance = axios.create({
+        headers: { Authorization: `Bearer ${token}` },
+        baseURL: `https://${apiGatewayId}.execute-api.eu-west-1.amazonaws.com/1/`,
+      });
+      await axiosBadAuthInstance.get("route4/1234/route4");
+      throw Error("Expected a 403 response");
+    } catch (err) {
+      expect(err.message).toBe("Request failed with status code 403");
+    }
+  });
 });
