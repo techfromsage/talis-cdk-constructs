@@ -3,8 +3,10 @@ import * as certificatemanager from "@aws-cdk/aws-certificatemanager";
 import * as cloudfront from "@aws-cdk/aws-cloudfront";
 import * as s3 from "@aws-cdk/aws-s3";
 import * as s3deploy from "@aws-cdk/aws-s3-deployment";
+import * as origins from "@aws-cdk/aws-cloudfront-origins";
 import { getSiteDomain } from "./utils";
 import { CommonCdnSiteHostingProps } from "./cdn-site-hosting-props";
+import { Duration } from "@aws-cdk/core";
 
 export interface CdnSiteHostingConstructProps
   extends CommonCdnSiteHostingProps {
@@ -22,7 +24,7 @@ export interface CdnSiteHostingConstructProps
  */
 export class CdnSiteHostingConstruct extends cdk.Construct {
   public readonly s3Bucket: s3.Bucket;
-  public readonly cloudfrontWebDistribution: cloudfront.CloudFrontWebDistribution;
+  public readonly cloudfrontWebDistribution: cloudfront.Distribution;
 
   constructor(
     scope: cdk.Construct,
@@ -35,19 +37,11 @@ export class CdnSiteHostingConstruct extends cdk.Construct {
 
     const siteDomain = getSiteDomain(props);
 
-    // certificate
-    const viewerCertificate = cloudfront.ViewerCertificate.fromAcmCertificate(
-      certificatemanager.Certificate.fromCertificateArn(
+    const certificate = certificatemanager.Certificate.fromCertificateArn(
         this,
         `${siteDomain}-cert`,
         props.certificateArn
-      ),
-      {
-        aliases: [siteDomain],
-        sslMethod: cloudfront.SSLMethod.SNI,
-        securityPolicy: cloudfront.SecurityPolicyProtocol.TLS_V1_1_2016,
-      }
-    );
+      );
 
     let websiteErrorDocument: string | undefined = props.websiteErrorDocument;
     if (!websiteErrorDocument) {
@@ -67,33 +61,42 @@ export class CdnSiteHostingConstruct extends cdk.Construct {
     });
     new cdk.CfnOutput(this, "Bucket", { value: this.s3Bucket.bucketName });
 
+    const responseHeadersPolicy = new cloudfront.ResponseHeadersPolicy(this, 'ResponseHeadersPolicy', {
+      responseHeadersPolicyName: 'DefaultPolicy',
+      comment: 'A default policy',
+      securityHeadersBehavior: props.securityHeadersBehavior ?? {
+        contentSecurityPolicy: { contentSecurityPolicy: 'default-src https:;', override: true },
+        contentTypeOptions: { override: true },
+        frameOptions: { frameOption: cloudfront.HeadersFrameOption.DENY, override: true },
+        referrerPolicy: { referrerPolicy: cloudfront.HeadersReferrerPolicy.NO_REFERRER, override: true },
+        strictTransportSecurity: { accessControlMaxAge: Duration.seconds(600), includeSubdomains: true, override: true },
+        xssProtection: { protection: true, modeBlock: true, override: true },
+      },
+    });
+
     // Cloudfront distribution
-    this.cloudfrontWebDistribution = new cloudfront.CloudFrontWebDistribution(
+    this.cloudfrontWebDistribution = new cloudfront.Distribution(
       this,
       "SiteDistribution",
       {
-        viewerCertificate,
-        originConfigs: [
-          {
-            // We use a custom origin rather than S3 origin because the latter
-            // does not seem to support websiteErrorDocument correctly
-            customOriginSource: {
-              domainName: this.s3Bucket.bucketWebsiteDomainName,
-              originProtocolPolicy: cloudfront.OriginProtocolPolicy.HTTP_ONLY,
-            },
-            behaviors: [{ isDefaultBehavior: true }],
-          },
-        ],
-        errorConfigurations: props.isRoutedSpa
+        sslSupportMethod: cloudfront.SSLMethod.SNI,
+        minimumProtocolVersion: cloudfront.SecurityPolicyProtocol.TLS_V1_1_2016,
+        certificate,
+        domainNames: [siteDomain],
+        defaultBehavior: {
+          origin: new origins.S3Origin(this.s3Bucket),
+          responseHeadersPolicy: responseHeadersPolicy,
+        },
+        errorResponses: props.isRoutedSpa
           ? [
               {
-                errorCode: 404,
-                responseCode: 200,
+                httpStatus: 404,
+                responseHttpStatus: 200,
                 responsePagePath: `/${props.websiteIndexDocument}`,
               },
             ]
           : undefined,
-      }
+      },
     );
     new cdk.CfnOutput(this, "DistributionId", {
       value: this.cloudfrontWebDistribution.distributionId,
