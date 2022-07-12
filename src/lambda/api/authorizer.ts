@@ -215,11 +215,11 @@ class PersonaAuthorizer {
     const scopeConfig = process.env["SCOPE_CONFIG"];
     if (scopeConfig != undefined) {
       const conf = JSON.parse(scopeConfig);
-      for (const pathRegEx of Object.keys(conf)) {
-        console.log(`Looping: pathRegEx: ${pathRegEx} parsedMethodArn.resourcePath: ${parsedMethodArn.resourcePath}`);
-        if (parsedMethodArn.resourcePath.match(pathRegEx)) {
-          console.log(`Scope required: ${conf[pathRegEx]}`)
-          return conf[pathRegEx];
+      for (const path of Object.keys(conf)) {
+        console.log(`Looping: path: ${path} parsedMethodArn.resourcePath: ${parsedMethodArn.resourcePath}`);
+        if (this.pathMatch(path, parsedMethodArn.resourcePath)) {
+          console.log(`Scope required: ${conf[path]}`)
+          return conf[path];
         }
       }
     }
@@ -243,6 +243,31 @@ class PersonaAuthorizer {
     }
 
     return this.personaClient;
+  }
+
+  pathMatch(pathDefination: string, path: string) : boolean {
+    const pathDefinationParts = pathDefination.split('/');
+    const pathParts = pathDefination.split('/');
+
+    if (pathDefinationParts.length != pathParts.length) {
+      return false;
+    }
+
+    for (let i = 0; i < pathDefinationParts.length; i++) {
+      const pathDefinitionSegment = pathDefinationParts[i];
+      const pathSegment = pathParts[i];
+
+      if (pathDefination.startsWith('{') && pathDefination.endsWith('}')) {
+        // Matches path argument
+      } else {
+        // Should match directly
+        if (pathDefinitionSegment !== pathSegment) {
+          return false;
+        }
+      }
+    }
+
+    return true;
   }
 }
 
