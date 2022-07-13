@@ -80,7 +80,7 @@ export class AuthenticatedApi extends cdk.Construct {
     if (props.lambdaRoutes) {
       for (const routeProps of props.lambdaRoutes) {
         if (routeProps.requiredScope) {
-          scopeConfig[`^${routeProps.path}$`] = routeProps.requiredScope;
+          scopeConfig[routeProps.path] = routeProps.requiredScope;
         }
       }
     }

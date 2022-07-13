@@ -105,6 +105,9 @@ jobs:
       - checkout
       - node/install-packages
       - run:
+          name: Run unit tests
+          command: npm run unit-test
+      - run:
           name: Run infra tests
           command: npm run infra-test
       - run:

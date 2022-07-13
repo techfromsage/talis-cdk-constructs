@@ -48,7 +48,7 @@ const API_GATEWAY_ARN_INDEXES = [
   RESOURCE_PATH_INDEX,
 ];
 
-class PersonaAuthorizer {
+export class PersonaAuthorizer {
   event: any;
   context: any;
   personaClient: PersonaClient | undefined;
@@ -215,9 +215,9 @@ class PersonaAuthorizer {
     const scopeConfig = process.env["SCOPE_CONFIG"];
     if (scopeConfig != undefined) {
       const conf = JSON.parse(scopeConfig);
-      for (const pathRegEx of Object.keys(conf)) {
-        if (parsedMethodArn.resourcePath.match(pathRegEx)) {
-          return conf[pathRegEx];
+      for (const path of Object.keys(conf)) {
+        if (this.pathMatch(path, parsedMethodArn.resourcePath)) {
+          return conf[path];
         }
       }
     }
@@ -240,6 +240,34 @@ class PersonaAuthorizer {
     }
 
     return this.personaClient;
+  }
+
+  pathMatch(pathDefinition: string, path: string): boolean {
+    const pathDefinitionParts = pathDefinition.split("/");
+    const pathParts = path.split("/");
+
+    if (pathDefinitionParts.length !== pathParts.length) {
+      return false;
+    }
+
+    for (let i = 0; i < pathDefinitionParts.length; i++) {
+      const pathDefinitionSegment = pathDefinitionParts[i];
+      const pathSegment = pathParts[i];
+
+      if (
+        pathDefinitionSegment.startsWith("{") &&
+        pathDefinitionSegment.endsWith("}")
+      ) {
+        // Matches path argument
+      } else {
+        // Should match directly
+        if (pathDefinitionSegment !== pathSegment) {
+          return false;
+        }
+      }
+    }
+
+    return true;
   }
 }
 
