@@ -254,7 +254,10 @@ class PersonaAuthorizer {
       const pathDefinitionSegment = pathDefinitionParts[i];
       const pathSegment = pathParts[i];
 
-      if (pathDefinitionSegment.startsWith("{") && pathDefinitionSegment.endsWith("}")) {
+      if (
+        pathDefinitionSegment.startsWith("{") &&
+        pathDefinitionSegment.endsWith("}")
+      ) {
         // Matches path argument
       } else {
         // Should match directly
@@ -264,7 +267,6 @@ class PersonaAuthorizer {
       }
     }
 
-console.log(`MSL: segments all match - returning true`);
     return true;
   }
 }
