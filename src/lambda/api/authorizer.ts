@@ -242,19 +242,19 @@ class PersonaAuthorizer {
     return this.personaClient;
   }
 
-  pathMatch(pathDefination: string, path: string): boolean {
-    const pathDefinationParts = pathDefination.split("/");
-    const pathParts = pathDefination.split("/");
+  pathMatch(pathDefinition: string, path: string): boolean {
+    const pathDefinitionParts = pathDefinition.split("/");
+    const pathParts = path.split("/");
 
-    if (pathDefinationParts.length != pathParts.length) {
+    if (pathDefinitionParts.length != pathParts.length) {
       return false;
     }
 
-    for (let i = 0; i < pathDefinationParts.length; i++) {
-      const pathDefinitionSegment = pathDefinationParts[i];
+    for (let i = 0; i < pathDefinitionParts.length; i++) {
+      const pathDefinitionSegment = pathDefinitionParts[i];
       const pathSegment = pathParts[i];
 
-      if (pathDefination.startsWith("{") && pathDefination.endsWith("}")) {
+      if (pathDefinition.startsWith("{") && pathDefinition.endsWith("}")) {
         // Matches path argument
       } else {
         // Should match directly
