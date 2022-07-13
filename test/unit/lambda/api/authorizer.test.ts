@@ -39,6 +39,12 @@ describe("authorizer", () => {
         path: "/1/a/test_id/route1",
         expectedResult: true,
       },
+      {
+        title: "does not match when number of segments don't match",
+        pathDefinition: "/a/b/route1",
+        path: "/a/b/c/route1",
+        expectedResult: false,
+      },
     ];
     pathMatchTests.forEach((testSpec) => {
       test(`${testSpec.title}`, async () => {

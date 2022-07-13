@@ -246,7 +246,7 @@ export class PersonaAuthorizer {
     const pathDefinitionParts = pathDefinition.split("/");
     const pathParts = path.split("/");
 
-    if (pathDefinitionParts.length != pathParts.length) {
+    if (pathDefinitionParts.length !== pathParts.length) {
       return false;
     }
 
