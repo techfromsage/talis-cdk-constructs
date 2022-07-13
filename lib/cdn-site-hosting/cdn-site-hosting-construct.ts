@@ -38,10 +38,10 @@ export class CdnSiteHostingConstruct extends cdk.Construct {
     const siteDomain = getSiteDomain(props);
 
     const certificate = certificatemanager.Certificate.fromCertificateArn(
-        this,
-        `${siteDomain}-cert`,
-        props.certificateArn
-      );
+      this,
+      `${siteDomain}-cert`,
+      props.certificateArn
+    );
 
     let websiteErrorDocument: string | undefined = props.websiteErrorDocument;
     if (!websiteErrorDocument) {
@@ -61,18 +61,44 @@ export class CdnSiteHostingConstruct extends cdk.Construct {
     });
     new cdk.CfnOutput(this, "Bucket", { value: this.s3Bucket.bucketName });
 
-    const responseHeadersPolicy = new cloudfront.ResponseHeadersPolicy(this, 'ResponseHeadersPolicy', {
-      responseHeadersPolicyName: 'DefaultPolicy',
-      comment: 'A default policy',
-      securityHeadersBehavior: props.securityHeadersBehavior ?? {
-        contentSecurityPolicy: { contentSecurityPolicy: 'default-src https:;', override: true },
-        contentTypeOptions: { override: true },
-        frameOptions: { frameOption: cloudfront.HeadersFrameOption.DENY, override: true },
-        referrerPolicy: { referrerPolicy: cloudfront.HeadersReferrerPolicy.NO_REFERRER, override: true },
-        strictTransportSecurity: { accessControlMaxAge: Duration.seconds(600), includeSubdomains: true, override: true },
-        xssProtection: { protection: true, modeBlock: true, override: true },
-      },
-    });
+    const responseHeadersPolicy = new cloudfront.ResponseHeadersPolicy(
+      this,
+      "ResponseHeadersPolicy",
+      {
+        responseHeadersPolicyName: "DefaultPolicy",
+        comment: "A default policy",
+        securityHeadersBehavior: props.securityHeadersBehavior ?? {
+          // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/default-src
+          contentSecurityPolicy: {
+            contentSecurityPolicy: "default-src self;",
+            override: true,
+          },
+          // https://web.dev/security-headers/#xcto
+          contentTypeOptions: { override: true },
+          // https://web.dev/security-headers/#recommended-usages-4
+          frameOptions: {
+            frameOption: cloudfront.HeadersFrameOption.DENY,
+            override: true,
+          },
+          // https://web.dev/referrer-best-practices/#setting-your-referrer-policy:-best-practices
+          referrerPolicy: {
+            referrerPolicy:
+              cloudfront.HeadersReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN,
+            override: true,
+          },
+          // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security#examples
+          strictTransportSecurity: {
+            accessControlMaxAge: Duration.millis(31536000),
+            includeSubdomains: true,
+            preload: true,
+            override: true,
+          },
+          // xxs-protection is overridden by the contentSecurityPolicy in modern browsers
+          // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-XSS-Protection
+          xssProtection: { protection: false, override: true },
+        },
+      }
+    );
 
     // Cloudfront distribution
     this.cloudfrontWebDistribution = new cloudfront.Distribution(
@@ -83,6 +109,7 @@ export class CdnSiteHostingConstruct extends cdk.Construct {
         minimumProtocolVersion: cloudfront.SecurityPolicyProtocol.TLS_V1_1_2016,
         certificate,
         domainNames: [siteDomain],
+        defaultRootObject: props.websiteIndexDocument,
         defaultBehavior: {
           origin: new origins.S3Origin(this.s3Bucket),
           responseHeadersPolicy: responseHeadersPolicy,
@@ -96,7 +123,7 @@ export class CdnSiteHostingConstruct extends cdk.Construct {
               },
             ]
           : undefined,
-      },
+      }
     );
     new cdk.CfnOutput(this, "DistributionId", {
       value: this.cloudfrontWebDistribution.distributionId,

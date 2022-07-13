@@ -12,7 +12,9 @@ import { Template } from "@aws-cdk/assertions";
 
 // hosted-zone requires an environment be attached to the Stack
 const testEnv: Environment = {
-  region: "eu-west-1",
+  // region for Cloudfront Distribution certificates must be us-east-1
+  // https://stackoverflow.com/questions/37289994/aws-certificate-manager-do-regions-matter
+  region: "us-east-1",
   account: "abcdefg12345",
 };
 const fakeCertificateArn = `arn:aws:acm:${testEnv.region}:${testEnv.account}:certificate/123456789012-1234-1234-1234-12345678`;
@@ -58,7 +60,6 @@ describe("CdnSiteHostingConstruct", () => {
         haveResourceLike("AWS::CloudFront::Distribution", {
           DistributionConfig: {
             Aliases: [fakeFqdn],
-            DefaultRootObject: "index.html",
             ViewerCertificate: {
               AcmCertificateArn: fakeCertificateArn,
             },
