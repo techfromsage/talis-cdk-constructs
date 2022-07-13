@@ -48,7 +48,7 @@ const API_GATEWAY_ARN_INDEXES = [
   RESOURCE_PATH_INDEX,
 ];
 
-class PersonaAuthorizer {
+export class PersonaAuthorizer {
   event: any;
   context: any;
   personaClient: PersonaClient | undefined;
