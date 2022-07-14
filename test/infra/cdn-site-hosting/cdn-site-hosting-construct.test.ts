@@ -76,6 +76,45 @@ describe("CdnSiteHostingConstruct", () => {
       );
     });
 
+    test("provisions a ResponseHeadersPolicy with default values", () => {
+      expectCDK(stack).to(countResources("AWS::CloudFront::Distribution", 1));
+      const template = Template.fromStack(stack);
+
+      template.hasResource("AWS::CloudFront::ResponseHeadersPolicy", {
+        Properties: {
+          ResponseHeadersPolicyConfig: {
+            SecurityHeadersConfig: {
+              ContentSecurityPolicy: {
+                ContentSecurityPolicy: "default-src self;",
+                Override: true,
+              },
+              ContentTypeOptions: {
+                Override: true,
+              },
+              FrameOptions: {
+                FrameOption: "DENY",
+                Override: true,
+              },
+              ReferrerPolicy: {
+                Override: true,
+                ReferrerPolicy: "strict-origin-when-cross-origin",
+              },
+              StrictTransportSecurity: {
+                AccessControlMaxAgeSec: 31536,
+                IncludeSubdomains: true,
+                Override: true,
+                Preload: true,
+              },
+              XSSProtection: {
+                Override: true,
+                Protection: false,
+              },
+            },
+          },
+        },
+      });
+    });
+
     test("issues a bucket deployment with CloudFront invalidation for the specified sources", () => {
       expectCDK(stack).to(countResources("Custom::CDKBucketDeployment", 1));
       expectCDK(stack).to(
@@ -307,6 +346,65 @@ describe("CdnSiteHostingConstruct", () => {
       expect(firstDeployment.DependsOn).toBeUndefined();
       expect(secondDeployment.DependsOn).toBeDefined();
       expect(secondDeployment.DependsOn).toContain(firstDeploymentId);
+    });
+  });
+
+  describe("When securityHeaders are provided", () => {
+    let stack: Stack;
+
+    beforeAll(() => {
+      const app = new cdk.App();
+      stack = new cdk.Stack(app, "TestStack", { env: testEnv });
+      new CdnSiteHostingConstruct(stack, "MyTestConstruct", {
+        certificateArn: fakeCertificateArn,
+        siteSubDomain: fakeSiteSubDomain,
+        domainName: fakeDomain,
+        removalPolicy: RemovalPolicy.DESTROY,
+        sources: [s3deploy.Source.asset("./")],
+        websiteIndexDocument: "index.html",
+        securityHeaders: {
+          contentSecurityPolicy: {
+            contentSecurityPolicy: "default-src 'none';",
+            override: true,
+          },
+          frameOptions: undefined,
+        },
+      });
+    });
+
+    test("provisions a ResponseHeadersPolicy with overridden default values", () => {
+      expectCDK(stack).to(countResources("AWS::CloudFront::Distribution", 1));
+      const template = Template.fromStack(stack);
+
+      template.hasResource("AWS::CloudFront::ResponseHeadersPolicy", {
+        Properties: {
+          ResponseHeadersPolicyConfig: {
+            SecurityHeadersConfig: {
+              ContentSecurityPolicy: {
+                ContentSecurityPolicy: "default-src 'none';",
+                Override: true,
+              },
+              ContentTypeOptions: {
+                Override: true,
+              },
+              ReferrerPolicy: {
+                Override: true,
+                ReferrerPolicy: "strict-origin-when-cross-origin",
+              },
+              StrictTransportSecurity: {
+                AccessControlMaxAgeSec: 31536,
+                IncludeSubdomains: true,
+                Override: true,
+                Preload: true,
+              },
+              XSSProtection: {
+                Override: true,
+                Protection: false,
+              },
+            },
+          },
+        },
+      });
     });
   });
 });
