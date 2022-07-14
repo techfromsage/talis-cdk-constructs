@@ -58,9 +58,7 @@ export class CdnSiteHostingWithDnsConstruct extends cdk.Construct {
     new route53.ARecord(this, `${siteDomain}-SiteAliasRecord`, {
       recordName: siteDomain,
       target: route53.RecordTarget.fromAlias(
-        new targets.CloudFrontTarget(
-          this.cdnSiteHosting.cloudfrontWebDistribution
-        )
+        new targets.CloudFrontTarget(this.cdnSiteHosting.cloudfrontDistribution)
       ),
       zone,
     });

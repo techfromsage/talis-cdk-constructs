@@ -24,7 +24,7 @@ export interface CdnSiteHostingConstructProps
  */
 export class CdnSiteHostingConstruct extends cdk.Construct {
   public readonly s3Bucket: s3.Bucket;
-  public readonly cloudfrontWebDistribution: cloudfront.Distribution;
+  public readonly cloudfrontDistribution: cloudfront.Distribution;
 
   constructor(
     scope: cdk.Construct,
@@ -106,7 +106,7 @@ export class CdnSiteHostingConstruct extends cdk.Construct {
     );
 
     // Cloudfront distribution
-    this.cloudfrontWebDistribution = new cloudfront.Distribution(
+    this.cloudfrontDistribution = new cloudfront.Distribution(
       this,
       "SiteDistribution",
       {
@@ -131,7 +131,7 @@ export class CdnSiteHostingConstruct extends cdk.Construct {
       }
     );
     new cdk.CfnOutput(this, "DistributionId", {
-      value: this.cloudfrontWebDistribution.distributionId,
+      value: this.cloudfrontDistribution.distributionId,
     });
 
     // Deploy site contents to S3 bucket
@@ -160,7 +160,7 @@ export class CdnSiteHostingConstruct extends cdk.Construct {
               prune: isSingleDeploymentStep,
               destinationBucket: this.s3Bucket,
               distribution: isInvalidationRequired
-                ? this.cloudfrontWebDistribution
+                ? this.cloudfrontDistribution
                 : undefined,
               distributionPaths: isInvalidationRequired
                 ? distributionPathsToInvalidate
@@ -180,7 +180,7 @@ export class CdnSiteHostingConstruct extends cdk.Construct {
       new s3deploy.BucketDeployment(this, "DeployAndInvalidate", {
         sources: props.sources,
         destinationBucket: this.s3Bucket,
-        distribution: this.cloudfrontWebDistribution,
+        distribution: this.cloudfrontDistribution,
         distributionPaths: ["/*"],
       });
     }
