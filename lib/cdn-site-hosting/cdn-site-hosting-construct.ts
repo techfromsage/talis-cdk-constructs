@@ -61,41 +61,46 @@ export class CdnSiteHostingConstruct extends cdk.Construct {
     });
     new cdk.CfnOutput(this, "Bucket", { value: this.s3Bucket.bucketName });
 
+    const defaultSecurityHeaders: cloudfront.ResponseSecurityHeadersBehavior = {
+      // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/default-src
+      contentSecurityPolicy: {
+        contentSecurityPolicy: "default-src 'self';",
+        override: true,
+      },
+      // https://web.dev/security-headers/#xcto
+      contentTypeOptions: { override: true },
+      // https://web.dev/security-headers/#recommended-usages-4
+      frameOptions: {
+        frameOption: cloudfront.HeadersFrameOption.DENY,
+        override: true,
+      },
+      // https://web.dev/referrer-best-practices/#setting-your-referrer-policy:-best-practices
+      referrerPolicy: {
+        referrerPolicy:
+          cloudfront.HeadersReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN,
+        override: true,
+      },
+      // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security#examples
+      strictTransportSecurity: {
+        accessControlMaxAge: Duration.millis(31536000),
+        includeSubdomains: true,
+        preload: true,
+        override: true,
+      },
+      // xxs-protection is overridden by the contentSecurityPolicy in modern browsers
+      // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-XSS-Protection
+      xssProtection: { protection: false, override: true },
+    };
+
     const responseHeadersPolicy = new cloudfront.ResponseHeadersPolicy(
       this,
       "ResponseHeadersPolicy",
       {
         responseHeadersPolicyName: "DefaultPolicy",
         comment: "A default policy",
-        securityHeadersBehavior: props.securityHeadersBehavior ?? {
-          // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/default-src
-          contentSecurityPolicy: {
-            contentSecurityPolicy: "default-src self;",
-            override: true,
-          },
-          // https://web.dev/security-headers/#xcto
-          contentTypeOptions: { override: true },
-          // https://web.dev/security-headers/#recommended-usages-4
-          frameOptions: {
-            frameOption: cloudfront.HeadersFrameOption.DENY,
-            override: true,
-          },
-          // https://web.dev/referrer-best-practices/#setting-your-referrer-policy:-best-practices
-          referrerPolicy: {
-            referrerPolicy:
-              cloudfront.HeadersReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN,
-            override: true,
-          },
-          // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security#examples
-          strictTransportSecurity: {
-            accessControlMaxAge: Duration.millis(31536000),
-            includeSubdomains: true,
-            preload: true,
-            override: true,
-          },
-          // xxs-protection is overridden by the contentSecurityPolicy in modern browsers
-          // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-XSS-Protection
-          xssProtection: { protection: false, override: true },
+        securityHeadersBehavior: {
+          ...defaultSecurityHeaders,
+          ...props.securityHeaders,
         },
       }
     );

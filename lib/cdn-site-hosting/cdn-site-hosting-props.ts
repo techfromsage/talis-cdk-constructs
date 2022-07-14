@@ -18,5 +18,5 @@ export interface CommonCdnSiteHostingProps {
   sourcesWithDeploymentOptions?: SourcesWithDeploymentOptions[];
   websiteErrorDocument?: string;
   websiteIndexDocument: string;
-  securityHeadersBehavior?: ResponseSecurityHeadersBehavior;
+  securityHeaders?: ResponseSecurityHeadersBehavior;
 }
