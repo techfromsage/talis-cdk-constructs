@@ -1,4 +1,4 @@
-import { PersonaAuthorizer } from './PersonaAuthorizer';
+import { PersonaAuthorizer } from "./PersonaAuthorizer";
 
 module.exports.validateToken = async (event: any, context: any) => {
   const route = new PersonaAuthorizer(event, context);
