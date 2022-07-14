@@ -13,6 +13,7 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
+    "unit-test": "npm run build && jest test/unit",
     "infra-test": "npm run build && jest test/infra",
     "integration-test": "npm run build && npm run jest-integration-test",
     "jest-integration-test": "jest test/integration/",

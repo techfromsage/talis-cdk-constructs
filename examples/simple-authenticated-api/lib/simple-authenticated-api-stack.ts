@@ -85,6 +85,32 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
       }
     );
 
+    const route3Handler = new AuthenticatedApiFunction(
+      this,
+      `${prefix}simple-authenticated-api-route3-handler`,
+      {
+        name: `${prefix}route3-handler`,
+        entry: "src/lambda/route3.js",
+        environment: {},
+        handler: "route",
+        timeout: cdk.Duration.seconds(30),
+        securityGroups: lambdaSecurityGroups,
+      }
+    );
+
+    const route4Handler = new AuthenticatedApiFunction(
+      this,
+      `${prefix}simple-authenticated-api-route4-handler`,
+      {
+        name: `${prefix}route4-handler`,
+        entry: "src/lambda/route4.js",
+        environment: {},
+        handler: "route",
+        timeout: cdk.Duration.seconds(30),
+        securityGroups: lambdaSecurityGroups,
+      }
+    );
+
     const api = new AuthenticatedApi(
       this,
       `${prefix}simple-authenticated-api`,
@@ -126,6 +152,20 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
             method: apigatewayv2.HttpMethod.GET,
             lambda: route2Handler,
             isPublic: true,
+          },
+          {
+            name: "route3",
+            path: "/1/route3/{id}",
+            method: apigatewayv2.HttpMethod.GET,
+            lambda: route3Handler,
+            requiredScope: "analytics:admin",
+          },
+          {
+            name: "route4",
+            path: "/1/route4/{id}/route4",
+            method: apigatewayv2.HttpMethod.GET,
+            lambda: route4Handler,
+            requiredScope: "analytics:admin",
           },
         ],
       }
