@@ -9,7 +9,7 @@ Establishes infrastructure to host a static-site or single-page-application in S
 This construct will:
 
 - Create an S3 bucket with static website hosting enabled
-- Create a CloudFront web distribution to deliver site content
+- Create a CloudFront distribution to deliver site content
 - Register the CloudFront distribution with the provided certificate
 - Deploy provided source code to S3 and invalidate the CloudFront distribution
 
