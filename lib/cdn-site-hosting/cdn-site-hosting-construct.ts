@@ -61,7 +61,6 @@ export class CdnSiteHostingConstruct extends cdk.Construct {
     });
     new cdk.CfnOutput(this, "Bucket", { value: this.s3Bucket.bucketName });
 
-    const twoYears = Duration.millis(31536000);
     const defaultSecurityHeaders: cloudfront.ResponseSecurityHeadersBehavior = {
       // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/default-src
       contentSecurityPolicy: {
@@ -83,7 +82,7 @@ export class CdnSiteHostingConstruct extends cdk.Construct {
       },
       // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security#examples
       strictTransportSecurity: {
-        accessControlMaxAge: twoYears,
+        accessControlMaxAge: Duration.days(365 * 2),
         includeSubdomains: true,
         preload: true,
         override: true,
