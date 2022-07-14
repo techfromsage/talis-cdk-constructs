@@ -97,8 +97,6 @@ export class CdnSiteHostingConstruct extends cdk.Construct {
       this,
       "ResponseHeadersPolicy",
       {
-        responseHeadersPolicyName: "DefaultPolicy",
-        comment: "A default policy",
         securityHeadersBehavior: {
           ...defaultSecurityHeaders,
           ...props.securityHeaders,
