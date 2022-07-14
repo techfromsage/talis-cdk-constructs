@@ -1,4 +1,4 @@
-import { PersonaAuthorizer } from "../../../../src/lambda/api/authorizer";
+import { PersonaAuthorizer } from "../../../../src/lambda/api/PersonaAuthorizer";
 
 describe("authorizer", () => {
   describe("pathMatch", () => {
