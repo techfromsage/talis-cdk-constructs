@@ -60,6 +60,7 @@ describe("CdnSiteHostingConstruct", () => {
         haveResourceLike("AWS::CloudFront::Distribution", {
           DistributionConfig: {
             Aliases: [fakeFqdn],
+            DefaultRootObject: "index.html",
             ViewerCertificate: {
               AcmCertificateArn: fakeCertificateArn,
             },
