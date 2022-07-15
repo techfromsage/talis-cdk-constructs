@@ -6,7 +6,6 @@ import * as s3deploy from "@aws-cdk/aws-s3-deployment";
 import * as origins from "@aws-cdk/aws-cloudfront-origins";
 import { getSiteDomain } from "./utils";
 import { CommonCdnSiteHostingProps } from "./cdn-site-hosting-props";
-import { Duration } from "@aws-cdk/core";
 
 export interface CdnSiteHostingConstructProps
   extends CommonCdnSiteHostingProps {
@@ -82,7 +81,7 @@ export class CdnSiteHostingConstruct extends cdk.Construct {
       },
       // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security#examples
       strictTransportSecurity: {
-        accessControlMaxAge: Duration.days(365 * 2),
+        accessControlMaxAge: cdk.Duration.days(365 * 2),
         includeSubdomains: true,
         preload: true,
         override: true,
