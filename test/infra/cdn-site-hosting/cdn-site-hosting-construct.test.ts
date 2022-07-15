@@ -77,7 +77,6 @@ describe("CdnSiteHostingConstruct", () => {
     });
 
     test("provisions a ResponseHeadersPolicy with default values", () => {
-      expectCDK(stack).to(countResources("AWS::CloudFront::Distribution", 1));
       const template = Template.fromStack(stack);
 
       template.hasResource("AWS::CloudFront::ResponseHeadersPolicy", {
@@ -373,7 +372,6 @@ describe("CdnSiteHostingConstruct", () => {
     });
 
     test("provisions a ResponseHeadersPolicy with overridden default values", () => {
-      expectCDK(stack).to(countResources("AWS::CloudFront::Distribution", 1));
       const template = Template.fromStack(stack);
 
       template.hasResource("AWS::CloudFront::ResponseHeadersPolicy", {
