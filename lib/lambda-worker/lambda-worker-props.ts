@@ -20,6 +20,7 @@ export interface LambdaWorkerProps {
     entry?: string;
     enableQueue?: boolean;
     environment?: { [key: string]: string };
+    ephemeralStorageSize?: cdk.Size;
     filesystem?: lambda.FileSystem;
     memorySize: number; // LambdaWorker will set a minimum memory size of 1024
     policyStatements?: iam.PolicyStatement[];

@@ -226,6 +226,7 @@ describe("LambdaWorker", () => {
 
             // Optional
             description: "Test Description",
+            ephemeralStorageSize: cdk.Size.mebibytes(1024),
             environment: {
               TALIS_ENV_VAR: "some value",
             },
@@ -253,6 +254,9 @@ describe("LambdaWorker", () => {
                 TALIS_ENV_VAR: "some value",
                 AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1",
               },
+            },
+            EphemeralStorage: {
+              Size: 1024,
             },
             ReservedConcurrentExecutions: 10,
           })
