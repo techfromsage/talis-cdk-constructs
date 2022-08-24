@@ -252,6 +252,7 @@ export class LambdaWorker extends cdk.Construct {
       handler: props.lambdaProps.handler,
       description: props.lambdaProps.description,
       environment: props.lambdaProps.environment,
+      ephemeralStorageSize: props.lambdaProps.ephemeralStorageSize,
       memorySize: props.lambdaProps.memorySize,
       reservedConcurrentExecutions:
         props.lambdaProps.reservedConcurrentExecutions,
@@ -297,6 +298,7 @@ export class LambdaWorker extends cdk.Construct {
       functionName: props.name,
       description: props.lambdaProps.description,
       environment: props.lambdaProps.environment,
+      ephemeralStorageSize: props.lambdaProps.ephemeralStorageSize,
       memorySize: props.lambdaProps.memorySize,
       reservedConcurrentExecutions:
         props.lambdaProps.reservedConcurrentExecutions,
