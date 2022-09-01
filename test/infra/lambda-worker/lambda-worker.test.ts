@@ -183,7 +183,7 @@ describe("LambdaWorker", () => {
                 Name: "QueueName",
                 Value: {
                   "Fn::GetAtt": [
-                    "MyTestLambdaWorkerMyTestLambdaWorkerdlq27BBFD95",
+                    "MyTestLambdaWorkerMyTestLambdaWorkerqueue01D6E79E",
                     "QueueName",
                   ],
                 },

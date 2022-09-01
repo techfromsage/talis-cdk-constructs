@@ -159,7 +159,7 @@ export class LambdaWorker extends cdk.Construct {
     dlqMessagesVisable.addOkAction(alarmAction);
 
     // Add an alarm for the age of the oldest message on the LambdaWorkers main trigger queue
-    const approximateAgeOfOldestMessageMetric = lambdaDLQ
+    const approximateAgeOfOldestMessageMetric = lambdaQueue
       .metric("ApproximateAgeOfOldestMessage")
       .with({ statistic: "average", period: cdk.Duration.minutes(1) });
     const queueMessagesAge = new cloudwatch.Alarm(
