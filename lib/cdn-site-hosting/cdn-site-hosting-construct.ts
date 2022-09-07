@@ -135,6 +135,10 @@ export class CdnSiteHostingConstruct extends cdk.Construct {
         }
       );
 
+      // Give the first deployment a dependency on the s3 bucket. 
+      // Without this, we may start copying files into the s3 bucket before it has been created.
+      deployments[0].node.addDependency(this.s3Bucket);
+      // Now make the rest of the deployments dependent on the previous one.
       deployments.forEach((deployment, deploymentIndex) => {
         if (deploymentIndex > 0) {
           deployment.node.addDependency(deployments[deploymentIndex - 1]);
