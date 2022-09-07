@@ -303,7 +303,9 @@ describe("CdnSiteHostingConstruct", () => {
       const [[firstDeploymentId, firstDeployment], [, secondDeployment]] =
         deployments;
       expect(firstDeployment.DependsOn).toBeDefined();
-      expect(firstDeployment.DependsOn).toContain('MyTestConstructSiteBucketEE4FFC1B');
+      expect(firstDeployment.DependsOn).toContain(
+        "MyTestConstructSiteBucketEE4FFC1B"
+      );
       expect(secondDeployment.DependsOn).toBeDefined();
       expect(secondDeployment.DependsOn).toContain(firstDeploymentId);
     });
