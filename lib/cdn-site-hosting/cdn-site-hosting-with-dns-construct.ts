@@ -6,7 +6,10 @@ import { CdnSiteHostingConstruct } from "./cdn-site-hosting-construct";
 import { getSiteDomain } from "./utils";
 import { CommonCdnSiteHostingProps } from "./cdn-site-hosting-props";
 
-export type CdnSiteHostingWithDnsConstructProps = CommonCdnSiteHostingProps;
+export interface CdnSiteHostingWithDnsConstructProps
+  extends CommonCdnSiteHostingProps {
+  certificateArn?: string;
+}
 
 /**
  * Establishes infrastructure to host a static-site or single-page-application in S3 via CloudFront,
@@ -36,16 +39,21 @@ export class CdnSiteHostingWithDnsConstruct extends cdk.Construct {
     });
     new cdk.CfnOutput(this, "Site", { value: `https://${siteDomain}` });
 
-    // Create a new TLS certificate - it has to be in `us-east-1`
-    const certificateArn = new certificatemanager.DnsValidatedCertificate(
-      this,
-      "SiteCertificate",
-      {
-        domainName: siteDomain,
-        hostedZone: zone,
-        region: "us-east-1", // Cloudfront only checks this region for certificates.
-      }
-    ).certificateArn;
+    // certificateArn is an option in props, if one is passed in, use it
+    // otherwise create one.
+    let certificateArn = props.certificateArn;
+    if (!certificateArn) {
+      // Create a new TLS certificate - it has to be in `us-east-1`
+      certificateArn = new certificatemanager.DnsValidatedCertificate(
+        this,
+        "SiteCertificate",
+        {
+          domainName: siteDomain,
+          hostedZone: zone,
+          region: "us-east-1", // Cloudfront only checks this region for certificates.
+        }
+      ).certificateArn;
+    }
     new cdk.CfnOutput(this, "Certificate", { value: certificateArn });
 
     // Create the underpinning hosting infrastructure
