@@ -93,6 +93,33 @@ describe("CdnSiteHostingWithDnsConstruct", () => {
     });
   });
 
+  describe("When certificate is provided", () => {
+    let stack: Stack;
+
+    beforeAll(() => {
+      const app = new cdk.App();
+      stack = new cdk.Stack(app, "TestStack", { env: testEnv });
+      new CdnSiteHostingWithDnsConstruct(stack, "MyTestConstruct", {
+        siteSubDomain: fakeSiteSubDomain,
+        domainName: fakeDomain,
+        removalPolicy: RemovalPolicy.DESTROY,
+        sources: [s3deploy.Source.asset("./")],
+        websiteErrorDocument: "error.html",
+        websiteIndexDocument: "index.html",
+        certificateArn: "test-cert",
+      });
+    });
+
+    test("does not provisions a new ACM TLS certificate covering the domain", () => {
+      expectCDK(stack).notTo(
+        haveResourceLike("AWS::CloudFormation::CustomResource", {
+          DomainName: fakeFqdn,
+          Region: "us-east-1",
+        })
+      );
+    });
+  });
+
   describe("When no error document is provided", () => {
     let stack: Stack;
 
