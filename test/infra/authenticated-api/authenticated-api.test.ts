@@ -141,6 +141,7 @@ describe("AuthenticatedApi", () => {
               PERSONA_PORT: "443",
               PERSONA_OAUTH_ROUTE: "/oauth/tokens/",
               AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1",
+              LAMBDA_EXECUTION_TIMEOUT: "120",
             },
           },
         })
@@ -155,7 +156,11 @@ describe("AuthenticatedApi", () => {
           Timeout: 30,
           Handler: "index.route",
           Runtime: "nodejs14.x",
-          Environment: {},
+          Environment: {
+            Variables: {
+              LAMBDA_EXECUTION_TIMEOUT: "30",
+            },
+          },
         })
       );
 
@@ -165,7 +170,11 @@ describe("AuthenticatedApi", () => {
           Timeout: 30,
           Handler: "index.route",
           Runtime: "nodejs14.x",
-          Environment: {},
+          Environment: {
+            Variables: {
+              LAMBDA_EXECUTION_TIMEOUT: "30",
+            },
+          },
         })
       );
     });
