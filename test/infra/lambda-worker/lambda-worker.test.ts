@@ -61,6 +61,7 @@ describe("LambdaWorker", () => {
             Environment: {
               Variables: {
                 AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1",
+                LAMBDA_EXECUTION_TIMEOUT: "300",
               },
             },
           })

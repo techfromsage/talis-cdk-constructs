@@ -10,6 +10,7 @@ import * as ecr from "@aws-cdk/aws-ecr";
 
 import { LambdaWorkerProps } from "./lambda-worker-props";
 import { IRepository } from "@aws-cdk/aws-ecr";
+import { buildLambdaEnvironment } from "../util/build-lambda-environment";
 
 const DEFAULT_MAX_RECEIVE_COUNT = 5;
 const DEFAULT_APPROX_AGE_OLDEST_MESSAGE_THRESHOLD = cdk.Duration.hours(1);
@@ -251,7 +252,10 @@ export class LambdaWorker extends cdk.Construct {
       entry: props.lambdaProps.entry,
       handler: props.lambdaProps.handler,
       description: props.lambdaProps.description,
-      environment: props.lambdaProps.environment,
+      environment: buildLambdaEnvironment({
+        environment: props.lambdaProps.environment,
+        timeout: props.lambdaProps.timeout,
+      }),
       ephemeralStorageSize: props.lambdaProps.ephemeralStorageSize,
       memorySize: props.lambdaProps.memorySize,
       reservedConcurrentExecutions:
@@ -297,7 +301,10 @@ export class LambdaWorker extends cdk.Construct {
       }),
       functionName: props.name,
       description: props.lambdaProps.description,
-      environment: props.lambdaProps.environment,
+      environment: buildLambdaEnvironment({
+        environment: props.lambdaProps.environment,
+        timeout: props.lambdaProps.timeout,
+      }),
       ephemeralStorageSize: props.lambdaProps.ephemeralStorageSize,
       memorySize: props.lambdaProps.memorySize,
       reservedConcurrentExecutions:

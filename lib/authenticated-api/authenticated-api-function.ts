@@ -4,6 +4,7 @@ import * as lambda from "@aws-cdk/aws-lambda";
 import * as lambdaNode from "@aws-cdk/aws-lambda-nodejs";
 
 import { AuthenticatedApiFunctionProps } from "./authenticated-api-function-props";
+import { buildLambdaEnvironment } from "../util/build-lambda-environment";
 
 export const MINIMUM_MEMORY_SIZE = 1024;
 
@@ -22,7 +23,10 @@ export class AuthenticatedApiFunction extends lambdaNode.NodejsFunction {
     super(scope, id, {
       functionName: `${props.name}`,
       entry: props.entry,
-      environment: props.environment,
+      environment: buildLambdaEnvironment({
+        environment: props.environment,
+        timeout: props.timeout,
+      }),
       handler: props.handler,
       memorySize: props.memorySize ?? MINIMUM_MEMORY_SIZE,
 

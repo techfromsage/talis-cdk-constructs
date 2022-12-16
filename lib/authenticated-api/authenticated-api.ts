@@ -13,6 +13,7 @@ import * as path from "path";
 import { AuthenticatedApiProps } from "./authenticated-api-props";
 import { RouteUrlProps } from "./route-url-props";
 import { IAlarmAction } from "@aws-cdk/aws-cloudwatch";
+import { buildLambdaEnvironment } from "../util/build-lambda-environment";
 
 const DEFAULT_API_LATENCY_THRESHOLD = cdk.Duration.minutes(1);
 const DEFAULT_LAMBDA_DURATION_THRESHOLD = cdk.Duration.minutes(1);
@@ -85,6 +86,8 @@ export class AuthenticatedApi extends cdk.Construct {
       }
     }
 
+    const authLambdaTimeout = cdk.Duration.minutes(2);
+
     // Auth Lambda
     const authLambda = new lambdaNodeJs.NodejsFunction(
       this,
@@ -109,18 +112,21 @@ export class AuthenticatedApi extends cdk.Construct {
           ],
         },
 
-        environment: {
-          PERSONA_CLIENT_NAME: `${props.prefix}${props.name}-authoriser`,
-          PERSONA_HOST: props.persona.host,
-          PERSONA_SCHEME: props.persona.scheme,
-          PERSONA_PORT: props.persona.port,
-          PERSONA_OAUTH_ROUTE: props.persona.oauth_route,
-          SCOPE_CONFIG: JSON.stringify(scopeConfig),
-        },
+        environment: buildLambdaEnvironment({
+          environment: {
+            PERSONA_CLIENT_NAME: `${props.prefix}${props.name}-authoriser`,
+            PERSONA_HOST: props.persona.host,
+            PERSONA_SCHEME: props.persona.scheme,
+            PERSONA_PORT: props.persona.port,
+            PERSONA_OAUTH_ROUTE: props.persona.oauth_route,
+            SCOPE_CONFIG: JSON.stringify(scopeConfig),
+          },
+          timeout: authLambdaTimeout,
+        }),
 
         awsSdkConnectionReuse: true,
         runtime: lambda.Runtime.NODEJS_14_X,
-        timeout: cdk.Duration.minutes(2),
+        timeout: authLambdaTimeout,
         securityGroups: props.securityGroups,
         vpc: props.vpc,
         vpcSubnets: props.vpcSubnets,
