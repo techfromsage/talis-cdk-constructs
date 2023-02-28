@@ -4,13 +4,13 @@
 
 Properties for any custom Talis CDK Stack, these are on top of the default CDK Stack props.
 
-| Property              | Type                       | Required | Description                                            |
-|-----------------------|----------------------------| -------- |--------------------------------------------------------|
-| vpcId                 | string                     | Optional | ID of the VPC to deploy stack components into          |
-| deploymentEnvironment | TalisDeploymentEnvironment | Required | The environment this stack is being deployed into      |
-| app                   | string                     | Required | application name                                       |
-| release               | string                     | Required | release version in format <build-number>-<commit-hash> |
-| env?                  | Environment                | Optional | The AWS environment (account/region) where this stack will be deployed      |
+| Property              | Type                       | Required | Description                                                            |
+| --------------------- | -------------------------- | -------- | ---------------------------------------------------------------------- |
+| vpcId                 | string                     | Optional | ID of the VPC to deploy stack components into                          |
+| deploymentEnvironment | TalisDeploymentEnvironment | Required | The environment this stack is being deployed into                      |
+| app                   | string                     | Required | application name                                                       |
+| release               | string                     | Required | release version in format <build-number>-<commit-hash>                 |
+| env?                  | Environment                | Optional | The AWS environment (account/region) where this stack will be deployed |
 
 ### TalisCdkStack
 
@@ -29,7 +29,9 @@ stack.getRemovalPolicyForTalisDeploymentEnvironment(
   props.deploymentEnvironment
 );
 ```
+
 It also adds the following tags to all taggable resources created within the construct:
+
 - tfs-app
 - tfs-environment
 - tfs-release
@@ -37,8 +39,6 @@ It also adds the following tags to all taggable resources created within the con
 - tfs-service
 
 The values of the tags are resolved from the TalisCdkStackProps passed to the construct.
-
-
 
 ### TalisDeploymentEnvironment
 

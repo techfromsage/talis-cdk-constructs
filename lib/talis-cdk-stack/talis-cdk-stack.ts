@@ -1,4 +1,4 @@
-import * as cdk from '@aws-cdk/core';
+import * as cdk from "@aws-cdk/core";
 
 import { IVpc, Vpc } from "@aws-cdk/aws-ec2";
 import { Stack, Construct, RemovalPolicy } from "@aws-cdk/core";
@@ -14,9 +14,9 @@ export class TalisCdkStack extends Stack {
       this.vpc = this.resolveVpc(props.vpcId);
     }
 
-    cdk.Tags.of(scope).add('tfs-app', props.app); // e.g. depot
-    cdk.Tags.of(scope).add('tfs-environment', props.deploymentEnvironment); // e.g. production staging development
-    cdk.Tags.of(scope).add('tfs-release', props.release); // e.g. 8561-105814f
+    cdk.Tags.of(scope).add("tfs-app", props.app); // e.g. depot
+    cdk.Tags.of(scope).add("tfs-environment", props.deploymentEnvironment); // e.g. production staging development
+    cdk.Tags.of(scope).add("tfs-release", props.release); // e.g. 8561-105814f
 
     // props.env comes from aws cdk core StackProps. It's optional
     // so that an environment agnostic stack can be created.
@@ -24,8 +24,11 @@ export class TalisCdkStack extends Stack {
     // region or service.
     // However, when we deploy into our environments for real - props.env will be set
     if (props.env?.region) {
-      cdk.Tags.of(scope).add('tfs-region', props.env.region);
-      cdk.Tags.of(scope).add('tfs-service', `${props.app}-${props.env.region.split('-')[0]}`);
+      cdk.Tags.of(scope).add("tfs-region", props.env.region);
+      cdk.Tags.of(scope).add(
+        "tfs-service",
+        `${props.app}-${props.env.region.split("-")[0]}`
+      );
     }
   }
 

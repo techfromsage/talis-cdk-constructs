@@ -15,8 +15,8 @@ test("Empty Stack", () => {
     app,
     "MyTestStack",
     {
-      app: 'test-app',
-      release: 'test-release',
+      app: "test-app",
+      release: "test-release",
       deploymentEnvironment: TalisDeploymentEnvironment.TEST,
     }
   );

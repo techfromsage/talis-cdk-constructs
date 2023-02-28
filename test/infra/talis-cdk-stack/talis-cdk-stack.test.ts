@@ -11,7 +11,6 @@ import {
   haveResourceLike,
 } from "@aws-cdk/assert";
 
-
 describe("Talis CDK Stack", () => {
   let stack: TalisCdkStack;
   let app: cdk.App;
@@ -20,10 +19,10 @@ describe("Talis CDK Stack", () => {
   describe("Default environment removal policies", () => {
     beforeEach(() => {
       app = new cdk.App();
-      props = 
-        { deploymentEnvironment: TalisDeploymentEnvironment.TEST,       
-          app: 'test-depot',
-          release: 'test1-105814f' 
+      props = {
+        deploymentEnvironment: TalisDeploymentEnvironment.TEST,
+        app: "test-depot",
+        release: "test1-105814f",
       };
       stack = new TalisCdkStack(app, "test-stack", props);
     });
@@ -46,17 +45,14 @@ describe("Talis CDK Stack", () => {
   describe("Tags are applied to resources", () => {
     it("Should have the correct tags", () => {
       app = new cdk.App();
-      stack = new TalisCdkStack(
-        app,
-        "TestStack",
-        { deploymentEnvironment: TalisDeploymentEnvironment.TEST,
-          app: 'test-depot',
-          release: 'test1-105814f',
-          env: {
-            region: 'eu-west-1',
-          }
-        }
-      );
+      stack = new TalisCdkStack(app, "TestStack", {
+        deploymentEnvironment: TalisDeploymentEnvironment.TEST,
+        app: "test-depot",
+        release: "test1-105814f",
+        env: {
+          region: "eu-west-1",
+        },
+      });
 
       new sns.Topic(stack, "TestAlarm", {
         topicName: "TestAlarm",
@@ -66,42 +62,39 @@ describe("Talis CDK Stack", () => {
 
       expectCDK(stack).to(
         haveResourceLike("AWS::SNS::Topic", {
-          "Tags": [
+          Tags: [
             {
-              "Key": "tfs-app",
-              "Value": "test-depot"
+              Key: "tfs-app",
+              Value: "test-depot",
             },
             {
-              "Key": "tfs-environment",
-              "Value": "test"
+              Key: "tfs-environment",
+              Value: "test",
             },
             {
-              "Key": "tfs-region",
-              "Value": "eu-west-1"
+              Key: "tfs-region",
+              Value: "eu-west-1",
             },
             {
-              "Key": "tfs-release",
-              "Value": "test1-105814f"
+              Key: "tfs-release",
+              Value: "test1-105814f",
             },
             {
-              "Key": "tfs-service",
-              "Value": "test-depot-eu"
-            }
+              Key: "tfs-service",
+              Value: "test-depot-eu",
+            },
           ],
-          "TopicName": "TestAlarm"
+          TopicName: "TestAlarm",
         })
       );
     });
     it("Should have correct tags when no environment", () => {
       app = new cdk.App();
-      stack = new TalisCdkStack(
-        app,
-        "TestStack",
-        { deploymentEnvironment: TalisDeploymentEnvironment.TEST,
-          app: 'test-depot',
-          release: 'test1-105814f',
-        }
-      );
+      stack = new TalisCdkStack(app, "TestStack", {
+        deploymentEnvironment: TalisDeploymentEnvironment.TEST,
+        app: "test-depot",
+        release: "test1-105814f",
+      });
 
       new sns.Topic(stack, "TestAlarm", {
         topicName: "TestAlarm",
@@ -111,21 +104,21 @@ describe("Talis CDK Stack", () => {
 
       expectCDK(stack).to(
         haveResourceLike("AWS::SNS::Topic", {
-          "Tags": [
+          Tags: [
             {
-              "Key": "tfs-app",
-              "Value": "test-depot"
+              Key: "tfs-app",
+              Value: "test-depot",
             },
             {
-              "Key": "tfs-environment",
-              "Value": "test"
+              Key: "tfs-environment",
+              Value: "test",
             },
             {
-              "Key": "tfs-release",
-              "Value": "test1-105814f"
+              Key: "tfs-release",
+              Value: "test1-105814f",
             },
           ],
-          "TopicName": "TestAlarm"
+          TopicName: "TestAlarm",
         })
       );
     });
