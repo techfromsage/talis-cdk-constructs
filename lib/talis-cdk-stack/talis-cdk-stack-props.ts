@@ -6,4 +6,8 @@ export interface TalisCdkStackProps extends StackProps {
   readonly vpcId?: string;
   // Environment the stack is deployed into
   readonly deploymentEnvironment: TalisDeploymentEnvironment;
+
+  // The following are used to create tags on the cloud formation stack.
+  readonly release: string; // tag tfs-release
+  readonly app: string; // tag tfs-app
 }
