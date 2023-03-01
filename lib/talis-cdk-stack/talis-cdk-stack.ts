@@ -4,7 +4,7 @@ import { IVpc, Vpc } from "@aws-cdk/aws-ec2";
 import { Stack, Construct, RemovalPolicy } from "@aws-cdk/core";
 import { TalisCdkStackProps } from "./talis-cdk-stack-props";
 import { TalisDeploymentEnvironment } from "./talis-deployment-environment";
-
+import { getTalisShortRegionFromTalisRegionName } from "./talis-region";
 export class TalisCdkStack extends Stack {
   protected readonly vpc: IVpc;
 
@@ -24,11 +24,25 @@ export class TalisCdkStack extends Stack {
     // region or service.
     // However, when we deploy into our environments for real - props.env will be set
     if (props.env?.region) {
-      cdk.Tags.of(scope).add("tfs-region", props.env.region);
-      cdk.Tags.of(scope).add(
-        "tfs-service",
-        `${props.app}-${props.env.region.split("-")[0]}`
+      const talisShortRegion = getTalisShortRegionFromTalisRegionName(
+        props.env.region
       );
+      if (talisShortRegion === undefined) {
+        throw new Error(
+          `Cannot resolve a tfs-region for props.env.region: '${props.env.region}'`
+        );
+      }
+      cdk.Tags.of(scope).add("tfs-region", talisShortRegion);
+      let tfsService;
+      if (
+        props.deploymentEnvironment === TalisDeploymentEnvironment.PRODUCTION
+      ) {
+        tfsService = `${props.app}-${talisShortRegion}`;
+      } else {
+        tfsService = `${props.app}-${props.deploymentEnvironment}-${talisShortRegion}`;
+      }
+
+      cdk.Tags.of(scope).add("tfs-service", tfsService);
     }
   }
 

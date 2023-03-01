@@ -4,11 +4,15 @@ import {
   TalisDeploymentEnvironment,
   TalisCdkStack,
   TalisCdkStackProps,
+  TalisShortRegion,
+  TalisRegion,
 } from "../../../lib";
 import {
   expect as expectCDK,
   countResources,
   haveResourceLike,
+  arrayWith,
+  objectLike,
 } from "@aws-cdk/assert";
 
 describe("Talis CDK Stack", () => {
@@ -47,10 +51,10 @@ describe("Talis CDK Stack", () => {
       app = new cdk.App();
       stack = new TalisCdkStack(app, "TestStack", {
         deploymentEnvironment: TalisDeploymentEnvironment.TEST,
-        app: "test-depot",
-        release: "test1-105814f",
+        app: "depot",
+        release: "1234-105814f",
         env: {
-          region: "eu-west-1",
+          region: TalisRegion.EU,
         },
       });
 
@@ -65,7 +69,7 @@ describe("Talis CDK Stack", () => {
           Tags: [
             {
               Key: "tfs-app",
-              Value: "test-depot",
+              Value: "depot",
             },
             {
               Key: "tfs-environment",
@@ -73,15 +77,15 @@ describe("Talis CDK Stack", () => {
             },
             {
               Key: "tfs-region",
-              Value: "eu-west-1",
+              Value: "eu",
             },
             {
               Key: "tfs-release",
-              Value: "test1-105814f",
+              Value: "1234-105814f",
             },
             {
               Key: "tfs-service",
-              Value: "test-depot-eu",
+              Value: "depot-test-eu",
             },
           ],
           TopicName: "TestAlarm",
@@ -120,6 +124,106 @@ describe("Talis CDK Stack", () => {
           ],
           TopicName: "TestAlarm",
         })
+      );
+    });
+    describe("should set the correct tfs-region for all env.regions", () => {
+      test.each([
+        [TalisRegion.CANADA, TalisShortRegion.CANADA],
+        [TalisRegion.EU, TalisShortRegion.EU],
+        [TalisRegion.LOCAL, TalisShortRegion.LOCAL],
+      ])(
+        "Environment AWS region %s should have tfs-region of %s",
+        (envAwsRegion, expectedShortRegion) => {
+          app = new cdk.App();
+          props = {
+            deploymentEnvironment: TalisDeploymentEnvironment.TEST,
+            app: "test-depot",
+            release: "test1-105814f",
+            env: {
+              region: envAwsRegion,
+            },
+          };
+          stack = new TalisCdkStack(app, "test-stack", props);
+          new sns.Topic(stack, "TestAlarm", {
+            topicName: "TestAlarm",
+          });
+
+          expectCDK(stack).to(countResources("AWS::SNS::Topic", 1));
+          expectCDK(stack).to(
+            haveResourceLike("AWS::SNS::Topic", {
+              Tags: arrayWith(
+                objectLike({
+                  Key: "tfs-region",
+                  Value: expectedShortRegion,
+                })
+              ),
+            })
+          );
+        }
+      );
+    });
+    describe("should set the correct tfs-service for all dev environments", () => {
+      test.each([
+        {
+          devEnvironment: TalisDeploymentEnvironment.TEST,
+          region: TalisRegion.EU,
+          expectedTfsService: "depot-test-eu",
+        },
+        {
+          devEnvironment: TalisDeploymentEnvironment.DEVELOPMENT,
+          region: TalisRegion.LOCAL,
+          expectedTfsService: "depot-development-local",
+        },
+        {
+          devEnvironment: TalisDeploymentEnvironment.BUILD,
+          region: TalisRegion.CANADA,
+          expectedTfsService: "depot-build-ca",
+        },
+        {
+          devEnvironment: TalisDeploymentEnvironment.ONDEMAND,
+          region: TalisRegion.EU,
+          expectedTfsService: "depot-ondemand-eu",
+        },
+        {
+          devEnvironment: TalisDeploymentEnvironment.STAGING,
+          region: TalisRegion.EU,
+          expectedTfsService: "depot-staging-eu",
+        },
+        {
+          devEnvironment: TalisDeploymentEnvironment.PRODUCTION,
+          region: TalisRegion.EU,
+          expectedTfsService: "depot-eu",
+        },
+      ])(
+        // todo correct title
+        "App depot, AWS props.env.region ${region} and dev environment ${devEnvironment} should have tfs-service of %s.expectedTfsService",
+        (testCase) => {
+          app = new cdk.App();
+          props = {
+            deploymentEnvironment: testCase.devEnvironment,
+            app: "depot",
+            release: "test1-105814f",
+            env: {
+              region: testCase.region,
+            },
+          };
+          stack = new TalisCdkStack(app, "test-stack", props);
+          new sns.Topic(stack, "TestAlarm", {
+            topicName: "TestAlarm",
+          });
+
+          expectCDK(stack).to(countResources("AWS::SNS::Topic", 1));
+          expectCDK(stack).to(
+            haveResourceLike("AWS::SNS::Topic", {
+              Tags: arrayWith(
+                objectLike({
+                  Key: "tfs-service",
+                  Value: testCase.expectedTfsService,
+                })
+              ),
+            })
+          );
+        }
       );
     });
   });
