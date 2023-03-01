@@ -1,7 +1,7 @@
 import {
   TalisRegion,
   TalisShortRegion,
-  getTalisShortRegionFromTalisRegionName,
+  getTalisShortRegionFromTalisRegion,
 } from "../../../lib";
 
 describe("Talis Region", () => {
@@ -24,16 +24,16 @@ describe("Talis Short Region", () => {
 
 describe("getTalisShortRegionFromTalisRegionName", () => {
   test("Returns correct short region for Canada", () => {
-    expect(getTalisShortRegionFromTalisRegionName(TalisRegion.CANADA)).toBe(
+    expect(getTalisShortRegionFromTalisRegion("ca-central-1")).toBe(
       TalisShortRegion.CANADA
     );
   });
   test("Returns correct short region for EU", () => {
-    expect(getTalisShortRegionFromTalisRegionName(TalisRegion.EU)).toBe(
+    expect(getTalisShortRegionFromTalisRegion(TalisRegion.EU)).toBe(
       TalisShortRegion.EU
     );
   });
   test("Returns undefined if the env region is not defined", () => {
-    expect(getTalisShortRegionFromTalisRegionName("foo")).toBeUndefined();
+    expect(getTalisShortRegionFromTalisRegion("foo")).toBeUndefined();
   });
 });

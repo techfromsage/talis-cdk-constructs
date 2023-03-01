@@ -162,8 +162,8 @@ describe("Talis CDK Stack", () => {
         }
       );
     });
-    describe("should set the correct tfs-service for all dev environments", () => {
-      test.each([
+    describe("should set the correct tfs-service for all apps, dev environments and regions", () => {
+      const testcases = [
         {
           devEnvironment: TalisDeploymentEnvironment.TEST,
           region: TalisRegion.EU,
@@ -194,17 +194,16 @@ describe("Talis CDK Stack", () => {
           region: TalisRegion.EU,
           expectedTfsService: "depot-eu",
         },
-      ])(
-        // todo correct title
-        "App depot, AWS props.env.region ${region} and dev environment ${devEnvironment} should have tfs-service of %s.expectedTfsService",
-        (testCase) => {
+      ];
+      testcases.forEach((testcase) => {
+        test(`given app='depot', AWS props.env.region='${testcase.region}' and devEnvironment='${testcase.devEnvironment}' then tfs-service='${testcase.expectedTfsService}'`, () => {
           app = new cdk.App();
           props = {
-            deploymentEnvironment: testCase.devEnvironment,
+            deploymentEnvironment: testcase.devEnvironment,
             app: "depot",
             release: "test1-105814f",
             env: {
-              region: testCase.region,
+              region: testcase.region,
             },
           };
           stack = new TalisCdkStack(app, "test-stack", props);
@@ -218,13 +217,13 @@ describe("Talis CDK Stack", () => {
               Tags: arrayWith(
                 objectLike({
                   Key: "tfs-service",
-                  Value: testCase.expectedTfsService,
+                  Value: testcase.expectedTfsService,
                 })
               ),
             })
           );
-        }
-      );
+        });
+      });
     });
   });
 });

@@ -4,7 +4,7 @@ import { IVpc, Vpc } from "@aws-cdk/aws-ec2";
 import { Stack, Construct, RemovalPolicy } from "@aws-cdk/core";
 import { TalisCdkStackProps } from "./talis-cdk-stack-props";
 import { TalisDeploymentEnvironment } from "./talis-deployment-environment";
-import { getTalisShortRegionFromTalisRegionName } from "./talis-region";
+import { getTalisShortRegionFromTalisRegion } from "./talis-region";
 export class TalisCdkStack extends Stack {
   protected readonly vpc: IVpc;
 
@@ -24,7 +24,7 @@ export class TalisCdkStack extends Stack {
     // region or service.
     // However, when we deploy into our environments for real - props.env will be set
     if (props.env?.region) {
-      const talisShortRegion = getTalisShortRegionFromTalisRegionName(
+      const talisShortRegion = getTalisShortRegionFromTalisRegion(
         props.env.region
       );
       if (talisShortRegion === undefined) {
