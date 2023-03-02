@@ -101,6 +101,4 @@ _Breaking Change_: _semantic-release 17.4.4_ doesn't support _feat!:_ as a _brea
 Use the commit comment footer _BREAKING CHANGE:..._ instead. This will trigger a new _Breaking Release_.
 
 To check if your branch follows the _semantic-release_ rules, run the command
-`npx semantic-release -b add_release_label_to_the_namespace --dry-run --branches main`
-
-Note: Be aware the commit semantic rules in both libraries are not fully aligned, meaning that some merges into master could pass _commitlint_ rules, but still not trigger the publishing of a new release by _semantic-release_ (this is expected).
+`npx semantic-release --branches <your-feature-branch> --dry-run`
