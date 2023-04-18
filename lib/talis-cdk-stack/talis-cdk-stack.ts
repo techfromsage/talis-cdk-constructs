@@ -14,9 +14,9 @@ export class TalisCdkStack extends Stack {
       this.vpc = this.resolveVpc(props.vpcId);
     }
 
-    cdk.Tags.of(scope).add("tfs-app", props.app); // e.g. depot
-    cdk.Tags.of(scope).add("tfs-environment", props.deploymentEnvironment); // e.g. production staging development
-    cdk.Tags.of(scope).add("tfs-release", props.release); // e.g. 8561-105814f
+    cdk.Tags.of(this).add("tfs-app", props.app); // e.g. depot
+    cdk.Tags.of(this).add("tfs-environment", props.deploymentEnvironment); // e.g. production staging development
+    cdk.Tags.of(this).add("tfs-release", props.release); // e.g. 8561-105814f
 
     // props.env comes from aws cdk core StackProps. It's optional
     // so that an environment agnostic stack can be created.
@@ -32,7 +32,7 @@ export class TalisCdkStack extends Stack {
           `Cannot resolve a tfs-region for props.env.region: '${props.env.region}'`
         );
       }
-      cdk.Tags.of(scope).add("tfs-region", talisShortRegion);
+      cdk.Tags.of(this).add("tfs-region", talisShortRegion);
       let tfsService;
       if (
         props.deploymentEnvironment === TalisDeploymentEnvironment.PRODUCTION
@@ -42,7 +42,7 @@ export class TalisCdkStack extends Stack {
         tfsService = `${props.app}-${props.deploymentEnvironment}-${talisShortRegion}`;
       }
 
-      cdk.Tags.of(scope).add("tfs-service", tfsService);
+      cdk.Tags.of(this).add("tfs-service", tfsService);
     }
   }
 
