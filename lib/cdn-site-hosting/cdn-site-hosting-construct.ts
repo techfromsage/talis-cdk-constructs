@@ -61,6 +61,12 @@ export class CdnSiteHostingConstruct extends cdk.Construct {
       bucketName: siteDomain,
       websiteIndexDocument: props.websiteIndexDocument,
       websiteErrorDocument,
+      blockPublicAccess: {
+        blockPublicAcls: false,
+        blockPublicPolicy: false,
+        ignorePublicAcls: false,
+        restrictPublicBuckets: false,
+      },
       publicReadAccess: true,
       removalPolicy: props.removalPolicy,
       autoDeleteObjects: props.removalPolicy === cdk.RemovalPolicy.DESTROY,
