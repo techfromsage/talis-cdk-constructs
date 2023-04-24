@@ -180,6 +180,12 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
       `${prefix}simple-authenticated-api-docs`,
       {
         bucketName: `${prefix}simple-authenticated-api-docs`,
+        blockPublicAccess: {
+          blockPublicAcls: false,
+          blockPublicPolicy: false,
+          ignorePublicAcls: false,
+          restrictPublicBuckets: false,
+        },
         publicReadAccess: true,
         removalPolicy: cdk.RemovalPolicy.DESTROY,
         websiteIndexDocument: "index.html",
