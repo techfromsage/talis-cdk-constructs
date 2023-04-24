@@ -1,5 +1,5 @@
 import { PersonaClient } from "talis-node";
-declare type ParsedArn = {
+type ParsedArn = {
     method: string;
     resourcePath: string;
     apiOptions: {
