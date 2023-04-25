@@ -106,13 +106,13 @@ jobs:
       - node/install-packages
       - run:
           name: Run unit tests
-          command: npm run unit-test
+          command: npm run jest-unit-test -- --ci --maxWorkers=2
       - run:
           name: Run infra tests
-          command: npm run infra-test
+          command: npm run jest-infra-test -- --ci --maxWorkers=2
       - run:
           name: Run integration tests
-          command: npm run integration-test
+          command: npm run jest-integration-test -- --ci --maxWorkers=2
   destroy-lambda-worker:
     executor: default_executor
     steps:

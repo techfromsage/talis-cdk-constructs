@@ -296,7 +296,7 @@ export class LambdaWorker extends cdk.Construct {
 
     return new lambda.DockerImageFunction(this, props.name, {
       code: lambda.DockerImageCode.fromEcr(ecrRepository, {
-        tag: imageTag,
+        tagOrDigest: imageTag,
         cmd: [props.lambdaProps.dockerCommand ?? ""],
       }),
       functionName: props.name,

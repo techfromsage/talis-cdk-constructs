@@ -113,7 +113,9 @@ describe("AuthenticatedApi", () => {
       await axiosNoAuthInstance.get("route1");
       throw Error("Expected a 401 response");
     } catch (err) {
-      expect(err.message).toBe("Request failed with status code 401");
+      expect((err as Error).message).toBe(
+        "Request failed with status code 401"
+      );
     }
   });
 
@@ -130,7 +132,9 @@ describe("AuthenticatedApi", () => {
       await axiosBadAuthInstance.get("route1");
       throw Error("Expected a 403 response");
     } catch (err) {
-      expect(err.message).toBe("Request failed with status code 403");
+      expect((err as Error).message).toBe(
+        "Request failed with status code 403"
+      );
     }
   });
 
@@ -184,7 +188,9 @@ describe("AuthenticatedApi", () => {
       await axiosBadAuthInstance.get("route3/1234");
       throw Error("Expected a 403 response");
     } catch (err) {
-      expect(err.message).toBe("Request failed with status code 403");
+      expect((err as Error).message).toBe(
+        "Request failed with status code 403"
+      );
     }
   });
 
@@ -215,7 +221,9 @@ describe("AuthenticatedApi", () => {
       await axiosBadAuthInstance.get("route4/1234/route4");
       throw Error("Expected a 403 response");
     } catch (err) {
-      expect(err.message).toBe("Request failed with status code 403");
+      expect((err as Error).message).toBe(
+        "Request failed with status code 403"
+      );
     }
   });
 });
