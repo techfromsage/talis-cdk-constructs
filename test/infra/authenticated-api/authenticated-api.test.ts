@@ -1,8 +1,10 @@
 import {
   expect as expectCDK,
   countResources,
+  haveOutput,
   haveResource,
   haveResourceLike,
+  stringLike,
 } from "@aws-cdk/assert";
 import * as apigatewayv2 from "@aws-cdk/aws-apigatewayv2";
 import * as ec2 from "@aws-cdk/aws-ec2";
@@ -309,6 +311,7 @@ describe("AuthenticatedApi", () => {
       );
     });
   });
+
   describe("with url routes", () => {
     let stack: cdk.Stack;
 
@@ -375,6 +378,132 @@ describe("AuthenticatedApi", () => {
         haveResource("AWS::ApiGatewayV2::Route", {
           RouteKey: "GET /docs/index.html",
           AuthorizationType: "NONE",
+        })
+      );
+    });
+  });
+
+  describe("with access logs", () => {
+    let stack: cdk.Stack;
+    let alarmTopic: sns.Topic;
+    const apiProps = {
+      prefix: `test-`,
+      name: "MyTestAuthenticatedApiWithAccessLogs",
+      description: "A simple example API",
+      stageName: "development",
+      domainName: `test-simple-authenticated-api.talis.com`,
+      certificateArn:
+        "arn:aws:acm:eu-west-1:987654321000:certificate/12345678-abcd-1234-abcd-123456789012",
+      persona: {
+        host: "staging-users.talis.com",
+        scheme: "https",
+        port: "443",
+        oauth_route: "/oauth/tokens/",
+      },
+    };
+
+    beforeEach(() => {
+      const app = new cdk.App();
+      stack = new cdk.Stack(app, "TestStack");
+      alarmTopic = new sns.Topic(stack, "TestAlarm", {
+        topicName: "TestAlarm",
+      });
+    });
+
+    test("logging disabled by default", () => {
+      new AuthenticatedApi(stack, "MyTestAuthenticatedApi", {
+        ...apiProps,
+        alarmTopic,
+      });
+
+      expectCDK(stack).to(countResources("AWS::Logs::LogGroup", 0));
+    });
+
+    test("logging can be enabled", () => {
+      new AuthenticatedApi(stack, "MyTestAuthenticatedApi", {
+        ...apiProps,
+        alarmTopic,
+        logging: {
+          enabled: true,
+        },
+      });
+
+      expectCDK(stack).to(
+        haveResourceLike("AWS::Logs::LogGroup", {
+          LogGroupName:
+            "/aws/vendedlogs/test-MyTestAuthenticatedApiWithAccessLogs-accessLog",
+          RetentionInDays: 731,
+        })
+      );
+
+      expectCDK(stack).to(
+        haveOutput({
+          exportName:
+            "test-MyTestAuthenticatedApiWithAccessLogs-accessLogGroup",
+        })
+      );
+
+      expectCDK(stack).to(
+        haveResourceLike("AWS::ApiGatewayV2::Stage", {
+          StageName: "$default",
+          AccessLogSettings: {
+            DestinationArn: {
+              "Fn::GetAtt": [stringLike("MyTestAuthenticatedApi*"), "Arn"],
+            },
+            Format: stringLike(`{"requestId":"$context.requestId",*}`),
+          },
+        })
+      );
+    });
+
+    test("logging can be enabled with custom log format", () => {
+      const apacheLikeFormat = `$context.identity.sourceIp - - [$context.requestTime] "$context.routeKey $context.protocol" $context.status $context.responseLength $context.requestId`;
+
+      new AuthenticatedApi(stack, "MyTestAuthenticatedApi", {
+        ...apiProps,
+        alarmTopic,
+        logging: {
+          enabled: true,
+          format: apacheLikeFormat,
+        },
+      });
+
+      expectCDK(stack).to(
+        haveResourceLike("AWS::Logs::LogGroup", {
+          LogGroupName:
+            "/aws/vendedlogs/test-MyTestAuthenticatedApiWithAccessLogs-accessLog",
+          RetentionInDays: 731,
+        })
+      );
+
+      expectCDK(stack).to(
+        haveResourceLike("AWS::ApiGatewayV2::Stage", {
+          StageName: "$default",
+          AccessLogSettings: {
+            DestinationArn: {
+              "Fn::GetAtt": [stringLike("MyTestAuthenticatedApi*"), "Arn"],
+            },
+            Format: apacheLikeFormat,
+          },
+        })
+      );
+    });
+
+    test("logging can be enabled with custom retention period", () => {
+      new AuthenticatedApi(stack, "MyTestAuthenticatedApi", {
+        ...apiProps,
+        alarmTopic,
+        logging: {
+          enabled: true,
+          retention: 90,
+        },
+      });
+
+      expectCDK(stack).to(
+        haveResourceLike("AWS::Logs::LogGroup", {
+          LogGroupName:
+            "/aws/vendedlogs/test-MyTestAuthenticatedApiWithAccessLogs-accessLog",
+          RetentionInDays: 90,
         })
       );
     });
