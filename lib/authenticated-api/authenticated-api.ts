@@ -2,9 +2,11 @@ import * as acm from "@aws-cdk/aws-certificatemanager";
 import * as apigatewayv2 from "@aws-cdk/aws-apigatewayv2";
 import * as apigateway2Integrations from "@aws-cdk/aws-apigatewayv2-integrations";
 import * as authorizers from "@aws-cdk/aws-apigatewayv2-authorizers";
+import * as awslogs from "@aws-cdk/aws-logs";
 import * as cdk from "@aws-cdk/core";
 import * as cloudwatch from "@aws-cdk/aws-cloudwatch";
 import * as cloudwatchActions from "@aws-cdk/aws-cloudwatch-actions";
+import * as iam from "@aws-cdk/aws-iam";
 import * as integrations from "@aws-cdk/aws-apigatewayv2-integrations";
 import * as lambda from "@aws-cdk/aws-lambda";
 import * as lambdaNodeJs from "@aws-cdk/aws-lambda-nodejs";
@@ -46,8 +48,9 @@ export class AuthenticatedApi extends cdk.Construct {
         props.certificateArn
       ),
     });
+    const apiName = `${props.prefix}${props.name}`;
     const apiGatewayProps: apigatewayv2.HttpApiProps = {
-      apiName: `${props.prefix}${props.name}`,
+      apiName: apiName,
       defaultDomainMapping: { domainName: this.domainName },
       ...(props.corsDomain && {
         corsPreflight: {
@@ -59,17 +62,56 @@ export class AuthenticatedApi extends cdk.Construct {
       }),
     };
 
-    this.httpApi = new apigatewayv2.HttpApi(
-      this,
-      `${props.prefix}${props.name}`,
-      apiGatewayProps
-    );
+    this.httpApi = new apigatewayv2.HttpApi(this, apiName, apiGatewayProps);
 
     this.apiId = this.httpApi.apiId;
     this.httpApiId = this.httpApi.httpApiId;
 
+    if (props.logging?.enabled) {
+      const logGroup = new awslogs.LogGroup(this, "apiGatewayLogs", {
+        // CloudWatch Logs automatically enables the /aws/vendedlogs/* prefix
+        // in the resource policy, so we use it to avoid adding each log
+        // group to the policy, which has a limit of 5120 characters.
+        logGroupName: `/aws/vendedlogs/${apiName}-accessLog`,
+        retention: props.logging.retention,
+      });
+
+      new cdk.CfnOutput(this, "apiGatewayLogGroup", {
+        exportName: `${apiName}-accessLogGroup`,
+        value: logGroup.logGroupName,
+      });
+
+      // Setting the accessLogSettings directly on the created HttpApi is
+      // not implemented in CDK. Since we only use a single API stage,
+      // we can grab the default stage, and enable logging there.
+      // See https://github.com/aws/aws-cdk/issues/11100
+      const defaultStage = this.httpApi.defaultStage?.node
+        .defaultChild as apigatewayv2.CfnStage;
+
+      defaultStage.accessLogSettings = {
+        destinationArn: logGroup.logGroupArn,
+        format:
+          props.logging.format ??
+          JSON.stringify({
+            requestId: "$context.requestId",
+            protocol: "$context.protocol",
+            method: "$context.httpMethod",
+            path: "$context.path",
+            status: "$context.status",
+            domainName: "$context.domainName",
+            requestTime: "$context.requestTime",
+            responseLength: "$context.responseLength",
+            userAgent: "$context.identity.userAgent",
+            sourceIp: "$context.identity.sourceIp",
+            clientContext: {
+              clientId: "$context.authorizer.clientId",
+            },
+          }),
+      };
+    }
+
     new cdk.CfnOutput(this, "apiGatewayEndpoint", {
-      exportName: `${props.prefix}${props.name}-endpoint`,
+      exportName: `${apiName}-endpoint`,
       value: this.httpApi.apiEndpoint,
     });
 
@@ -91,9 +133,9 @@ export class AuthenticatedApi extends cdk.Construct {
     // Auth Lambda
     const authLambda = new lambdaNodeJs.NodejsFunction(
       this,
-      `${props.prefix}${props.name}-authoriser`,
+      `${apiName}-authoriser`,
       {
-        functionName: `${props.prefix}${props.name}-authoriser`,
+        functionName: `${apiName}-authoriser`,
 
         entry: `${path.resolve(__dirname)}/../../src/lambda/api/authorizer.ts`,
         handler: "validateToken",
@@ -114,7 +156,7 @@ export class AuthenticatedApi extends cdk.Construct {
 
         environment: buildLambdaEnvironment({
           environment: {
-            PERSONA_CLIENT_NAME: `${props.prefix}${props.name}-authoriser`,
+            PERSONA_CLIENT_NAME: `${apiName}-authoriser`,
             PERSONA_HOST: props.persona.host,
             PERSONA_SCHEME: props.persona.scheme,
             PERSONA_PORT: props.persona.port,
@@ -137,7 +179,7 @@ export class AuthenticatedApi extends cdk.Construct {
       "lambda-authorizer",
       authLambda,
       {
-        authorizerName: `${props.prefix}${props.name}-http-lambda-authoriser`,
+        authorizerName: `${apiName}-http-lambda-authoriser`,
         responseTypes: [authorizers.HttpLambdaResponseType.SIMPLE], // Define if returns simple and/or iam response
       }
     );
@@ -181,9 +223,9 @@ export class AuthenticatedApi extends cdk.Construct {
           .with({ period: cdk.Duration.minutes(1), statistic: "sum" });
         const durationAlarm = new cloudwatch.Alarm(
           this,
-          `${props.prefix}${props.name}-${routeProps.name}-duration-alarm`,
+          `${apiName}-${routeProps.name}-duration-alarm`,
           {
-            alarmName: `${props.prefix}${props.name}-${routeProps.name}-duration-alarm`,
+            alarmName: `${apiName}-${routeProps.name}-duration-alarm`,
             alarmDescription: `Alarm if duration of lambda for route ${
               props.prefix
             }${props.name}-${
@@ -209,10 +251,10 @@ export class AuthenticatedApi extends cdk.Construct {
 
         const errorsAlarm = new cloudwatch.Alarm(
           this,
-          `${props.prefix}${props.name}-${routeProps.name}-errors-alarm`,
+          `${apiName}-${routeProps.name}-errors-alarm`,
           {
-            alarmName: `${props.prefix}${props.name}-${routeProps.name}-errors-alarm`,
-            alarmDescription: `Alarm if errors on api ${props.prefix}${props.name}-${routeProps.name}`,
+            alarmName: `${apiName}-${routeProps.name}-errors-alarm`,
+            alarmDescription: `Alarm if errors on api ${apiName}-${routeProps.name}`,
             actionsEnabled: true,
             metric: errorsMetric,
             evaluationPeriods: 1,
@@ -239,9 +281,9 @@ export class AuthenticatedApi extends cdk.Construct {
 
     const routeLatencyAlarm = new cloudwatch.Alarm(
       this,
-      `${props.prefix}${props.name}-latency-alarm`,
+      `${apiName}-latency-alarm`,
       {
-        alarmName: `${props.prefix}${props.name}-latency-alarm`,
+        alarmName: `${apiName}-latency-alarm`,
         alarmDescription: `Alarm if latency on api ${props.prefix}${
           props.name
         } exceeds ${latencyThreshold.toMilliseconds()} milliseconds`,

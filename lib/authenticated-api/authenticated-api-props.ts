@@ -1,3 +1,4 @@
+import * as awslogs from "@aws-cdk/aws-logs";
 import * as cdk from "@aws-cdk/core";
 import * as ec2 from "@aws-cdk/aws-ec2";
 import * as sns from "@aws-cdk/aws-sns";
@@ -18,6 +19,16 @@ export interface AuthenticatedApiProps {
   domainName: string;
   certificateArn: string;
   corsDomain?: string[];
+
+  // Access logs via CloudWatch log group
+  logging?: {
+    /** @default false */
+    enabled: boolean;
+    /** @default JSON */
+    format?: string;
+    /** @default awslogs.RetentionDays.TWO_YEARS */
+    retention?: awslogs.RetentionDays;
+  };
 
   // Persona props are all strings - even the port.
   // These are set as environment variables on the Auth Lambda.
