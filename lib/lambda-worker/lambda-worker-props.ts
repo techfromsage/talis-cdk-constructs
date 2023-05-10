@@ -47,6 +47,10 @@ export interface LambdaWorkerProps {
     // The threshold for the alarm on the ApproximateNumberOfMessagesVisible metric
     // i.e. An alarm will be triggered if more than this number of messages is on the queue
     approximateNumberOfMessagesVisibleThreshold?: number;
+
+    // Use a FIFO queue. Defaults to false;
+    fifo?: boolean;
+    contentBasedDeduplication?: boolean;
   };
 
   // SNS Topic all alarm actions should be sent to

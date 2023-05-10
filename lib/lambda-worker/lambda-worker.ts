@@ -76,16 +76,33 @@ export class LambdaWorker extends cdk.Construct {
         ? props.queueProps.approximateNumberOfMessagesVisibleThreshold
         : DEFAULT_APPROX_NUM_MESSAGES_VISIBLE_THRESHOLD;
 
+    const isFifo = 
+      props.queueProps &&
+      props.queueProps.fifo
+        ? props.queueProps.fifo
+        : false;
+
     // Create both the main queue and the dead letter queue
+    let dlqName = `${props.name}-dlq`;
+    if (isFifo) {
+      dlqName = `${dlqName}.fifo`
+    }
     const lambdaDLQ = new sqs.Queue(this, `${props.name}-dlq`, {
-      queueName: `${props.name}-dlq`,
+      queueName: dlqName,
       visibilityTimeout: queueTimeout,
+      isFifo, 
     });
 
+    let queueName = `${props.name}-queue`;
+    if (isFifo) {
+      queueName = `${queueName}.fifo`
+    }
     const lambdaQueue = new sqs.Queue(this, `${props.name}-queue`, {
-      queueName: `${props.name}-queue`,
+      queueName,
       visibilityTimeout: queueTimeout,
       deadLetterQueue: { queue: lambdaDLQ, maxReceiveCount: maxReceiveCount },
+      fifo: isFifo,
+      contentBasedDeduplication: props.queueProps && props.queueProps.contentBasedDeduplication ? props.queueProps.contentBasedDeduplication : undefined,
     });
     this.lambdaQueueUrl = lambdaQueue.queueUrl;
     this.lambdaQueueArn = lambdaQueue.queueArn;
@@ -294,11 +311,18 @@ export class LambdaWorker extends cdk.Construct {
       }
     );
 
+    const dockerImageCodeProps: lambda.EcrImageCodeProps = {
+      tagOrDigest: imageTag,
+    };
+
+    // Only set the command on props if there is one.
+    // Setting an empty string causes errors when using the default command
+    if (props.lambdaProps.dockerCommand) {
+      dockerImageCodeProps.cmd = [ props.lambdaProps.dockerCommand ];
+    };
+
     return new lambda.DockerImageFunction(this, props.name, {
-      code: lambda.DockerImageCode.fromEcr(ecrRepository, {
-        tagOrDigest: imageTag,
-        cmd: [props.lambdaProps.dockerCommand ?? ""],
-      }),
+      code: lambda.DockerImageCode.fromEcr(ecrRepository, dockerImageCodeProps),
       functionName: props.name,
       description: props.lambdaProps.description,
       environment: buildLambdaEnvironment({
