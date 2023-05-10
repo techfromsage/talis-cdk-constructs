@@ -76,7 +76,7 @@ export class LambdaWorker extends cdk.Construct {
         ? props.queueProps.approximateNumberOfMessagesVisibleThreshold
         : DEFAULT_APPROX_NUM_MESSAGES_VISIBLE_THRESHOLD;
 
-    const isFifo = 
+    const fifo = 
       props.queueProps &&
       props.queueProps.fifo
         ? props.queueProps.fifo
@@ -84,24 +84,24 @@ export class LambdaWorker extends cdk.Construct {
 
     // Create both the main queue and the dead letter queue
     let dlqName = `${props.name}-dlq`;
-    if (isFifo) {
+    if (fifo) {
       dlqName = `${dlqName}.fifo`
     }
     const lambdaDLQ = new sqs.Queue(this, `${props.name}-dlq`, {
       queueName: dlqName,
       visibilityTimeout: queueTimeout,
-      isFifo, 
+      fifo, 
     });
 
     let queueName = `${props.name}-queue`;
-    if (isFifo) {
+    if (fifo) {
       queueName = `${queueName}.fifo`
     }
     const lambdaQueue = new sqs.Queue(this, `${props.name}-queue`, {
       queueName,
       visibilityTimeout: queueTimeout,
       deadLetterQueue: { queue: lambdaDLQ, maxReceiveCount: maxReceiveCount },
-      fifo: isFifo,
+      fifo,
       contentBasedDeduplication: props.queueProps && props.queueProps.contentBasedDeduplication ? props.queueProps.contentBasedDeduplication : undefined,
     });
     this.lambdaQueueUrl = lambdaQueue.queueUrl;
@@ -311,14 +311,17 @@ export class LambdaWorker extends cdk.Construct {
       }
     );
 
-    const dockerImageCodeProps: lambda.EcrImageCodeProps = {
+    let dockerImageCodeProps: lambda.EcrImageCodeProps = {
       tagOrDigest: imageTag,
     };
 
     // Only set the command on props if there is one.
     // Setting an empty string causes errors when using the default command
     if (props.lambdaProps.dockerCommand) {
-      dockerImageCodeProps.cmd = [ props.lambdaProps.dockerCommand ];
+      dockerImageCodeProps = {
+        tagOrDigest: imageTag,
+        cmd: [ props.lambdaProps.dockerCommand ]
+      };
     };
 
     return new lambda.DockerImageFunction(this, props.name, {
