@@ -89,6 +89,7 @@ describe("LambdaWorker", () => {
           haveResourceLike("AWS::SQS::Queue", {
             QueueName: "MyTestLambdaWorker-queue",
             VisibilityTimeout: 1500, // 5 (default max receive count) * 300 (lambda timeout)
+            FifoQueue: false,
             RedrivePolicy: {
               maxReceiveCount: 5,
               deadLetterTargetArn: {
@@ -105,6 +106,7 @@ describe("LambdaWorker", () => {
           haveResourceLike("AWS::SQS::Queue", {
             QueueName: "MyTestLambdaWorker-dlq",
             VisibilityTimeout: 1500, // 5 (default max receive count) * 300 (lambda timeout)
+            FifoQueue: false,
           })
         );
       });
@@ -435,6 +437,78 @@ describe("LambdaWorker", () => {
           })
         );
       });
+    });
+  });
+
+  describe("with fifo queue", () => {
+    let stack: cdk.Stack;
+    let worker: LambdaWorker;
+
+    beforeAll(() => {
+      const app = new cdk.App();
+      stack = new cdk.Stack(app, "TestStack");
+      const alarmTopic = new sns.Topic(stack, "TestAlarm", {
+        topicName: "TestAlarm",
+      });
+
+      const vpc = new ec2.Vpc(stack, "TheVPC", {
+        cidr: "10.0.0.0/16",
+      });
+
+      worker = new LambdaWorker(stack, "MyTestLambdaWorker", {
+        name: "MyTestLambdaWorker",
+        lambdaProps: {
+          entry: "examples/simple-lambda-worker/src/lambda/simple-worker.js",
+          handler: "testWorker",
+          memorySize: 2048,
+          policyStatements: [
+            new iam.PolicyStatement({
+              effect: iam.Effect.ALLOW,
+              actions: ["sqs:*"],
+              resources: ["*"],
+            }),
+          ],
+          timeout: cdk.Duration.minutes(5),
+          vpc: vpc,
+          vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT },
+        },
+        queueProps: {
+          fifo: true,
+          contentBasedDeduplication: true,
+        },
+        alarmTopic: alarmTopic,
+      });
+    });
+
+    test("provisions fifo SQS queue and dead letter queue", () => {
+      expectCDK(stack).to(countResources("AWS::SQS::Queue", 2));
+
+      expectCDK(stack).to(
+        haveResourceLike("AWS::SQS::Queue", {
+          QueueName: "MyTestLambdaWorker-queue.fifo",
+          VisibilityTimeout: 1500, // 5 (default max receive count) * 300 (lambda timeout)
+          FifoQueue: true,
+          ContentBasedDeduplication: true,
+          RedrivePolicy: {
+            maxReceiveCount: 5,
+            deadLetterTargetArn: {
+              "Fn::GetAtt": [
+                "MyTestLambdaWorkerMyTestLambdaWorkerdlq27BBFD95",
+                "Arn",
+              ],
+            },
+          },
+        })
+      );
+
+      expectCDK(stack).to(
+        haveResourceLike("AWS::SQS::Queue", {
+          QueueName: "MyTestLambdaWorker-dlq.fifo",
+          VisibilityTimeout: 1500, // 5 (default max receive count) * 300 (lambda timeout)
+          FifoQueue: true,
+          // ContentBasedDeduplication: true, // not set on the dlq. If it fails - we don't want it de duplicated for some reason.
+        })
+      );
     });
   });
 
