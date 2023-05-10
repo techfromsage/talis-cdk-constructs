@@ -76,33 +76,33 @@ export class LambdaWorker extends cdk.Construct {
         ? props.queueProps.approximateNumberOfMessagesVisibleThreshold
         : DEFAULT_APPROX_NUM_MESSAGES_VISIBLE_THRESHOLD;
 
-    const fifo = 
-      props.queueProps &&
-      props.queueProps.fifo
-        ? props.queueProps.fifo
-        : false;
+    const fifo =
+      props.queueProps && props.queueProps.fifo ? props.queueProps.fifo : false;
 
     // Create both the main queue and the dead letter queue
     let dlqName = `${props.name}-dlq`;
     if (fifo) {
-      dlqName = `${dlqName}.fifo`
+      dlqName = `${dlqName}.fifo`;
     }
     const lambdaDLQ = new sqs.Queue(this, `${props.name}-dlq`, {
       queueName: dlqName,
       visibilityTimeout: queueTimeout,
-      fifo, 
+      fifo,
     });
 
     let queueName = `${props.name}-queue`;
     if (fifo) {
-      queueName = `${queueName}.fifo`
+      queueName = `${queueName}.fifo`;
     }
     const lambdaQueue = new sqs.Queue(this, `${props.name}-queue`, {
       queueName,
       visibilityTimeout: queueTimeout,
       deadLetterQueue: { queue: lambdaDLQ, maxReceiveCount: maxReceiveCount },
       fifo,
-      contentBasedDeduplication: props.queueProps && props.queueProps.contentBasedDeduplication ? props.queueProps.contentBasedDeduplication : undefined,
+      contentBasedDeduplication:
+        props.queueProps && props.queueProps.contentBasedDeduplication
+          ? props.queueProps.contentBasedDeduplication
+          : undefined,
     });
     this.lambdaQueueUrl = lambdaQueue.queueUrl;
     this.lambdaQueueArn = lambdaQueue.queueArn;
@@ -320,9 +320,9 @@ export class LambdaWorker extends cdk.Construct {
     if (props.lambdaProps.dockerCommand) {
       dockerImageCodeProps = {
         tagOrDigest: imageTag,
-        cmd: [ props.lambdaProps.dockerCommand ]
+        cmd: [props.lambdaProps.dockerCommand],
       };
-    };
+    }
 
     return new lambda.DockerImageFunction(this, props.name, {
       code: lambda.DockerImageCode.fromEcr(ecrRepository, dockerImageCodeProps),
