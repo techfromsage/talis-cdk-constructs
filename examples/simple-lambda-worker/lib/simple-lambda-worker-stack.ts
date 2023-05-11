@@ -34,7 +34,7 @@ export class SimpleLambdaWorkerStack extends cdk.Stack {
     const alarmTopic = new sns.Topic(
       this,
       `${prefix}simple-lambda-Worker-alarm`,
-      { topicName: `${prefix}simple-lambda-worker-alarm` }
+      { topicName: `${prefix}simple-lambda-worker-alarm`, fifo: true }
     );
 
     // VPC is optional. To use one, you would look it up as follows:
