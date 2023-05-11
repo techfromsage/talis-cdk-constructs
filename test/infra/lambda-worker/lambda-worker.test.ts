@@ -558,6 +558,11 @@ describe("LambdaWorker", () => {
         expectCDK(stack).to(
           haveResourceLike("AWS::Lambda::Function", {
             FunctionName: "MyTestLambdaWorker",
+            ImageConfig: {                                                                             
+              "Command": [
+                "./src/script"   
+              ]                         
+            },
             MemorySize: 2048,
             Timeout: 300,
             Code: {
@@ -706,6 +711,79 @@ describe("LambdaWorker", () => {
             ComparisonOperator: "GreaterThanOrEqualToThreshold",
             TreatMissingData: "ignore",
             OKActions: [{ Ref: "TestAlarm5A9EF6BD" }],
+          })
+        );
+      });
+    });
+
+    describe("with no command specified", () => {
+      let stack: cdk.Stack;
+      let worker: LambdaWorker;
+
+      beforeAll(() => {
+        const app = new cdk.App();
+        stack = new cdk.Stack(app, "TestStack");
+        const alarmTopic = new sns.Topic(stack, "TestAlarm", {
+          topicName: "TestAlarm",
+        });
+
+        const vpc = new ec2.Vpc(stack, "TheVPC", {
+          cidr: "10.0.0.0/16",
+        });
+
+        worker = new LambdaWorker(stack, "MyTestLambdaWorker", {
+          name: "MyTestLambdaWorker",
+          lambdaProps: {
+            dockerImageTag: "test-lambda-12345",
+            ecrRepositoryArn: "arn:aws:ecr:eu-west-1:012345678910:repository",
+            ecrRepositoryName: "repository",
+            // dockerCommand: "./src/script", Intentionally removed
+            memorySize: 2048,
+            policyStatements: [
+              new iam.PolicyStatement({
+                effect: iam.Effect.ALLOW,
+                actions: ["sqs:*"],
+                resources: ["*"],
+              }),
+            ],
+            timeout: cdk.Duration.minutes(5),
+            vpc: vpc,
+            vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE },
+          },
+          queueProps: {},
+          alarmTopic: alarmTopic,
+        });
+      });
+
+      test("provisions a lambda", () => {
+        expectCDK(stack).to(countResources("AWS::Lambda::Function", 1));
+
+        expectCDK(stack).to(
+          haveResourceLike("AWS::Lambda::Function", {
+            FunctionName: "MyTestLambdaWorker",
+            // Command removed. There doesn't seem to be a way to verify that properties do not exist.
+            //
+            // ImageConfig: {                                                                             
+            //   "Command": [
+            //     "./src/script"   
+            //   ]                         
+            // },
+            MemorySize: 2048,
+            Timeout: 300,
+            Code: {
+              ImageUri: {
+                "Fn::Join": [
+                  "",
+                  [
+                    "012345678910.dkr.ecr.eu-west-1.",
+                    {
+                      Ref: "AWS::URLSuffix",
+                    },
+                    `/repository:test-lambda-12345`,
+                  ],
+                ],
+              },
+            },
           })
         );
       });
