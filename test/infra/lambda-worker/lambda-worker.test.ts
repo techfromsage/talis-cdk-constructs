@@ -89,7 +89,6 @@ describe("LambdaWorker", () => {
           haveResourceLike("AWS::SQS::Queue", {
             QueueName: "MyTestLambdaWorker-queue",
             VisibilityTimeout: 1500, // 5 (default max receive count) * 300 (lambda timeout)
-            FifoQueue: false,
             RedrivePolicy: {
               maxReceiveCount: 5,
               deadLetterTargetArn: {
@@ -106,7 +105,6 @@ describe("LambdaWorker", () => {
           haveResourceLike("AWS::SQS::Queue", {
             QueueName: "MyTestLambdaWorker-dlq",
             VisibilityTimeout: 1500, // 5 (default max receive count) * 300 (lambda timeout)
-            FifoQueue: false,
           })
         );
       });
