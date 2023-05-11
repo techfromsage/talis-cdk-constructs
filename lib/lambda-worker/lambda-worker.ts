@@ -53,7 +53,7 @@ export class LambdaWorker extends cdk.Construct {
         `Invalid lambdaProps only dockerImageTag/ecrRepositoryArn/ecrRepositoryName or handler/entry can be specified.`
       );
     }
-
+    
     // Queue settings
     const maxReceiveCount =
       props.queueProps && props.queueProps.maxReceiveCount
@@ -76,8 +76,7 @@ export class LambdaWorker extends cdk.Construct {
         ? props.queueProps.approximateNumberOfMessagesVisibleThreshold
         : DEFAULT_APPROX_NUM_MESSAGES_VISIBLE_THRESHOLD;
 
-    const fifo =
-      props.queueProps && props.queueProps.fifo ? props.queueProps.fifo : false;
+    const fifo = this.isFifo(props);
 
     // Create both the main queue and the dead letter queue
     let dlqName = `${props.name}-dlq`;
@@ -242,6 +241,16 @@ export class LambdaWorker extends cdk.Construct {
       !props.lambdaProps.ecrRepositoryName &&
       props.lambdaProps.entry &&
       props.lambdaProps.handler
+    ) {
+      return true;
+    }
+    return false;
+  }
+
+  isFifo(props: LambdaWorkerProps): boolean {
+    if (
+      props.queueProps &&
+      props.queueProps.fifo === true
     ) {
       return true;
     }

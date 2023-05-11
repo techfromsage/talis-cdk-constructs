@@ -100,6 +100,7 @@ export class SimpleLambdaWorkerStack extends cdk.Stack {
           maxReceiveCount: 1,
           // If you want the lambda to use a fifo queue, you would do so here:
           fifo: true,
+          contentBasedDeduplication: false,
         },
         alarmTopic: alarmTopic,
 
