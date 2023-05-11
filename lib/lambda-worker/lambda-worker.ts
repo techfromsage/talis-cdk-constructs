@@ -86,7 +86,7 @@ export class LambdaWorker extends cdk.Construct {
     const lambdaDLQ = new sqs.Queue(this, `${props.name}-dlq`, {
       queueName: dlqName,
       visibilityTimeout: queueTimeout,
-      fifo: fifo ? true : undefined,
+      fifo: fifo ? true : undefined, // This is required for fifo, but has to be undefined not flase for non-fifo
     });
 
     let queueName = `${props.name}-queue`;
@@ -97,7 +97,7 @@ export class LambdaWorker extends cdk.Construct {
       queueName,
       visibilityTimeout: queueTimeout,
       deadLetterQueue: { queue: lambdaDLQ, maxReceiveCount: maxReceiveCount },
-      fifo: fifo ? true : undefined,
+      fifo: fifo ? true : undefined, // This is required for fifo, but has to be undefined not flase for non-fifo
       contentBasedDeduplication:
         props.queueProps && props.queueProps.contentBasedDeduplication
           ? props.queueProps.contentBasedDeduplication
