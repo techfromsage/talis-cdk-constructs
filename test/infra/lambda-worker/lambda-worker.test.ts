@@ -558,10 +558,8 @@ describe("LambdaWorker", () => {
         expectCDK(stack).to(
           haveResourceLike("AWS::Lambda::Function", {
             FunctionName: "MyTestLambdaWorker",
-            ImageConfig: {                                                                             
-              "Command": [
-                "./src/script"   
-              ]                         
+            ImageConfig: {
+              Command: ["./src/script"],
             },
             MemorySize: 2048,
             Timeout: 300,
@@ -763,10 +761,10 @@ describe("LambdaWorker", () => {
             FunctionName: "MyTestLambdaWorker",
             // Command removed. There doesn't seem to be a way to verify that properties do not exist.
             //
-            // ImageConfig: {                                                                             
+            // ImageConfig: {
             //   "Command": [
-            //     "./src/script"   
-            //   ]                         
+            //     "./src/script"
+            //   ]
             // },
             MemorySize: 2048,
             Timeout: 300,
