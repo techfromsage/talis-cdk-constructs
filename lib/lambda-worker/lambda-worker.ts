@@ -86,7 +86,7 @@ export class LambdaWorker extends cdk.Construct {
     const lambdaDLQ = new sqs.Queue(this, `${props.name}-dlq`, {
       queueName: dlqName,
       visibilityTimeout: queueTimeout,
-      fifo,
+      fifo: fifo ? true : undefined,
     });
 
     let queueName = `${props.name}-queue`;
@@ -97,7 +97,7 @@ export class LambdaWorker extends cdk.Construct {
       queueName,
       visibilityTimeout: queueTimeout,
       deadLetterQueue: { queue: lambdaDLQ, maxReceiveCount: maxReceiveCount },
-      fifo,
+      fifo: fifo ? true : undefined,
       contentBasedDeduplication:
         props.queueProps && props.queueProps.contentBasedDeduplication
           ? props.queueProps.contentBasedDeduplication
