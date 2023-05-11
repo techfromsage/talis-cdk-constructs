@@ -53,7 +53,7 @@ export class LambdaWorker extends cdk.Construct {
         `Invalid lambdaProps only dockerImageTag/ecrRepositoryArn/ecrRepositoryName or handler/entry can be specified.`
       );
     }
-    
+
     // Queue settings
     const maxReceiveCount =
       props.queueProps && props.queueProps.maxReceiveCount
@@ -248,10 +248,7 @@ export class LambdaWorker extends cdk.Construct {
   }
 
   isFifo(props: LambdaWorkerProps): boolean {
-    if (
-      props.queueProps &&
-      props.queueProps.fifo === true
-    ) {
+    if (props.queueProps && props.queueProps.fifo === true) {
       return true;
     }
     return false;
