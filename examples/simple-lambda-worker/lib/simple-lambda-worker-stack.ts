@@ -26,6 +26,7 @@ export class SimpleLambdaWorkerStack extends cdk.Stack {
     // "File" topic is created which all workers subscribe to.
     const topic = new sns.Topic(this, `${prefix}simple-lambda-worker-topic`, {
       topicName: `${prefix}simple-lambda-worker-topic`,
+      fifo: true,
     });
 
     // LambdaWorker requires an existing SNS topic to publish alarms to.
@@ -34,7 +35,7 @@ export class SimpleLambdaWorkerStack extends cdk.Stack {
     const alarmTopic = new sns.Topic(
       this,
       `${prefix}simple-lambda-Worker-alarm`,
-      { topicName: `${prefix}simple-lambda-worker-alarm`, fifo: true }
+      { topicName: `${prefix}simple-lambda-worker-alarm` }
     );
 
     // VPC is optional. To use one, you would look it up as follows:
