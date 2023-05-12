@@ -1,4 +1,8 @@
 version: 2.1
+
+orbs:
+  node: circleci/node@5.1.0
+
 commands:
   save_root_build_number:
     steps:
@@ -21,6 +25,12 @@ commands:
           name: Set the AWS_PREFIX
           command: |
             echo "export AWS_PREFIX=build-$(cat /tmp/root-build-number)-" >> $BASH_ENV
+  node_install_packages:
+    steps:
+      - run:
+          name: Configure git to use https instead of git protocol
+          command: git config --global url."https://".insteadOf git://
+      - node/install-packages
 
 executors:
   default_executor:
@@ -30,9 +40,6 @@ executors:
         auth:
           username: $DOCKER_USERNAME
           password: $DOCKER_PASSWORD
-
-orbs:
-  node: circleci/node@4.5.1
 
 jobs:
   fan_out:
@@ -48,7 +55,7 @@ jobs:
           fingerprints:
             - "ee:b4:00:e6:23:5b:55:bb:fd:07:bc:73:9e:f7:89:9c" # shared.aspire@talis.com 'talis-cdk-constructs Deploy Key'
       - checkout
-      - node/install-packages
+      - node_install_packages
       - run:
           name: Lint all commits on the branch
           command: |
@@ -64,7 +71,7 @@ jobs:
           fingerprints:
             - "ee:b4:00:e6:23:5b:55:bb:fd:07:bc:73:9e:f7:89:9c" # shared.aspire@talis.com 'talis-cdk-constructs Deploy Key'
       - checkout
-      - node/install-packages
+      - node_install_packages
       - run:
           name: Lint code before building, to lint only source files
           command: npm run lint
@@ -80,7 +87,7 @@ jobs:
       - restore_root_build_number
       - set_aws_prefix
       - checkout
-      - node/install-packages
+      - node_install_packages
       - run:
           name: Build and deploy lambda worker example code
           command: cd examples/simple-lambda-worker && npm install && npm run build && npx cdk --require-approval never deploy
@@ -93,7 +100,7 @@ jobs:
       - restore_root_build_number
       - set_aws_prefix
       - checkout
-      - node/install-packages
+      - node_install_packages
       - run:
           name: Build and deploy authenticated api example code
           command: cd examples/simple-authenticated-api && npm install && npm run build && npx cdk --require-approval never deploy
@@ -103,7 +110,7 @@ jobs:
       - restore_root_build_number
       - set_aws_prefix
       - checkout
-      - node/install-packages
+      - node_install_packages
       - run:
           name: Run unit tests
           command: npm run jest-unit-test -- --ci --maxWorkers=2
@@ -122,7 +129,7 @@ jobs:
       - restore_root_build_number
       - set_aws_prefix
       - checkout
-      - node/install-packages
+      - node_install_packages
       - run:
           name: Destroy lambda worker example code
           command: cd examples/simple-lambda-worker && npm install && npm run build && npx cdk --require-approval never destroy --force
@@ -135,7 +142,7 @@ jobs:
       - restore_root_build_number
       - set_aws_prefix
       - checkout
-      - node/install-packages
+      - node_install_packages
       - run:
           name: Destroy authenticated api example code
           command: cd examples/simple-authenticated-api && npm install && npm run build && npx cdk --require-approval never destroy --force
@@ -143,7 +150,7 @@ jobs:
     executor: default_executor
     steps:
       - checkout
-      - node/install-packages
+      - node_install_packages
       - run:
           name: Build code
           command: npm run build
