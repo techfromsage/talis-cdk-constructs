@@ -76,16 +76,32 @@ export class LambdaWorker extends cdk.Construct {
         ? props.queueProps.approximateNumberOfMessagesVisibleThreshold
         : DEFAULT_APPROX_NUM_MESSAGES_VISIBLE_THRESHOLD;
 
+    const fifo = this.isFifo(props);
+
     // Create both the main queue and the dead letter queue
+    let dlqName = `${props.name}-dlq`;
+    if (fifo) {
+      dlqName = `${dlqName}.fifo`;
+    }
     const lambdaDLQ = new sqs.Queue(this, `${props.name}-dlq`, {
-      queueName: `${props.name}-dlq`,
+      queueName: dlqName,
       visibilityTimeout: queueTimeout,
+      fifo: fifo ? true : undefined, // This is required for fifo, but has to be undefined not flase for non-fifo
     });
 
+    let queueName = `${props.name}-queue`;
+    if (fifo) {
+      queueName = `${queueName}.fifo`;
+    }
     const lambdaQueue = new sqs.Queue(this, `${props.name}-queue`, {
-      queueName: `${props.name}-queue`,
+      queueName,
       visibilityTimeout: queueTimeout,
       deadLetterQueue: { queue: lambdaDLQ, maxReceiveCount: maxReceiveCount },
+      fifo: fifo ? true : undefined, // This is required for fifo, but has to be undefined not flase for non-fifo
+      contentBasedDeduplication:
+        props.queueProps && props.queueProps.contentBasedDeduplication
+          ? props.queueProps.contentBasedDeduplication
+          : undefined,
     });
     this.lambdaQueueUrl = lambdaQueue.queueUrl;
     this.lambdaQueueArn = lambdaQueue.queueArn;
@@ -208,7 +224,6 @@ export class LambdaWorker extends cdk.Construct {
   isContainerLambda(props: LambdaWorkerProps): boolean {
     if (
       props.lambdaProps.dockerImageTag &&
-      props.lambdaProps.dockerCommand &&
       props.lambdaProps.ecrRepositoryArn &&
       props.lambdaProps.ecrRepositoryName &&
       !props.lambdaProps.entry &&
@@ -221,13 +236,19 @@ export class LambdaWorker extends cdk.Construct {
 
   isFunctionLambda(props: LambdaWorkerProps): boolean {
     if (
-      !props.lambdaProps.dockerCommand &&
       !props.lambdaProps.dockerImageTag &&
       !props.lambdaProps.ecrRepositoryArn &&
       !props.lambdaProps.ecrRepositoryName &&
       props.lambdaProps.entry &&
       props.lambdaProps.handler
     ) {
+      return true;
+    }
+    return false;
+  }
+
+  isFifo(props: LambdaWorkerProps): boolean {
+    if (props.queueProps && props.queueProps.fifo === true) {
       return true;
     }
     return false;
@@ -294,11 +315,21 @@ export class LambdaWorker extends cdk.Construct {
       }
     );
 
-    return new lambda.DockerImageFunction(this, props.name, {
-      code: lambda.DockerImageCode.fromEcr(ecrRepository, {
+    let dockerImageCodeProps: lambda.EcrImageCodeProps = {
+      tagOrDigest: imageTag,
+    };
+
+    // Only set the command on props if there is one.
+    // Setting an empty string causes errors when using the default command
+    if (props.lambdaProps.dockerCommand) {
+      dockerImageCodeProps = {
         tagOrDigest: imageTag,
-        cmd: [props.lambdaProps.dockerCommand ?? ""],
-      }),
+        cmd: [props.lambdaProps.dockerCommand],
+      };
+    }
+
+    return new lambda.DockerImageFunction(this, props.name, {
+      code: lambda.DockerImageCode.fromEcr(ecrRepository, dockerImageCodeProps),
       functionName: props.name,
       description: props.lambdaProps.description,
       environment: buildLambdaEnvironment({

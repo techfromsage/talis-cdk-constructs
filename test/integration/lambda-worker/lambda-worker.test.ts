@@ -1,4 +1,5 @@
 import { SQS } from "aws-sdk";
+import { v4 as uuidv4 } from "uuid";
 
 const sqs = new SQS();
 
@@ -43,10 +44,12 @@ describe("LambdaWorker", () => {
     throw Error("Worker queue not found");
   }
 
-  async function sendJob(message: string) {
+  async function sendJob(message: object) {
     const params = {
       QueueUrl: workerSqsUrl,
-      MessageBody: message,
+      MessageDeduplicationId: uuidv4(),
+      MessageGroupId: "1",
+      MessageBody: JSON.stringify(message),
     };
     await sqs.sendMessage(params).promise();
   }
@@ -92,8 +95,8 @@ describe("LambdaWorker", () => {
   }
 
   beforeAll(async () => {
-    workerSqsUrl = await findQueueUrl("simple-lambda-worker-queue");
-    dlqSqsUrl = await findQueueUrl("simple-lambda-worker-dlq");
+    workerSqsUrl = await findQueueUrl("simple-lambda-worker-queue.fifo");
+    dlqSqsUrl = await findQueueUrl("simple-lambda-worker-dlq.fifo");
     successSqsUrl = await findQueueUrl("simple-lambda-worker-success");
   });
 
@@ -117,13 +120,13 @@ describe("LambdaWorker", () => {
   });
 
   test("successfully processes messages", async () => {
-    sendJob(JSON.stringify(JOB_WHICH_WILL_SUCCEED));
+    sendJob(JOB_WHICH_WILL_SUCCEED);
     await waitForQueueSizeToBe(successSqsUrl, 1);
     await waitForQueueSizeToBe(dlqSqsUrl, 0);
   });
 
   test("failed messages go to the dlq", async () => {
-    sendJob(JSON.stringify(JOB_WHICH_WILL_FAIL));
+    sendJob(JOB_WHICH_WILL_FAIL);
     await waitForQueueSizeToBe(dlqSqsUrl, 1);
     await waitForQueueSizeToBe(successSqsUrl, 0);
   });

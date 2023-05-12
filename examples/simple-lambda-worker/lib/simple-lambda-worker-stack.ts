@@ -26,6 +26,7 @@ export class SimpleLambdaWorkerStack extends cdk.Stack {
     // "File" topic is created which all workers subscribe to.
     const topic = new sns.Topic(this, `${prefix}simple-lambda-worker-topic`, {
       topicName: `${prefix}simple-lambda-worker-topic`,
+      fifo: true,
     });
 
     // LambdaWorker requires an existing SNS topic to publish alarms to.
@@ -97,6 +98,9 @@ export class SimpleLambdaWorkerStack extends cdk.Stack {
         },
         queueProps: {
           maxReceiveCount: 1,
+          // If you want the lambda to use a fifo queue, you would do so here:
+          fifo: true,
+          contentBasedDeduplication: false,
         },
         alarmTopic: alarmTopic,
 
