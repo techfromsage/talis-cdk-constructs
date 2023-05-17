@@ -1,6 +1,7 @@
 coverage
 node_modules
 .vscode/
+cdk.out/
 
 # Typescript is our source-code; generated JS and d.ts is left unlinted.
 src/**/*.js
