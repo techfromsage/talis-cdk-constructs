@@ -4,6 +4,27 @@ import * as iam from "@aws-cdk/aws-iam";
 import * as sns from "@aws-cdk/aws-sns";
 import * as lambda from "@aws-cdk/aws-lambda";
 
+// Lambda properties for different runtimes
+export interface FunctionLambdaProps {
+  handler: string;
+  entry: string;
+}
+
+export interface ContainerFromEcrLambdaProps {
+  ecrRepositoryArn: string;
+  ecrRepositoryName: string;
+  dockerImageTag: string;
+  dockerCommand?: string;
+}
+
+export interface ContainerFromImageAssetLambdaProps {
+  /** Create an ECR image from the specified asset and bind it as the Lambda code */
+  imageAsset: {
+    directory: string;
+    props?: lambda.AssetImageCodeProps;
+  };
+}
+
 export interface LambdaWorkerProps {
   // The name of the LambdaWorker
   name: string;
@@ -12,12 +33,6 @@ export interface LambdaWorkerProps {
   // Documented here https://docs.aws.amazon.com/cdk/api/latest/docs/@aws-cdk_aws-lambda-nodejs.NodejsFunctionProps.html
   lambdaProps: {
     description?: string;
-    dockerCommand?: string;
-    dockerImageTag?: string;
-    ecrRepositoryArn?: string;
-    ecrRepositoryName?: string;
-    handler?: string;
-    entry?: string;
     enableQueue?: boolean;
     environment?: { [key: string]: string };
     ephemeralStorageSize?: cdk.Size;
@@ -30,7 +45,9 @@ export interface LambdaWorkerProps {
     timeout: cdk.Duration;
     vpc?: ec2.IVpc;
     vpcSubnets?: ec2.SubnetSelection;
-  };
+  } & Partial<FunctionLambdaProps> &
+    Partial<ContainerFromEcrLambdaProps> &
+    Partial<ContainerFromImageAssetLambdaProps>;
 
   // Queue Properties
   queueProps?: {

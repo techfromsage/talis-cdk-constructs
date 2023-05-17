@@ -2,5 +2,5 @@
   "name": "container-worker",
   "version": "0.1.0",
   "description": "Basic container worker example",
-  "main": "src/lambda/container-worker.js"
+  "main": "container-worker.js"
 }

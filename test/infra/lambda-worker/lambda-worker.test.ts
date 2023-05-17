@@ -2,12 +2,13 @@ import {
   expect as expectCDK,
   countResources,
   haveResourceLike,
+  stringLike,
 } from "@aws-cdk/assert";
 import * as cdk from "@aws-cdk/core";
 import * as ec2 from "@aws-cdk/aws-ec2";
 import * as iam from "@aws-cdk/aws-iam";
 import * as sns from "@aws-cdk/aws-sns";
-import { LambdaWorker } from "../../../lib/lambda-worker";
+import { LambdaWorker, LambdaWorkerProps } from "../../../lib/lambda-worker";
 
 describe("LambdaWorker", () => {
   describe("function lambda", () => {
@@ -714,7 +715,6 @@ describe("LambdaWorker", () => {
 
     describe("with no command specified", () => {
       let stack: cdk.Stack;
-      let worker: LambdaWorker;
 
       beforeAll(() => {
         const app = new cdk.App();
@@ -727,7 +727,7 @@ describe("LambdaWorker", () => {
           cidr: "10.0.0.0/16",
         });
 
-        worker = new LambdaWorker(stack, "MyTestLambdaWorker", {
+        new LambdaWorker(stack, "MyTestLambdaWorker", {
           name: "MyTestLambdaWorker",
           lambdaProps: {
             dockerImageTag: "test-lambda-12345",
@@ -779,6 +779,134 @@ describe("LambdaWorker", () => {
                   ],
                 ],
               },
+            },
+          })
+        );
+      });
+    });
+
+    describe("from image asset", () => {
+      let stack: cdk.Stack;
+      let alarmTopic: sns.Topic;
+      let lambdaProps: LambdaWorkerProps["lambdaProps"];
+
+      beforeEach(() => {
+        const app = new cdk.App();
+        stack = new cdk.Stack(app, "TestStack");
+        alarmTopic = new sns.Topic(stack, "TestAlarm", {
+          topicName: "TestAlarm",
+        });
+
+        lambdaProps = {
+          memorySize: 2048,
+          policyStatements: [
+            new iam.PolicyStatement({
+              effect: iam.Effect.ALLOW,
+              actions: ["sqs:*"],
+              resources: ["*"],
+            }),
+          ],
+          timeout: cdk.Duration.minutes(5),
+          vpc: new ec2.Vpc(stack, "TheVPC", {
+            cidr: "10.0.0.0/16",
+          }),
+          vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT },
+        };
+      });
+
+      test("builds an image from directory", () => {
+        new LambdaWorker(stack, "MyTestLambdaWorker", {
+          name: "MyTestLambdaWorker",
+          lambdaProps: {
+            ...lambdaProps,
+            imageAsset: {
+              directory: "./test/infra/lambda-worker/image-assets1",
+            },
+          },
+          queueProps: {},
+          alarmTopic: alarmTopic,
+        });
+
+        expectCDK(stack).to(countResources("AWS::Lambda::Function", 1));
+
+        expectCDK(stack).to(
+          haveResourceLike("AWS::Lambda::Function", {
+            PackageType: "Image",
+            Code: {
+              // This is how the CDK generates the image uri with legacy synthesizer (CDK v1 only)
+              ImageUri: {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      Ref: "AWS::AccountId",
+                    },
+                    ".dkr.ecr.",
+                    {
+                      Ref: "AWS::Region",
+                    },
+                    ".",
+                    {
+                      Ref: "AWS::URLSuffix",
+                    },
+                    stringLike("/aws-cdk/assets:*"),
+                  ],
+                ],
+              },
+            },
+          })
+        );
+      });
+
+      test("builds an image with asset props", () => {
+        new LambdaWorker(stack, "MyTestLambdaWorker", {
+          name: "MyTestLambdaWorker",
+          lambdaProps: {
+            ...lambdaProps,
+            imageAsset: {
+              directory: "./test/infra/lambda-worker/image-assets2",
+              props: {
+                buildArgs: {
+                  TEST_ARG: "test",
+                },
+                file: "my.Dockerfile",
+                cmd: ["app.handler"],
+              },
+            },
+          },
+          queueProps: {},
+          alarmTopic: alarmTopic,
+        });
+
+        expectCDK(stack).to(countResources("AWS::Lambda::Function", 1));
+
+        expectCDK(stack).to(
+          haveResourceLike("AWS::Lambda::Function", {
+            PackageType: "Image",
+            Code: {
+              // This is how the CDK generates the image uri with legacy synthesizer (CDK v1 only)
+              ImageUri: {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      Ref: "AWS::AccountId",
+                    },
+                    ".dkr.ecr.",
+                    {
+                      Ref: "AWS::Region",
+                    },
+                    ".",
+                    {
+                      Ref: "AWS::URLSuffix",
+                    },
+                    stringLike("/aws-cdk/assets:*"),
+                  ],
+                ],
+              },
+            },
+            ImageConfig: {
+              Command: ["app.handler"],
             },
           })
         );

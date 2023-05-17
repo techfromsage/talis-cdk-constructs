@@ -1,0 +1,6 @@
+FROM public.ecr.aws/lambda/nodejs:18.2023.05.13.00
+
+ARG TEST_ARG
+ENV TEST_ENV_VAR=${TEST_ARG}
+
+COPY app.js ${LAMBDA_TASK_ROOT}
