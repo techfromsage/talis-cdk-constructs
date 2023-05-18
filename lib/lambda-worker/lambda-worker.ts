@@ -8,7 +8,10 @@ import * as sqs from "@aws-cdk/aws-sqs";
 import * as subs from "@aws-cdk/aws-sns-subscriptions";
 import * as ecr from "@aws-cdk/aws-ecr";
 
-import { LambdaWorkerProps } from "./lambda-worker-props";
+import {
+  ContainerFromEcrLambdaProps,
+  LambdaWorkerProps,
+} from "./lambda-worker-props";
 import { IRepository } from "@aws-cdk/aws-ecr";
 import { buildLambdaEnvironment } from "../util/build-lambda-environment";
 
@@ -222,29 +225,15 @@ export class LambdaWorker extends cdk.Construct {
   }
 
   isContainerLambda(props: LambdaWorkerProps): boolean {
-    if (
-      props.lambdaProps.dockerImageTag &&
-      props.lambdaProps.ecrRepositoryArn &&
-      props.lambdaProps.ecrRepositoryName &&
-      !props.lambdaProps.entry &&
-      !props.lambdaProps.handler
-    ) {
-      return true;
-    }
-    return false;
+    return (
+      this.hasContainerLambdaProps(props) && !this.hasFunctionLambdaProps(props)
+    );
   }
 
   isFunctionLambda(props: LambdaWorkerProps): boolean {
-    if (
-      !props.lambdaProps.dockerImageTag &&
-      !props.lambdaProps.ecrRepositoryArn &&
-      !props.lambdaProps.ecrRepositoryName &&
-      props.lambdaProps.entry &&
-      props.lambdaProps.handler
-    ) {
-      return true;
-    }
-    return false;
+    return (
+      this.hasFunctionLambdaProps(props) && !this.hasContainerLambdaProps(props)
+    );
   }
 
   isFifo(props: LambdaWorkerProps): boolean {
@@ -260,6 +249,19 @@ export class LambdaWorker extends cdk.Construct {
     }
 
     return this.createNodejsLambdaFunction(props);
+  }
+
+  private hasContainerLambdaProps(props: LambdaWorkerProps): boolean {
+    return Boolean(
+      props.lambdaProps.imageAsset ||
+        (props.lambdaProps.dockerImageTag &&
+          props.lambdaProps.ecrRepositoryArn &&
+          props.lambdaProps.ecrRepositoryName)
+    );
+  }
+
+  private hasFunctionLambdaProps(props: LambdaWorkerProps): boolean {
+    return Boolean(props.lambdaProps.entry && props.lambdaProps.handler);
   }
 
   private createNodejsLambdaFunction(
@@ -297,39 +299,8 @@ export class LambdaWorker extends cdk.Construct {
   private createContainerLambdaFunction(
     props: LambdaWorkerProps
   ): lambda.Function {
-    const imageTag: string = props.lambdaProps.dockerImageTag
-      ? props.lambdaProps.dockerImageTag
-      : "";
-    const ecrRepositoryArn: string = props.lambdaProps.ecrRepositoryArn
-      ? props.lambdaProps.ecrRepositoryArn
-      : "";
-    const ecrRepositoryName: string = props.lambdaProps.ecrRepositoryName
-      ? props.lambdaProps.ecrRepositoryName
-      : "";
-    const ecrRepository: IRepository = ecr.Repository.fromRepositoryAttributes(
-      this,
-      `${props.name}-ecr`,
-      {
-        repositoryArn: ecrRepositoryArn,
-        repositoryName: ecrRepositoryName,
-      }
-    );
-
-    let dockerImageCodeProps: lambda.EcrImageCodeProps = {
-      tagOrDigest: imageTag,
-    };
-
-    // Only set the command on props if there is one.
-    // Setting an empty string causes errors when using the default command
-    if (props.lambdaProps.dockerCommand) {
-      dockerImageCodeProps = {
-        tagOrDigest: imageTag,
-        cmd: [props.lambdaProps.dockerCommand],
-      };
-    }
-
     return new lambda.DockerImageFunction(this, props.name, {
-      code: lambda.DockerImageCode.fromEcr(ecrRepository, dockerImageCodeProps),
+      code: this.getContainerLambdaCode(props),
       functionName: props.name,
       description: props.lambdaProps.description,
       environment: buildLambdaEnvironment({
@@ -347,5 +318,42 @@ export class LambdaWorker extends cdk.Construct {
       vpc: props.lambdaProps.vpc,
       vpcSubnets: props.lambdaProps.vpcSubnets,
     });
+  }
+
+  private getContainerLambdaCode(
+    props: LambdaWorkerProps
+  ): lambda.DockerImageCode {
+    if (props.lambdaProps.imageAsset) {
+      return lambda.DockerImageCode.fromImageAsset(
+        props.lambdaProps.imageAsset.directory,
+        props.lambdaProps.imageAsset.props
+      );
+    }
+
+    const containerProps = props.lambdaProps as ContainerFromEcrLambdaProps;
+
+    const ecrRepository: IRepository = ecr.Repository.fromRepositoryAttributes(
+      this,
+      `${props.name}-ecr`,
+      {
+        repositoryArn: containerProps.ecrRepositoryArn,
+        repositoryName: containerProps.ecrRepositoryName,
+      }
+    );
+
+    let dockerImageCodeProps: lambda.EcrImageCodeProps = {
+      tagOrDigest: containerProps.dockerImageTag,
+    };
+
+    // Only set the command on props if there is one.
+    // Setting an empty string causes errors when using the default command
+    if (containerProps.dockerCommand) {
+      dockerImageCodeProps = {
+        tagOrDigest: containerProps.dockerImageTag,
+        cmd: [containerProps.dockerCommand],
+      };
+    }
+
+    return lambda.DockerImageCode.fromEcr(ecrRepository, dockerImageCodeProps);
   }
 }
