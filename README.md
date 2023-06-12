@@ -1,6 +1,7 @@
 # Talis CDK constructs
 
-A Talis library of AWS CDK constructs, implemented in Typescript.
+A Talis library of AWS CDK constructs, implemented in Typescript and currently
+Node v18.16.0
 
 ## Contributing
 
