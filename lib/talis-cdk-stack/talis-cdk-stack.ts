@@ -57,6 +57,7 @@ export class TalisCdkStack extends Stack {
       case TalisDeploymentEnvironment.STAGING:
         return RemovalPolicy.SNAPSHOT;
       case TalisDeploymentEnvironment.PRODUCTION:
+      case TalisDeploymentEnvironment.PREVIEW:
         return RemovalPolicy.RETAIN;
       default:
         return RemovalPolicy.RETAIN;

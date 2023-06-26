@@ -51,6 +51,8 @@ Helper constants to allow us to map and reference our deployment environments
 | BUILD       | Environments spun up for running builds |
 | STAGING     | Staging environment                     |
 | PRODUCTION  | Production Environment                  |
+| ONDEMAND    | On-Demand Environment                   |
+| PREVIEW     | Preview Environment                     |
 
 ### TalisRegions
 
