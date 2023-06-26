@@ -7,6 +7,8 @@ describe("Talis Deployment Environments", () => {
     [TalisDeploymentEnvironment.TEST, "test"],
     [TalisDeploymentEnvironment.STAGING, "staging"],
     [TalisDeploymentEnvironment.PRODUCTION, "production"],
+    [TalisDeploymentEnvironment.ONDEMAND, "ondemand"],
+    [TalisDeploymentEnvironment.PREVIEW, "preview"],
   ])(
     "Deployment environment %s should be defined as %s",
     (environment, expected) => {

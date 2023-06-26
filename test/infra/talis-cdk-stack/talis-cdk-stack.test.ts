@@ -37,6 +37,8 @@ describe("Talis CDK Stack", () => {
       [TalisDeploymentEnvironment.TEST, cdk.RemovalPolicy.DESTROY],
       [TalisDeploymentEnvironment.STAGING, cdk.RemovalPolicy.SNAPSHOT],
       [TalisDeploymentEnvironment.PRODUCTION, cdk.RemovalPolicy.RETAIN],
+      [TalisDeploymentEnvironment.PREVIEW, cdk.RemovalPolicy.RETAIN],
+      [TalisDeploymentEnvironment.ONDEMAND, cdk.RemovalPolicy.RETAIN],
     ])(
       "Environment %s should have removal policy of %s",
       (environment, expected) => {
@@ -193,6 +195,11 @@ describe("Talis CDK Stack", () => {
           devEnvironment: TalisDeploymentEnvironment.PRODUCTION,
           region: TalisRegion.EU,
           expectedTfsService: "depot-eu",
+        },
+        {
+          devEnvironment: TalisDeploymentEnvironment.PREVIEW,
+          region: TalisRegion.EU,
+          expectedTfsService: "depot-preview-eu",
         },
       ];
       testcases.forEach((testcase) => {
