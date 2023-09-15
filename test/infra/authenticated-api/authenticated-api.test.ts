@@ -134,7 +134,7 @@ describe("AuthenticatedApi", () => {
           FunctionName: "test-MyTestAuthenticatedApi-authoriser",
           Timeout: 120,
           Handler: "index.validateToken",
-          Runtime: "nodejs14.x",
+          Runtime: "nodejs16.x",
           Environment: {
             Variables: {
               PERSONA_CLIENT_NAME: "test-MyTestAuthenticatedApi-authoriser",
@@ -157,7 +157,7 @@ describe("AuthenticatedApi", () => {
           FunctionName: "test-route1-handler",
           Timeout: 30,
           Handler: "index.route",
-          Runtime: "nodejs14.x",
+          Runtime: "nodejs16.x",
           Environment: {
             Variables: {
               LAMBDA_EXECUTION_TIMEOUT: "30",
@@ -171,7 +171,7 @@ describe("AuthenticatedApi", () => {
           FunctionName: "test-route2-handler",
           Timeout: 30,
           Handler: "index.route",
-          Runtime: "nodejs14.x",
+          Runtime: "nodejs16.x",
           Environment: {
             Variables: {
               LAMBDA_EXECUTION_TIMEOUT: "30",

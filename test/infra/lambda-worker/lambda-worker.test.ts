@@ -58,7 +58,7 @@ describe("LambdaWorker", () => {
             MemorySize: 2048,
             Timeout: 300,
             Handler: "index.testWorker",
-            Runtime: "nodejs14.x",
+            Runtime: "nodejs16.x",
             Environment: {
               Variables: {
                 AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1",
@@ -250,7 +250,7 @@ describe("LambdaWorker", () => {
             MemorySize: 2048,
             Timeout: 300,
             Handler: "index.testWorker",
-            Runtime: "nodejs14.x",
+            Runtime: "nodejs16.x",
             //Optional
             Description: "Test Description",
             Environment: {
