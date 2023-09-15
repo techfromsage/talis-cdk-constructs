@@ -1,10 +1,11 @@
-import * as cdk from "@aws-cdk/core";
-import * as certificatemanager from "@aws-cdk/aws-certificatemanager";
-import * as cloudfront from "@aws-cdk/aws-cloudfront";
-import * as s3 from "@aws-cdk/aws-s3";
-import * as s3deploy from "@aws-cdk/aws-s3-deployment";
+import * as cdk from 'aws-cdk-lib';
+import { aws_certificatemanager as certificatemanager } from 'aws-cdk-lib';
+import { aws_cloudfront as cloudfront } from 'aws-cdk-lib';
+import { aws_s3 as s3 } from 'aws-cdk-lib';
+import { aws_s3_deployment as s3deploy } from 'aws-cdk-lib';
 import { getSiteDomain } from "./utils";
 import { CommonCdnSiteHostingProps } from "./cdn-site-hosting-props";
+import { Construct } from 'constructs';
 
 export interface CdnSiteHostingConstructProps
   extends CommonCdnSiteHostingProps {
@@ -20,12 +21,12 @@ export interface CdnSiteHostingConstructProps
  * - Register the CloudFront distribution with the provided certificate
  * - Deploy provided source code to S3 and invalidate the CloudFront distribution
  */
-export class CdnSiteHostingConstruct extends cdk.Construct {
+export class CdnSiteHostingConstruct extends Construct {
   public readonly s3Bucket: s3.Bucket;
   public readonly cloudfrontWebDistribution: cloudfront.CloudFrontWebDistribution;
 
   constructor(
-    scope: cdk.Construct,
+    scope: Construct,
     id: string,
     props: CdnSiteHostingConstructProps
   ) {

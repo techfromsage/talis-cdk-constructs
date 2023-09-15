@@ -1,10 +1,11 @@
-import * as cdk from "@aws-cdk/core";
-import * as certificatemanager from "@aws-cdk/aws-certificatemanager";
-import * as route53 from "@aws-cdk/aws-route53";
-import * as targets from "@aws-cdk/aws-route53-targets/lib";
+import * as cdk from 'aws-cdk-lib';
+import { aws_certificatemanager as certificatemanager } from 'aws-cdk-lib';
+import { aws_route53 as route53 } from 'aws-cdk-lib';
+import { aws_route53_targets as targets } from 'aws-cdk-lib';
 import { CdnSiteHostingConstruct } from "./cdn-site-hosting-construct";
 import { getSiteDomain } from "./utils";
 import { CommonCdnSiteHostingProps } from "./cdn-site-hosting-props";
+import { Construct } from 'constructs';
 
 export interface CdnSiteHostingWithDnsConstructProps
   extends CommonCdnSiteHostingProps {
@@ -21,11 +22,11 @@ export interface CdnSiteHostingWithDnsConstructProps
  * - Delegate underlying infrastructure and code deployment to `cdnSiteHostingConstruct`
  * - Associate the DNS entry with the underpinning CloudFront distribution
  */
-export class CdnSiteHostingWithDnsConstruct extends cdk.Construct {
+export class CdnSiteHostingWithDnsConstruct extends Construct {
   public readonly cdnSiteHosting: CdnSiteHostingConstruct;
 
   constructor(
-    scope: cdk.Construct,
+    scope: Construct,
     id: string,
     props: CdnSiteHostingWithDnsConstructProps
   ) {

@@ -1,5 +1,5 @@
-import * as cdk from "@aws-cdk/core";
-import * as s3deploy from "@aws-cdk/aws-s3-deployment";
+import * as cdk from 'aws-cdk-lib';
+import { aws_s3_deployment as s3deploy } from 'aws-cdk-lib';
 
 export interface SourcesWithDeploymentOptions {
   name?: string;
