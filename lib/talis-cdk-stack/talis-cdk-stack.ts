@@ -1,12 +1,13 @@
-import * as cdk from "@aws-cdk/core";
+import * as cdk from 'aws-cdk-lib';
 
-import { IVpc, Vpc } from "@aws-cdk/aws-ec2";
-import { Stack, Construct, RemovalPolicy } from "@aws-cdk/core";
+import { aws_ec2 as ec2 } from 'aws-cdk-lib';
 import { TalisCdkStackProps } from "./talis-cdk-stack-props";
 import { TalisDeploymentEnvironment } from "./talis-deployment-environment";
 import { getTalisShortRegionFromTalisRegion } from "./talis-region";
-export class TalisCdkStack extends Stack {
-  protected readonly vpc: IVpc;
+import { Construct } from 'constructs';
+
+export class TalisCdkStack extends cdk.Stack {
+  protected readonly vpc: ec2.IVpc;
 
   constructor(scope: Construct, id: string, props: TalisCdkStackProps) {
     super(scope, id, props);
@@ -48,23 +49,23 @@ export class TalisCdkStack extends Stack {
 
   getRemovalPolicyForTalisDeploymentEnvironment(
     environment: TalisDeploymentEnvironment
-  ): RemovalPolicy {
+  ): cdk.RemovalPolicy {
     switch (environment) {
       case TalisDeploymentEnvironment.BUILD:
       case TalisDeploymentEnvironment.DEVELOPMENT:
       case TalisDeploymentEnvironment.TEST:
-        return RemovalPolicy.DESTROY;
+        return cdk.RemovalPolicy.DESTROY;
       case TalisDeploymentEnvironment.STAGING:
-        return RemovalPolicy.SNAPSHOT;
+        return cdk.RemovalPolicy.SNAPSHOT;
       case TalisDeploymentEnvironment.PRODUCTION:
       case TalisDeploymentEnvironment.PREVIEW:
-        return RemovalPolicy.RETAIN;
+        return cdk.RemovalPolicy.RETAIN;
       default:
-        return RemovalPolicy.RETAIN;
+        return cdk.RemovalPolicy.RETAIN;
     }
   }
 
-  private resolveVpc(vpcId: string): IVpc {
-    return Vpc.fromLookup(this, vpcId, { vpcId });
+  private resolveVpc(vpcId: string): ec2.IVpc {
+    return ec2.Vpc.fromLookup(this, vpcId, { vpcId });
   }
 }
