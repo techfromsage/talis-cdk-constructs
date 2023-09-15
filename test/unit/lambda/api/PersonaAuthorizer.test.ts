@@ -50,7 +50,7 @@ describe("authorizer", () => {
       test(`${testSpec.title}`, async () => {
         const authorizer = new PersonaAuthorizer(null, null);
         expect(
-          authorizer.pathMatch(testSpec.pathDefinition, testSpec.path)
+          authorizer.pathMatch(testSpec.pathDefinition, testSpec.path),
         ).toBe(testSpec.expectedResult);
       });
     });

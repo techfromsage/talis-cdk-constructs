@@ -1,6 +1,6 @@
-import { CfnApiProps } from "@aws-cdk/aws-apigatewayv2";
+import { aws_apigatewayv2 as apigatewayv2 } from "aws-cdk-lib";
 
-export const CfnApiProperties: CfnApiProps = {
+export const CfnApiProperties: apigatewayv2.CfnApiProps = {
   apiKeySelectionExpression: "apiKeySelectionExpression",
   basePath: "basePath",
   body: {},

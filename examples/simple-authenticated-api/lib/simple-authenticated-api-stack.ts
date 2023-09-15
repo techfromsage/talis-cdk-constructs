@@ -1,8 +1,9 @@
-import * as apigatewayv2 from "@aws-cdk/aws-apigatewayv2";
-import * as cdk from "@aws-cdk/core";
-import * as s3 from "@aws-cdk/aws-s3";
-import * as ec2 from "@aws-cdk/aws-ec2";
-import * as sns from "@aws-cdk/aws-sns";
+import * as cdk from "aws-cdk-lib";
+// import { aws_ec2 as ec2 } from "aws-cdk-lib";
+import { aws_s3 as s3 } from "aws-cdk-lib";
+import { aws_sns as sns } from "aws-cdk-lib";
+import * as apigatewayv2_alpha from "@aws-cdk/aws-apigatewayv2-alpha";
+import { Construct } from "constructs";
 
 import { AuthenticatedApi, AuthenticatedApiFunction } from "../../../lib";
 
@@ -10,7 +11,7 @@ export const STAGING_TALIS_TLS_CERT_ARN =
   "arn:aws:acm:eu-west-1:302477901552:certificate/46e0fb43-bba8-4aa7-bf98-a3b2038cf760";
 
 export class SimpleAuthenticatedApiStack extends cdk.Stack {
-  constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
     // Use AWS_PREFIX to give all resources in this sample
@@ -27,7 +28,7 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
     const alarmTopic = new sns.Topic(
       this,
       `${prefix}simple-lambda-Worker-alarm`,
-      { topicName: `${prefix}simple-authenticated-api-alarm` }
+      { topicName: `${prefix}simple-authenticated-api-alarm` },
     );
 
     // VPC is optional. To use one, you would look it up as follows:
@@ -41,16 +42,20 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
     // one, the default group created will add significant time to deploy and destroy
     // steps in the build. This is not a problem IRL where the group will only be created
     // once instead of being created and destroyed on every build.
-    const lambdaSecurityGroups = [
-      ec2.SecurityGroup.fromSecurityGroupId(
-        this,
-        "a-talis-cdk-constructs-build",
-        "sg-0ac646f0077b5ce03",
-        {
-          mutable: false,
-        }
-      ),
-    ];
+    // Note : Trying to configure the security group without providing a vpc results is the error:
+    //   Error: Cannot configure 'securityGroups' without configuring a VPC
+    // since CDK V2.
+    //
+    // const lambdaSecurityGroups = [
+    //   ec2.SecurityGroup.fromSecurityGroupId(
+    //     this,
+    //     "a-talis-cdk-constructs-build",
+    //     "sg-0ac646f0077b5ce03",
+    //     {
+    //       mutable: false,
+    //     }
+    //   ),
+    // ];
 
     // Create the lambda's to be passed into the AuthenticatedApi construct
     const route1Handler = new AuthenticatedApiFunction(
@@ -62,11 +67,12 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
         environment: {},
         handler: "route",
         timeout: cdk.Duration.seconds(30),
-        securityGroups: lambdaSecurityGroups,
+        // A security group is optional. If you need to specify one, you would do so here:
+        // securityGroups: lambdaSecurityGroups,
         // A VPC is optional. If you need to specify one, you would do so here:
         // vpc: vpc,
         // vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT },
-      }
+      },
     );
 
     const route2Handler = new AuthenticatedApiFunction(
@@ -78,11 +84,12 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
         environment: {},
         handler: "route",
         timeout: cdk.Duration.seconds(30),
-        securityGroups: lambdaSecurityGroups,
+        // A security group is optional. If you need to specify one, you would do so here:
+        // securityGroups: lambdaSecurityGroups,
         // A VPC is optional. If you need to specify one, you would do so here:
         // vpc: vpc,
         // vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT },
-      }
+      },
     );
 
     const route3Handler = new AuthenticatedApiFunction(
@@ -94,8 +101,9 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
         environment: {},
         handler: "route",
         timeout: cdk.Duration.seconds(30),
-        securityGroups: lambdaSecurityGroups,
-      }
+        // A security group is optional. If you need to specify one, you would do so here:
+        // securityGroups: lambdaSecurityGroups,
+      },
     );
 
     const route4Handler = new AuthenticatedApiFunction(
@@ -107,8 +115,9 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
         environment: {},
         handler: "route",
         timeout: cdk.Duration.seconds(30),
-        securityGroups: lambdaSecurityGroups,
-      }
+        // A security group is optional. If you need to specify one, you would do so here:
+        // securityGroups: lambdaSecurityGroups,
+      },
     );
 
     const api = new AuthenticatedApi(
@@ -123,7 +132,8 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
         // A VPC is optional. If you need to specify one, you would do so here:
         // vpc: vpc,
         // vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT },
-        securityGroups: lambdaSecurityGroups,
+        // A security group is optional. If you need to specify one, you would do so here:
+        // securityGroups: lambdaSecurityGroups,
         domainName: `${prefix}simple-authenticated-api.talis.com`,
         certificateArn: STAGING_TALIS_TLS_CERT_ARN,
         corsDomain: [
@@ -142,33 +152,33 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
           {
             name: "route1",
             path: "/1/route1",
-            method: apigatewayv2.HttpMethod.GET,
+            method: apigatewayv2_alpha.HttpMethod.GET,
             lambda: route1Handler,
             requiredScope: "analytics:admin",
           },
           {
             name: "route2",
             path: "/1/route2",
-            method: apigatewayv2.HttpMethod.GET,
+            method: apigatewayv2_alpha.HttpMethod.GET,
             lambda: route2Handler,
             isPublic: true,
           },
           {
             name: "route3",
             path: "/1/route3/{id}",
-            method: apigatewayv2.HttpMethod.GET,
+            method: apigatewayv2_alpha.HttpMethod.GET,
             lambda: route3Handler,
             requiredScope: "analytics:admin",
           },
           {
             name: "route4",
             path: "/1/route4/{id}/route4",
-            method: apigatewayv2.HttpMethod.GET,
+            method: apigatewayv2_alpha.HttpMethod.GET,
             lambda: route4Handler,
             requiredScope: "analytics:admin",
           },
         ],
-      }
+      },
     );
 
     // It's common to want to route to static content, for example api documentation.
@@ -189,7 +199,7 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
         publicReadAccess: true,
         removalPolicy: cdk.RemovalPolicy.DESTROY,
         websiteIndexDocument: "index.html",
-      }
+      },
     );
 
     // Url Routes can be added in the initial props of the api construct, but they can also be
@@ -198,12 +208,12 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
       name: "simple authenticated api docs",
       baseUrl: `${documentationBucket.bucketWebsiteUrl}/api-documentation/index.html`,
       path: "/api-documentation",
-      method: apigatewayv2.HttpMethod.GET,
+      method: apigatewayv2_alpha.HttpMethod.GET,
     });
 
     console.log(`Regional domain name: ${api.domainName.regionalDomainName}`);
     console.log(
-      `Regional hosted zone id: ${api.domainName.regionalHostedZoneId}`
+      `Regional hosted zone id: ${api.domainName.regionalHostedZoneId}`,
     );
   }
 }

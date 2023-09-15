@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import "source-map-support/register";
-import * as cdk from "@aws-cdk/core";
+import * as cdk from "aws-cdk-lib";
 import { SimpleLambdaWorkerStack } from "../lib/simple-lambda-worker-stack";
 
 const app = new cdk.App();
@@ -12,5 +12,5 @@ new SimpleLambdaWorkerStack(
       account: process.env.CDK_DEFAULT_ACCOUNT,
       region: process.env.CDK_DEFAULT_REGION,
     },
-  }
+  },
 );

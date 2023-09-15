@@ -13,6 +13,6 @@ describe("Talis Deployment Environments", () => {
     "Deployment environment %s should be defined as %s",
     (environment, expected) => {
       expect(environment).toBe(expected);
-    }
+    },
   );
 });

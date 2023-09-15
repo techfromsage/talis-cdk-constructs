@@ -1,5 +1,5 @@
+import * as cdk from "aws-cdk-lib";
 import { buildLambdaEnvironment } from "../../../lib/util/build-lambda-environment";
-import { Duration } from "@aws-cdk/core";
 
 describe("buildLambdaEnvironment", () => {
   test("returns empty object if no options were passed", () => {
@@ -14,11 +14,11 @@ describe("buildLambdaEnvironment", () => {
 
   describe("timeout", () => {
     test("adds LAMBDA_EXECUTION_TIMEOUT if timeout provided", () => {
-      expect(buildLambdaEnvironment({ timeout: Duration.seconds(60) })).toEqual(
-        {
-          LAMBDA_EXECUTION_TIMEOUT: "60",
-        }
-      );
+      expect(
+        buildLambdaEnvironment({ timeout: cdk.Duration.seconds(60) }),
+      ).toEqual({
+        LAMBDA_EXECUTION_TIMEOUT: "60",
+      });
     });
 
     const conversionCases: {
@@ -33,7 +33,7 @@ describe("buildLambdaEnvironment", () => {
     conversionCases.forEach(({ amount, unit, expected }) => {
       test(`converts timeout to seconds in LAMBDA_EXECUTION_TIMEOUT: ${amount} ${unit}`, () => {
         expect(
-          buildLambdaEnvironment({ timeout: Duration[unit](amount) })
+          buildLambdaEnvironment({ timeout: cdk.Duration[unit](amount) }),
         ).toEqual({
           LAMBDA_EXECUTION_TIMEOUT: expected,
         });
@@ -44,8 +44,8 @@ describe("buildLambdaEnvironment", () => {
       expect(
         buildLambdaEnvironment({
           environment: { FOO: "bar" },
-          timeout: Duration.seconds(60),
-        })
+          timeout: cdk.Duration.seconds(60),
+        }),
       ).toEqual({
         FOO: "bar",
         LAMBDA_EXECUTION_TIMEOUT: "60",
@@ -56,8 +56,8 @@ describe("buildLambdaEnvironment", () => {
       expect(
         buildLambdaEnvironment({
           environment: { LAMBDA_EXECUTION_TIMEOUT: "foo" },
-          timeout: Duration.seconds(60),
-        })
+          timeout: cdk.Duration.seconds(60),
+        }),
       ).toEqual({
         LAMBDA_EXECUTION_TIMEOUT: "foo",
       });

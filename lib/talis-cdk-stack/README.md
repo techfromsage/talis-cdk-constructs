@@ -26,7 +26,7 @@ const stack = new TalisCdkStack(app, "my-stack", props);
 // Get the removal policy for the stacks environment
 // Returns a CDK Removal Policy
 stack.getRemovalPolicyForTalisDeploymentEnvironment(
-  props.deploymentEnvironment
+  props.deploymentEnvironment,
 );
 ```
 

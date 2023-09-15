@@ -1,4 +1,5 @@
-import { IConstruct, CfnResource, Annotations } from "@aws-cdk/core";
+import * as cdk from "aws-cdk-lib";
+import { IConstruct } from "constructs";
 import {
   CfnResourcePrefixer,
   CfnResourcePrefixerBase,
@@ -9,9 +10,9 @@ export class EmptyCfnResourcePrefixer
   implements CfnResourcePrefixer
 {
   constructor(node: IConstruct) {
-    if (!CfnResource.isCfnResource(node)) {
-      Annotations.of(node).addError(
-        "Node is not a CfnResource and cannot be prefixed using this prefixer"
+    if (!cdk.CfnResource.isCfnResource(node)) {
+      cdk.Annotations.of(node).addError(
+        "Node is not a CfnResource and cannot be prefixed using this prefixer",
       );
     }
     super(node, "");

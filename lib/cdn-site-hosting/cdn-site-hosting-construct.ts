@@ -1,10 +1,11 @@
-import * as cdk from "@aws-cdk/core";
-import * as certificatemanager from "@aws-cdk/aws-certificatemanager";
-import * as cloudfront from "@aws-cdk/aws-cloudfront";
-import * as s3 from "@aws-cdk/aws-s3";
-import * as s3deploy from "@aws-cdk/aws-s3-deployment";
+import * as cdk from "aws-cdk-lib";
+import { aws_certificatemanager as certificatemanager } from "aws-cdk-lib";
+import { aws_cloudfront as cloudfront } from "aws-cdk-lib";
+import { aws_s3 as s3 } from "aws-cdk-lib";
+import { aws_s3_deployment as s3deploy } from "aws-cdk-lib";
 import { getSiteDomain } from "./utils";
 import { CommonCdnSiteHostingProps } from "./cdn-site-hosting-props";
+import { Construct } from "constructs";
 
 export interface CdnSiteHostingConstructProps
   extends CommonCdnSiteHostingProps {
@@ -20,14 +21,14 @@ export interface CdnSiteHostingConstructProps
  * - Register the CloudFront distribution with the provided certificate
  * - Deploy provided source code to S3 and invalidate the CloudFront distribution
  */
-export class CdnSiteHostingConstruct extends cdk.Construct {
+export class CdnSiteHostingConstruct extends Construct {
   public readonly s3Bucket: s3.Bucket;
   public readonly cloudfrontWebDistribution: cloudfront.CloudFrontWebDistribution;
 
   constructor(
-    scope: cdk.Construct,
+    scope: Construct,
     id: string,
-    props: CdnSiteHostingConstructProps
+    props: CdnSiteHostingConstructProps,
   ) {
     super(scope, id);
 
@@ -40,13 +41,13 @@ export class CdnSiteHostingConstruct extends cdk.Construct {
       certificatemanager.Certificate.fromCertificateArn(
         this,
         `${siteDomain}-cert`,
-        props.certificateArn
+        props.certificateArn,
       ),
       {
         aliases: [siteDomain],
         sslMethod: cloudfront.SSLMethod.SNI,
         securityPolicy: cloudfront.SecurityPolicyProtocol.TLS_V1_1_2016,
-      }
+      },
     );
 
     let websiteErrorDocument: string | undefined = props.websiteErrorDocument;
@@ -99,7 +100,7 @@ export class CdnSiteHostingConstruct extends cdk.Construct {
               },
             ]
           : undefined,
-      }
+      },
     );
     new cdk.CfnOutput(this, "DistributionId", {
       value: this.cloudfrontWebDistribution.distributionId,
@@ -114,7 +115,7 @@ export class CdnSiteHostingConstruct extends cdk.Construct {
       const deployments = props.sourcesWithDeploymentOptions.map(
         (
           { name, sources, distributionPathsToInvalidate, cacheControl },
-          index
+          index,
         ) => {
           const isInvalidationRequired =
             distributionPathsToInvalidate &&
@@ -136,9 +137,9 @@ export class CdnSiteHostingConstruct extends cdk.Construct {
               distributionPaths: isInvalidationRequired
                 ? distributionPathsToInvalidate
                 : undefined,
-            }
+            },
           );
-        }
+        },
       );
 
       // Give the first deployment a dependency on the s3 bucket.
@@ -168,18 +169,18 @@ function validateProps(props: CdnSiteHostingConstructProps): void {
   // validate source specifications
   if (!sources && !sourcesWithDeploymentOptions) {
     throw new Error(
-      "Either `sources` or `sourcesWithDeploymentOptions` must be specified"
+      "Either `sources` or `sourcesWithDeploymentOptions` must be specified",
     );
   } else if (sources && sourcesWithDeploymentOptions) {
     throw new Error(
-      "Either `sources` or `sourcesWithDeploymentOptions` may be specified, but not both."
+      "Either `sources` or `sourcesWithDeploymentOptions` may be specified, but not both.",
     );
   } else if (
     sourcesWithDeploymentOptions &&
     sourcesWithDeploymentOptions.length === 0
   ) {
     throw new Error(
-      "If specified, `sourcesWithDeploymentOptions` cannot be empty"
+      "If specified, `sourcesWithDeploymentOptions` cannot be empty",
     );
   } else if (
     sourcesWithDeploymentOptions &&

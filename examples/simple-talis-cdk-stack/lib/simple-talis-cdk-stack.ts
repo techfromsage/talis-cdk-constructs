@@ -1,9 +1,8 @@
-import * as cdk from "@aws-cdk/core";
-
+import { Construct } from "constructs";
 import { TalisCdkStack, TalisCdkStackProps } from "../../../lib";
 
 export class SimpleTalisCdkStack extends TalisCdkStack {
-  constructor(scope: cdk.Construct, id: string, props: TalisCdkStackProps) {
+  constructor(scope: Construct, id: string, props: TalisCdkStackProps) {
     super(scope, id, props);
   }
 }

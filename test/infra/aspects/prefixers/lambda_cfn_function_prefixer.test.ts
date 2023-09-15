@@ -1,8 +1,7 @@
-import * as lambda from "@aws-cdk/aws-lambda";
-import * as cdk from "@aws-cdk/core";
+import * as cdk from "aws-cdk-lib";
+import { aws_lambda as lambda } from "aws-cdk-lib";
+import { Annotations, Template } from "aws-cdk-lib/assertions";
 
-import { expect as expectCDK, haveResource } from "@aws-cdk/assert";
-import { Annotations } from "@aws-cdk/assertions";
 import { LambdaCfnFunctionPrefixer } from "../../../../lib";
 import { CfnFunctionProperties } from "../../../fixtures/infra/aws-lambda/cfn_function";
 import { EmptyResource } from "../../../fixtures/infra/empty_resource";
@@ -20,7 +19,7 @@ describe("Lambda CfnFunction Prefixer", () => {
     cfnFunction = new lambda.CfnFunction(
       stack,
       "function2",
-      CfnFunctionProperties
+      CfnFunctionProperties,
     );
     prefixer = new LambdaCfnFunctionPrefixer(cfnFunction, "test-prefix-");
     emptyPrefixer = new LambdaCfnFunctionPrefixer(cfnFunction, "");
@@ -30,11 +29,9 @@ describe("Lambda CfnFunction Prefixer", () => {
     test("Keeps function name the same", () => {
       emptyPrefixer.prefix();
 
-      expectCDK(stack).to(
-        haveResource("AWS::Lambda::Function", {
-          FunctionName: "functionName",
-        })
-      );
+      Template.fromStack(stack).hasResourceProperties("AWS::Lambda::Function", {
+        FunctionName: "functionName",
+      });
     });
   });
 
@@ -42,11 +39,9 @@ describe("Lambda CfnFunction Prefixer", () => {
     test("Adds prefix to the start of the function name", () => {
       prefixer.prefix();
 
-      expectCDK(stack).to(
-        haveResource("AWS::Lambda::Function", {
-          FunctionName: "test-prefix-functionName",
-        })
-      );
+      Template.fromStack(stack).hasResourceProperties("AWS::Lambda::Function", {
+        FunctionName: "test-prefix-functionName",
+      });
     });
   });
 
@@ -58,7 +53,7 @@ describe("Lambda CfnFunction Prefixer", () => {
       new LambdaCfnFunctionPrefixer(unknownResource, "prefix");
       Annotations.fromStack(stack).hasError(
         "/AspectTestStack/empty",
-        "Node is not a CfnFunction and cannot be prefixed using this prefixer"
+        "Node is not a CfnFunction and cannot be prefixed using this prefixer",
       );
     });
   });

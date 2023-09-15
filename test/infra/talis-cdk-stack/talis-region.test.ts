@@ -25,12 +25,12 @@ describe("Talis Short Region", () => {
 describe("getTalisShortRegionFromTalisRegionName", () => {
   test("Returns correct short region for Canada", () => {
     expect(getTalisShortRegionFromTalisRegion("ca-central-1")).toBe(
-      TalisShortRegion.CANADA
+      TalisShortRegion.CANADA,
     );
   });
   test("Returns correct short region for EU", () => {
     expect(getTalisShortRegionFromTalisRegion(TalisRegion.EU)).toBe(
-      TalisShortRegion.EU
+      TalisShortRegion.EU,
     );
   });
   test("Returns undefined if the env region is not defined", () => {

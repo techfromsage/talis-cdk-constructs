@@ -1,9 +1,6 @@
-import * as cdk from "@aws-cdk/core";
-
-import { expect as expectCDK, haveResource } from "@aws-cdk/assert";
-import { Annotations, Template } from "@aws-cdk/assertions";
+import * as cdk from "aws-cdk-lib";
+import { Annotations, Template } from "aws-cdk-lib/assertions";
 import { ResourcePrefixer } from "../../../lib";
-import { Aspects } from "@aws-cdk/core";
 import { EmptyResource } from "../../fixtures/infra/empty_resource";
 import { ResourcePrefixerTestCases } from "../../fixtures/infra/resource_prefixer_test_cases";
 
@@ -30,11 +27,12 @@ describe("Resource Prefixer", () => {
         expectedPropsUnprefixed,
       }) => {
         new resourceType(stack, "test-item", resourceProps);
-        Aspects.of(stack).add(emptyResourcePrefixer);
-        expectCDK(stack).to(
-          haveResource(expectedType, expectedPropsUnprefixed)
+        cdk.Aspects.of(stack).add(emptyResourcePrefixer);
+        Template.fromStack(stack).hasResourceProperties(
+          expectedType,
+          expectedPropsUnprefixed,
         );
-      }
+      },
     );
   });
 
@@ -48,19 +46,22 @@ describe("Resource Prefixer", () => {
         expectedPropsPrefixed,
       }) => {
         new resourceType(stack, "test-item", resourceProps);
-        Aspects.of(stack).add(resourcePrefixer);
-        expectCDK(stack).to(haveResource(expectedType, expectedPropsPrefixed));
-      }
+        cdk.Aspects.of(stack).add(resourcePrefixer);
+        Template.fromStack(stack).hasResourceProperties(
+          expectedType,
+          expectedPropsPrefixed,
+        );
+      },
     );
   });
 
   describe("Undefined Resources", () => {
     test("Adds warning annotation if no prefixer registered for cloud formation resource", () => {
       new EmptyResource(stack, "empty", { type: "Empty::Resource " });
-      Aspects.of(stack).add(resourcePrefixer);
+      cdk.Aspects.of(stack).add(resourcePrefixer);
       Annotations.fromStack(stack).hasWarning(
         "/AspectTestStack/empty",
-        "No defined resource prefixer for: Empty::Resource "
+        "No defined resource prefixer for: Empty::Resource ",
       );
     });
   });

@@ -1,10 +1,6 @@
-import {
-  expect as expectCDK,
-  matchTemplate,
-  MatchStyle,
-} from "@aws-cdk/assert";
-import * as cdk from "@aws-cdk/core";
+import * as cdk from "aws-cdk-lib";
 import * as SimpleTalisCdkStack from "../lib/simple-talis-cdk-stack";
+import { Template } from "aws-cdk-lib/assertions";
 
 import { TalisDeploymentEnvironment } from "../../../lib";
 
@@ -18,15 +14,8 @@ test("Empty Stack", () => {
       app: "test-app",
       release: "test-release",
       deploymentEnvironment: TalisDeploymentEnvironment.TEST,
-    }
+    },
   );
   // THEN
-  expectCDK(stack).to(
-    matchTemplate(
-      {
-        Resources: {},
-      },
-      MatchStyle.EXACT
-    )
-  );
+  Template.fromStack(stack).templateMatches({});
 });

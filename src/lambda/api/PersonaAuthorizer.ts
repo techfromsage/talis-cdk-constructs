@@ -48,6 +48,7 @@ const API_GATEWAY_ARN_INDEXES = [
   RESOURCE_PATH_INDEX,
 ];
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export class PersonaAuthorizer {
   event: any;
   context: any;
@@ -78,7 +79,7 @@ export class PersonaAuthorizer {
       token: _.replace(
         this.event.headers["authorization"],
         "Bearer",
-        ""
+        "",
       ).trim(),
     };
     if (scope != null) {
@@ -88,7 +89,7 @@ export class PersonaAuthorizer {
 
     console.log(
       "validating token against request",
-      `${parsedMethodArn.resourcePath}`
+      `${parsedMethodArn.resourcePath}`,
     );
 
     if (!validationOpts.token || validationOpts.token.length === 0) {
@@ -144,7 +145,7 @@ export class PersonaAuthorizer {
             });
           }
           resolve(decodedToken);
-        }
+        },
       );
     });
   }
@@ -235,7 +236,7 @@ export class PersonaAuthorizer {
 
       this.personaClient = persona.createClient(
         `${process.env["PERSONA_CLIENT_NAME"]} (lambda; NODE_ENV=${process.env["NODE_ENV"]})`,
-        _.merge(personaConfig, {})
+        _.merge(personaConfig, {}),
       );
     }
 
@@ -270,3 +271,4 @@ export class PersonaAuthorizer {
     return true;
   }
 }
+/* eslint-enable @typescript-eslint/no-explicit-any */

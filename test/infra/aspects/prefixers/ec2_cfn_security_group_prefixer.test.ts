@@ -1,8 +1,7 @@
-import * as ec2 from "@aws-cdk/aws-ec2";
-import * as cdk from "@aws-cdk/core";
+import * as cdk from "aws-cdk-lib";
+import { aws_ec2 as ec2 } from "aws-cdk-lib";
+import { Annotations, Template } from "aws-cdk-lib/assertions";
 
-import { expect as expectCDK, haveResource } from "@aws-cdk/assert";
-import { Annotations } from "@aws-cdk/assertions";
 import { Ec2CfnSecurityGroupPrefixer } from "../../../../lib";
 import { CfnSecurityGroupProperties } from "../../../fixtures/infra/aws-ec2/cfn_security_group";
 import { EmptyResource } from "../../../fixtures/infra/empty_resource";
@@ -20,11 +19,11 @@ describe("Lambda CfnSecurityGroup Prefixer", () => {
     cfnSecurityGroup = new ec2.CfnSecurityGroup(
       stack,
       "securityGroup2",
-      CfnSecurityGroupProperties
+      CfnSecurityGroupProperties,
     );
     prefixer = new Ec2CfnSecurityGroupPrefixer(
       cfnSecurityGroup,
-      "test-prefix-"
+      "test-prefix-",
     );
     emptyPrefixer = new Ec2CfnSecurityGroupPrefixer(cfnSecurityGroup, "");
   });
@@ -33,10 +32,11 @@ describe("Lambda CfnSecurityGroup Prefixer", () => {
     test("Keeps group name the same", () => {
       emptyPrefixer.prefix();
 
-      expectCDK(stack).to(
-        haveResource("AWS::EC2::SecurityGroup", {
+      Template.fromStack(stack).hasResourceProperties(
+        "AWS::EC2::SecurityGroup",
+        {
           GroupName: "groupName",
-        })
+        },
       );
     });
   });
@@ -45,10 +45,11 @@ describe("Lambda CfnSecurityGroup Prefixer", () => {
     test("Adds prefix to the start of the group name", () => {
       prefixer.prefix();
 
-      expectCDK(stack).to(
-        haveResource("AWS::EC2::SecurityGroup", {
+      Template.fromStack(stack).hasResourceProperties(
+        "AWS::EC2::SecurityGroup",
+        {
           GroupName: "test-prefix-groupName",
-        })
+        },
       );
     });
   });
@@ -61,7 +62,7 @@ describe("Lambda CfnSecurityGroup Prefixer", () => {
       new Ec2CfnSecurityGroupPrefixer(unknownResource, "prefix");
       Annotations.fromStack(stack).hasError(
         "/AspectTestStack/empty",
-        "Node is not a CfnSecurityGroup and cannot be prefixed using this prefixer"
+        "Node is not a CfnSecurityGroup and cannot be prefixed using this prefixer",
       );
     });
   });

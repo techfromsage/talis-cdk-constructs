@@ -20,7 +20,7 @@ describe("LambdaWorker", () => {
 
   async function findQueueUrl(
     queuePostfix: string,
-    nextToken: string | undefined = undefined
+    nextToken: string | undefined = undefined,
   ): Promise<string> {
     const response = await sqs.listQueues({ NextToken: nextToken }).promise();
 
@@ -77,7 +77,7 @@ describe("LambdaWorker", () => {
         return;
       } else if (currentSize > expectedSize) {
         throw Error(
-          `Looking for ${expectedSize} messages on ${queueUrl} But there are already ${currentSize}.`
+          `Looking for ${expectedSize} messages on ${queueUrl} But there are already ${currentSize}.`,
         );
       } else {
         await sleep(WATCH_CHECK_PERIOD);
@@ -86,7 +86,7 @@ describe("LambdaWorker", () => {
 
     const finalSize = await queueSize(queueUrl);
     throw Error(
-      `Looking for ${expectedSize} messages on ${queueUrl}. But there are only ${finalSize}`
+      `Looking for ${expectedSize} messages on ${queueUrl}. But there are only ${finalSize}`,
     );
   }
 

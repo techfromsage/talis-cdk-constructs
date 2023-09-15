@@ -3,6 +3,8 @@ node_modules
 .vscode/
 
 # Typescript is our source-code; generated JS and d.ts is left unlinted.
+src/**/*.js
+src/**/*.d.ts
 lib/**/*.js
 lib/**/*.d.ts
 test/**/*.js

@@ -1,5 +1,6 @@
-import { CfnTable } from "@aws-cdk/aws-dynamodb";
-import { IConstruct, CfnResource, Annotations } from "@aws-cdk/core";
+import * as cdk from "aws-cdk-lib";
+import { aws_dynamodb as dynamodb } from "aws-cdk-lib";
+import { IConstruct } from "constructs";
 import {
   CfnResourcePrefixer,
   CfnResourcePrefixerBase,
@@ -12,19 +13,19 @@ export class DynamoDbCfnTablePrefixer
   constructor(node: IConstruct, resourcePrefix: string) {
     if (
       !(
-        (node as CfnResource).cfnResourceType ===
-        CfnTable.CFN_RESOURCE_TYPE_NAME
+        (node as cdk.CfnResource).cfnResourceType ===
+        dynamodb.CfnTable.CFN_RESOURCE_TYPE_NAME
       )
     ) {
-      Annotations.of(node).addError(
-        "Node is not a CfnTable and cannot be prefixed using this prefixer"
+      cdk.Annotations.of(node).addError(
+        "Node is not a CfnTable and cannot be prefixed using this prefixer",
       );
     }
     super(node, resourcePrefix);
   }
 
   public prefix(): void {
-    const table = this.node as CfnTable;
+    const table = this.node as dynamodb.CfnTable;
     this.prefixResourceName(table.tableName, "TableName");
   }
 }
