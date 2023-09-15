@@ -1,18 +1,22 @@
-import * as cdk from "@aws-cdk/core";
-import * as cloudwatch from "@aws-cdk/aws-cloudwatch";
-import * as cloudwatchActions from "@aws-cdk/aws-cloudwatch-actions";
-import * as eventSource from "@aws-cdk/aws-lambda-event-sources";
-import * as lambda from "@aws-cdk/aws-lambda";
-import * as lambdaNodeJs from "@aws-cdk/aws-lambda-nodejs";
-import * as sqs from "@aws-cdk/aws-sqs";
-import * as subs from "@aws-cdk/aws-sns-subscriptions";
-import * as ecr from "@aws-cdk/aws-ecr";
+import * as cdk from 'aws-cdk-lib';
+import { aws_ec2 as ec2 } from 'aws-cdk-lib';
+import { aws_ecr as ecr } from 'aws-cdk-lib';
+import { aws_iam as iam } from 'aws-cdk-lib';
+import { aws_sns as sns } from 'aws-cdk-lib';
+import { aws_sns_subscriptions as subs } from 'aws-cdk-lib';
+import { aws_sqs as sqs } from 'aws-cdk-lib';
+import { aws_lambda as lambda } from 'aws-cdk-lib';
+import { aws_cloudwatch as cloudwatch } from 'aws-cdk-lib';
+import { aws_cloudwatch_actions as cloudwatchActions } from 'aws-cdk-lib';
+import { aws_lambda_nodejs as lambdaNodeJs } from 'aws-cdk-lib';
+import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
+import { Construct } from 'constructs';
+
 
 import {
   ContainerFromEcrLambdaProps,
   LambdaWorkerProps,
 } from "./lambda-worker-props";
-import { IRepository } from "@aws-cdk/aws-ecr";
 import { buildLambdaEnvironment } from "../util/build-lambda-environment";
 
 const DEFAULT_MAX_RECEIVE_COUNT = 5;
@@ -21,7 +25,7 @@ const DEFAULT_APPROX_NUM_MESSAGES_VISIBLE_THRESHOLD = 1000;
 const MINIMUM_MEMORY_SIZE = 1024;
 const MINIMUM_LAMBDA_TIMEOUT = cdk.Duration.seconds(30);
 
-export class LambdaWorker extends cdk.Construct {
+export class LambdaWorker extends Construct {
   // The ARN of the queue messages for this LambdaWorker to process
   // should be placed on.
   public lambdaQueueArn: string;
@@ -33,7 +37,7 @@ export class LambdaWorker extends cdk.Construct {
   // messages to the queue at lambdaQueueUrl.
   public lambdaQueueUrl: string;
 
-  constructor(scope: cdk.Construct, id: string, props: LambdaWorkerProps) {
+  constructor(scope: Construct, id: string, props: LambdaWorkerProps) {
     super(scope, id);
 
     // Lambda settings
@@ -130,20 +134,21 @@ export class LambdaWorker extends cdk.Construct {
 
     if (props.lambdaProps.policyStatements) {
       for (const statement of props.lambdaProps.policyStatements) {
-        lambdaWorker.role?.addToPolicy(statement);
+// Changed to addToPrincipalPolicy - is this correct?
+        lambdaWorker.role?.addToPrincipalPolicy(statement);
       }
     }
 
     // Add main queue and DLQ as event sources to the lambda
     // By default, the main queue is enabled and the DLQ is disabled
     lambdaWorker.addEventSource(
-      new eventSource.SqsEventSource(lambdaQueue, {
+      new SqsEventSource(lambdaQueue, {
         enabled: props.lambdaProps.enableQueue ?? true,
         batchSize: 1,
       })
     );
     lambdaWorker.addEventSource(
-      new eventSource.SqsEventSource(lambdaDLQ, {
+      new SqsEventSource(lambdaDLQ, {
         enabled: false,
         batchSize: 1,
       })
@@ -334,7 +339,7 @@ export class LambdaWorker extends cdk.Construct {
 
     const containerProps = props.lambdaProps as ContainerFromEcrLambdaProps;
 
-    const ecrRepository: IRepository = ecr.Repository.fromRepositoryAttributes(
+    const ecrRepository: ecr.IRepository = ecr.Repository.fromRepositoryAttributes(
       this,
       `${props.name}-ecr`,
       {

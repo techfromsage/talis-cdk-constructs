@@ -1,4 +1,4 @@
-import { FunctionOptions } from "@aws-cdk/aws-lambda";
+import { aws_lambda as lambda } from 'aws-cdk-lib';
 
 /**
  * Build environment variables for a lambda function based on the options.
@@ -14,7 +14,7 @@ import { FunctionOptions } from "@aws-cdk/aws-lambda";
  * @param options Lambda function options
  * @returns Key-value pairs
  */
-export function buildLambdaEnvironment(options: Partial<FunctionOptions>): {
+export function buildLambdaEnvironment(options: Partial<lambda.FunctionOptions>): {
   [key: string]: string;
 } {
   const environment: { [key: string]: string } = {};
