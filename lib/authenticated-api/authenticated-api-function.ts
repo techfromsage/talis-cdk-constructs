@@ -1,7 +1,7 @@
-import * as cdk from "@aws-cdk/core";
-import * as ec2 from "@aws-cdk/aws-ec2";
-import * as lambda from "@aws-cdk/aws-lambda";
-import * as lambdaNode from "@aws-cdk/aws-lambda-nodejs";
+import * as cdk from 'aws-cdk-lib';
+import { aws_lambda as lambda } from 'aws-cdk-lib';
+import { aws_lambda_nodejs as lambdaNode } from 'aws-cdk-lib';
+import { Construct } from 'constructs';
 
 import { AuthenticatedApiFunctionProps } from "./authenticated-api-function-props";
 import { buildLambdaEnvironment } from "../util/build-lambda-environment";
@@ -10,7 +10,7 @@ export const MINIMUM_MEMORY_SIZE = 1024;
 
 export class AuthenticatedApiFunction extends lambdaNode.NodejsFunction {
   constructor(
-    scope: cdk.Construct,
+    scope: Construct,
     id: string,
     props: AuthenticatedApiFunctionProps
   ) {
