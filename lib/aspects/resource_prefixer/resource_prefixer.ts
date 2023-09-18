@@ -1,4 +1,11 @@
-import { CfnResource, Construct, IAspect, IConstruct } from "@aws-cdk/core";
+import * as cdk from 'aws-cdk-lib';
+import { aws_ec2 as ec2 } from 'aws-cdk-lib';
+import { aws_iam as iam } from 'aws-cdk-lib';
+import { aws_lambda as lambda } from 'aws-cdk-lib';
+import { aws_dynamodb as dynamodb } from 'aws-cdk-lib';
+import { aws_apigatewayv2 as apigatewayv2 } from 'aws-cdk-lib';
+import { Construct, IConstruct } from 'constructs';
+
 import {
   Apigatewayv2CfnApiPrefixer,
   DynamoDbCfnTablePrefixer,
@@ -7,22 +14,16 @@ import {
   LambdaCfnFunctionPrefixer,
 } from "./prefixers";
 import { CfnResourcePrefixer } from "./cfn_resource_prefixer";
-import { CfnTable } from "@aws-cdk/aws-dynamodb";
-import { CfnApi, CfnStage } from "@aws-cdk/aws-apigatewayv2";
-import { CfnSecurityGroup } from "@aws-cdk/aws-ec2";
-import { CfnRole } from "@aws-cdk/aws-iam";
-import { CfnFunction } from "@aws-cdk/aws-lambda";
-import { Annotations } from "@aws-cdk/core";
 import { EmptyCfnResourcePrefixer } from "./prefixers/empty_cfn_resource_prefixer";
 
 export type Constructor<T> = { new (...args: any[]): T };
 
 type CfnResourceConstructor = {
-  new (...args: any[]): CfnResource;
+  new (...args: any[]): cdk.CfnResource;
   CFN_RESOURCE_TYPE_NAME: string;
 };
 
-export class ResourcePrefixer implements IAspect {
+export class ResourcePrefixer implements cdk.IAspect {
   private prefix: string;
   private prefixers: Map<
     CfnResourceConstructor,
@@ -36,16 +37,16 @@ export class ResourcePrefixer implements IAspect {
       Constructor<CfnResourcePrefixer>[]
     >();
 
-    this.registerPrefixer(CfnTable, DynamoDbCfnTablePrefixer);
-    this.registerPrefixer(CfnApi, Apigatewayv2CfnApiPrefixer);
-    this.registerPrefixer(CfnSecurityGroup, Ec2CfnSecurityGroupPrefixer);
-    this.registerPrefixer(CfnRole, IamCfnRolePrefixer);
-    this.registerPrefixer(CfnFunction, LambdaCfnFunctionPrefixer);
+    this.registerPrefixer(dynamodb.CfnTable, DynamoDbCfnTablePrefixer);
+    this.registerPrefixer(apigatewayv2.CfnApi, Apigatewayv2CfnApiPrefixer);
+    this.registerPrefixer(ec2.CfnSecurityGroup, Ec2CfnSecurityGroupPrefixer);
+    this.registerPrefixer(iam.CfnRole, IamCfnRolePrefixer);
+    this.registerPrefixer(lambda.CfnFunction, LambdaCfnFunctionPrefixer);
   }
 
   public visit(node: IConstruct): void {
     // We only care about Cloudformation Resources so skip anything that isnot one
-    if (!CfnResource.isCfnResource(node)) {
+    if (!cdk.CfnResource.isCfnResource(node)) {
       return;
     }
 
@@ -59,7 +60,7 @@ export class ResourcePrefixer implements IAspect {
       }
     }
 
-    Annotations.of(node).addWarning(
+    cdk.Annotations.of(node).addWarning(
       `No defined resource prefixer for: ${node.cfnResourceType}`
     );
 

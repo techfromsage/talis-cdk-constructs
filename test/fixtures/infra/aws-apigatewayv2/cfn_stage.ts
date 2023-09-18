@@ -1,6 +1,6 @@
-import { CfnStageProps } from "@aws-cdk/aws-apigatewayv2";
+import { aws_apigatewayv2 as apigatewayv2 } from 'aws-cdk-lib';
 
-export const CfnStageProperties: CfnStageProps = {
+export const CfnStageProperties: apigatewayv2.CfnStageProps = {
   apiId: "apiId",
   stageName: "stageName",
 

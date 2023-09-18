@@ -1,5 +1,6 @@
-import { CfnApi } from "@aws-cdk/aws-apigatewayv2";
-import { IConstruct, CfnResource, Annotations } from "@aws-cdk/core";
+import * as cdk from 'aws-cdk-lib';
+import { Construct, IConstruct } from 'constructs';
+import { aws_apigatewayv2 as apigatewayv2 } from 'aws-cdk-lib';
 import {
   CfnResourcePrefixer,
   CfnResourcePrefixerBase,
@@ -11,9 +12,9 @@ export class Apigatewayv2CfnApiPrefixer
 {
   constructor(node: IConstruct, resourcePrefix: string) {
     if (
-      !((node as CfnResource).cfnResourceType === CfnApi.CFN_RESOURCE_TYPE_NAME)
+      !((node as cdk.CfnResource).cfnResourceType === apigatewayv2.CfnApi.CFN_RESOURCE_TYPE_NAME)
     ) {
-      Annotations.of(node).addError(
+      cdk.Annotations.of(node).addError(
         "Node is not a CfnApi and cannot be prefixed using this prefixer"
       );
     }
@@ -21,7 +22,7 @@ export class Apigatewayv2CfnApiPrefixer
   }
 
   public prefix(): void {
-    const api = this.node as CfnApi;
+    const api = this.node as apigatewayv2.CfnApi;
     this.prefixResourceName(api.name, "Name");
   }
 }

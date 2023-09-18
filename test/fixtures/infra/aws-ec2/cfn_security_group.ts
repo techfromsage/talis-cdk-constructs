@@ -1,6 +1,6 @@
-import { CfnSecurityGroupProps } from "@aws-cdk/aws-ec2";
+import { aws_ec2 as ec2 } from 'aws-cdk-lib';
 
-export const CfnSecurityGroupProperties: CfnSecurityGroupProps = {
+export const CfnSecurityGroupProperties: ec2.CfnSecurityGroupProps = {
   groupDescription: "groupDescription",
 
   // the properties below are optional

@@ -1,4 +1,5 @@
-import { IConstruct, CfnResource, Token } from "@aws-cdk/core";
+import * as cdk from 'aws-cdk-lib';
+import { IConstruct } from 'constructs';
 
 export interface CfnResourcePrefixer {
   prefix(): void;
@@ -9,11 +10,11 @@ export interface CfnResourcePrefixerConstructor {
 }
 
 export abstract class CfnResourcePrefixerBase implements CfnResourcePrefixer {
-  protected node: CfnResource;
+  protected node: cdk.CfnResource;
   protected resourcePrefix: string;
 
   constructor(node: IConstruct, resourcePrefix: string) {
-    if (!CfnResource.isCfnResource(node)) {
+    if (!cdk.CfnResource.isCfnResource(node)) {
       throw new Error("Node is not a CfnResource");
     }
     this.node = node;
@@ -24,7 +25,7 @@ export abstract class CfnResourcePrefixerBase implements CfnResourcePrefixer {
     name: string | undefined,
     propertyPath: string
   ): void {
-    if (!Token.isUnresolved(name)) {
+    if (!cdk.Token.isUnresolved(name)) {
       this.node.addPropertyOverride(
         propertyPath,
         `${this.resourcePrefix}${name}`

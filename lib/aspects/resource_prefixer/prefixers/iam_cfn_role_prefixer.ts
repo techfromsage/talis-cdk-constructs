@@ -1,5 +1,7 @@
-import { CfnRole } from "@aws-cdk/aws-iam";
-import { IConstruct, CfnResource, Annotations } from "@aws-cdk/core";
+import * as cdk from 'aws-cdk-lib';
+import { aws_iam as iam } from 'aws-cdk-lib';
+import { IConstruct } from 'constructs';
+
 import {
   CfnResourcePrefixer,
   CfnResourcePrefixerBase,
@@ -12,10 +14,10 @@ export class IamCfnRolePrefixer
   constructor(node: IConstruct, resourcePrefix: string) {
     if (
       !(
-        (node as CfnResource).cfnResourceType === CfnRole.CFN_RESOURCE_TYPE_NAME
+        (node as cdk.CfnResource).cfnResourceType === iam.CfnRole.CFN_RESOURCE_TYPE_NAME
       )
     ) {
-      Annotations.of(node).addError(
+      cdk.Annotations.of(node).addError(
         "Node is not a CfnRole and cannot be prefixed using this prefixer"
       );
     }
@@ -23,7 +25,7 @@ export class IamCfnRolePrefixer
   }
 
   public prefix(): void {
-    const role = this.node as CfnRole;
+    const role = this.node as iam.CfnRole;
     this.prefixResourceName(role.roleName, "RoleName");
   }
 }

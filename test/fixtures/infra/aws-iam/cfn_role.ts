@@ -1,6 +1,6 @@
-import { CfnRoleProps } from "@aws-cdk/aws-iam";
+import { aws_iam as iam } from 'aws-cdk-lib';
 
-export const CfnRoleProperties: CfnRoleProps = {
+export const CfnRoleProperties: iam.CfnRoleProps = {
   assumeRolePolicyDocument: {
     Version: "2012-10-17",
     Statement: [
