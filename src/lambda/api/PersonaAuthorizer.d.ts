@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { PersonaClient } from "talis-node";
 type ParsedArn = {
     method: string;
@@ -44,3 +45,4 @@ export declare class PersonaAuthorizer {
     pathMatch(pathDefinition: string, path: string): boolean;
 }
 export {};
+/* eslint-enable @typescript-eslint/no-explicit-any */

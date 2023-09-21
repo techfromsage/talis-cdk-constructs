@@ -1,6 +1,6 @@
-import { CfnTableProps } from "@aws-cdk/aws-dynamodb";
+import { aws_dynamodb as dynamodb } from "aws-cdk-lib";
 
-export const CfnTableProperties: CfnTableProps = {
+export const CfnTableProperties: dynamodb.CfnTableProps = {
   keySchema: [
     {
       attributeName: "attributeName",

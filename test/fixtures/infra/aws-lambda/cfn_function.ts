@@ -1,6 +1,6 @@
-import { CfnFunctionProps } from "@aws-cdk/aws-lambda";
+import { aws_lambda as lambda } from "aws-cdk-lib";
 
-export const CfnFunctionProperties: CfnFunctionProps = {
+export const CfnFunctionProperties: lambda.CfnFunctionProps = {
   code: {
     imageUri: "imageUri",
     s3Bucket: "s3Bucket",

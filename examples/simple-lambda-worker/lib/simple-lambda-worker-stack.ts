@@ -1,13 +1,14 @@
-import * as ec2 from "@aws-cdk/aws-ec2";
-import * as cdk from "@aws-cdk/core";
-import * as iam from "@aws-cdk/aws-iam";
-import * as sns from "@aws-cdk/aws-sns";
-import * as sqs from "@aws-cdk/aws-sqs";
+import * as cdk from "aws-cdk-lib";
+// import { aws_ec2 as ec2 } from "aws-cdk-lib";
+import { aws_iam as iam } from "aws-cdk-lib";
+import { aws_sns as sns } from "aws-cdk-lib";
+import { aws_sqs as sqs } from "aws-cdk-lib";
+import { Construct } from "constructs";
 
 import { LambdaWorker } from "../../../lib";
 
 export class SimpleLambdaWorkerStack extends cdk.Stack {
-  constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
     // Use AWS_PREFIX to give all resources in this sample
@@ -35,7 +36,7 @@ export class SimpleLambdaWorkerStack extends cdk.Stack {
     const alarmTopic = new sns.Topic(
       this,
       `${prefix}simple-lambda-Worker-alarm`,
-      { topicName: `${prefix}simple-lambda-worker-alarm` }
+      { topicName: `${prefix}simple-lambda-worker-alarm` },
     );
 
     // VPC is optional. To use one, you would look it up as follows:
@@ -49,16 +50,19 @@ export class SimpleLambdaWorkerStack extends cdk.Stack {
     // one, the default group created will add significant time to deploy and destroy
     // steps in the build. This is not a problem IRL where the group will only be created
     // once instead of being created and destroyed on every build.
-    const lambdaSecurityGroups = [
-      ec2.SecurityGroup.fromSecurityGroupId(
-        this,
-        "a-talis-cdk-constructs-build",
-        "sg-0ac646f0077b5ce03",
-        {
-          mutable: false,
-        }
-      ),
-    ];
+    // Note : Trying to configure the security group without providing a vpc results is the error:
+    //   Error: Cannot configure 'securityGroups' without configuring a VPC
+    // since CDK V2.
+    // const lambdaSecurityGroups = [
+    //   ec2.SecurityGroup.fromSecurityGroupId(
+    //     this,
+    //     "a-talis-cdk-constructs-build",
+    //     "sg-0ac646f0077b5ce03",
+    //     {
+    //       mutable: false,
+    //     }
+    //   ),
+    // ];
 
     // In this example, and to aid integration tests, after successfully processing
     // a message the lambda worker will send a new messages to an SQS queue.
@@ -83,7 +87,8 @@ export class SimpleLambdaWorkerStack extends cdk.Stack {
           entry: "src/lambda/simple-worker.js",
           handler: "simpleLambdaWorker",
           memorySize: 1024,
-          securityGroups: lambdaSecurityGroups,
+          // A security group is optional. If you need to specify one, you would do so here:
+          // securityGroups: lambdaSecurityGroups,
           timeout: cdk.Duration.seconds(30),
           // A VPC is optional. If you need to specify one, you would do so here:
           // vpc: vpc,
@@ -123,7 +128,7 @@ export class SimpleLambdaWorkerStack extends cdk.Stack {
             }),
           },
         },
-      }
+      },
     );
   }
 }

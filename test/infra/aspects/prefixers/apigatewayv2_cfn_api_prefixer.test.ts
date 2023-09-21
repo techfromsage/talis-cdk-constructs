@@ -1,8 +1,7 @@
-import * as apigatewayv2 from "@aws-cdk/aws-apigatewayv2";
-import * as cdk from "@aws-cdk/core";
+import * as cdk from "aws-cdk-lib";
+import { aws_apigatewayv2 as apigatewayv2 } from "aws-cdk-lib";
+import { Annotations, Template } from "aws-cdk-lib/assertions";
 
-import { expect as expectCDK, haveResource } from "@aws-cdk/assert";
-import { Annotations } from "@aws-cdk/assertions";
 import { Apigatewayv2CfnApiPrefixer } from "../../../../lib";
 import { CfnApiProperties } from "../../../fixtures/infra/aws-apigatewayv2/cfn_api";
 import { EmptyResource } from "../../../fixtures/infra/empty_resource";
@@ -26,10 +25,11 @@ describe("Apigatewayv2 CfnApi Prefixer", () => {
     test("Keeps api name the same", () => {
       emptyPrefixer.prefix();
 
-      expectCDK(stack).to(
-        haveResource("AWS::ApiGatewayV2::Api", {
+      Template.fromStack(stack).hasResourceProperties(
+        "AWS::ApiGatewayV2::Api",
+        {
           Name: "apiName",
-        })
+        },
       );
     });
   });
@@ -38,10 +38,11 @@ describe("Apigatewayv2 CfnApi Prefixer", () => {
     test("Adds prefix to the start of the api name", () => {
       prefixer.prefix();
 
-      expectCDK(stack).to(
-        haveResource("AWS::ApiGatewayV2::Api", {
+      Template.fromStack(stack).hasResourceProperties(
+        "AWS::ApiGatewayV2::Api",
+        {
           Name: "test-prefix-apiName",
-        })
+        },
       );
     });
     test.todo("Truncates the api name if too long");
@@ -55,7 +56,7 @@ describe("Apigatewayv2 CfnApi Prefixer", () => {
       new Apigatewayv2CfnApiPrefixer(unknownResource, "prefix");
       Annotations.fromStack(stack).hasError(
         "/AspectTestStack/empty",
-        "Node is not a CfnApi and cannot be prefixed using this prefixer"
+        "Node is not a CfnApi and cannot be prefixed using this prefixer",
       );
     });
   });

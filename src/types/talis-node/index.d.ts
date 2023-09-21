@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 declare module "talis-node" {
   type ERROR_TYPES = {
     VALIDATION_FAILURE: "validation_failure";
@@ -22,3 +23,4 @@ declare module "talis-node" {
   export const persona: persona;
   export const PersonaClient: PersonaClient;
 }
+/* eslint-enable @typescript-eslint/no-explicit-any */

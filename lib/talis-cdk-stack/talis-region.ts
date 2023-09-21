@@ -17,7 +17,7 @@ const talisRegionToShortRegionMap = {
 };
 
 export function getTalisShortRegionFromTalisRegion(
-  talisRegion: string
+  talisRegion: string,
 ): TalisShortRegion | undefined {
   return talisRegionToShortRegionMap[talisRegion as TalisRegion] ?? undefined;
 }

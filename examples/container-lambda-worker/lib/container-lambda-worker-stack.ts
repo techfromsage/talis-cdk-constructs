@@ -1,12 +1,13 @@
-import * as cdk from "@aws-cdk/core";
+import * as cdk from "aws-cdk-lib";
+import { aws_ec2 as ec2 } from "aws-cdk-lib";
+import { aws_sns as sns } from "aws-cdk-lib";
+import { Construct } from "constructs";
 import * as path from "path";
-import * as sns from "@aws-cdk/aws-sns";
-import * as ec2 from "@aws-cdk/aws-ec2";
 
 import { LambdaWorker } from "../../../lib";
 
 export class ContainerLambdaWorkerStack extends cdk.Stack {
-  constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
     // Use AWS_PREFIX to give all resources in this sample
@@ -28,7 +29,7 @@ export class ContainerLambdaWorkerStack extends cdk.Stack {
       `${prefix}container-lambda-worker-topic`,
       {
         topicName: `${prefix}container-lambda-worker-topic`,
-      }
+      },
     );
 
     // LambdaWorker requires an existing SNS topic to publish alarms to.
@@ -37,7 +38,7 @@ export class ContainerLambdaWorkerStack extends cdk.Stack {
     const alarmTopic = new sns.Topic(
       this,
       `${prefix}container-lambda-Worker-alarm`,
-      { topicName: `${prefix}container-lambda-worker-alarm` }
+      { topicName: `${prefix}container-lambda-worker-alarm` },
     );
 
     const vpc = ec2.Vpc.fromLookup(this, `${prefix}-vpc`, {
@@ -89,7 +90,7 @@ export class ContainerLambdaWorkerStack extends cdk.Stack {
             }),
           },
         },
-      }
+      },
     );
   }
 }

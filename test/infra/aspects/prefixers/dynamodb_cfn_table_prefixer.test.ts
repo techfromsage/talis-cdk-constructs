@@ -1,8 +1,7 @@
-import * as dynamodb from "@aws-cdk/aws-dynamodb";
-import * as cdk from "@aws-cdk/core";
+import * as cdk from "aws-cdk-lib";
+import { aws_dynamodb as dynamodb } from "aws-cdk-lib";
+import { Annotations, Template } from "aws-cdk-lib/assertions";
 
-import { expect as expectCDK, haveResource } from "@aws-cdk/assert";
-import { Annotations } from "@aws-cdk/assertions";
 import { DynamoDbCfnTablePrefixer } from "../../../../lib";
 import { CfnTableProperties } from "../../../fixtures/infra/aws-dynamodb/cfn_table";
 import { EmptyResource } from "../../../fixtures/infra/empty_resource";
@@ -26,11 +25,9 @@ describe("DynamoDB CfnTable Prefixer", () => {
     test("Keeps table name the same", () => {
       emptyPrefixer.prefix();
 
-      expectCDK(stack).to(
-        haveResource("AWS::DynamoDB::Table", {
-          TableName: "tableName",
-        })
-      );
+      Template.fromStack(stack).hasResourceProperties("AWS::DynamoDB::Table", {
+        TableName: "tableName",
+      });
     });
   });
 
@@ -38,11 +35,9 @@ describe("DynamoDB CfnTable Prefixer", () => {
     test("Adds prefix to the start of the table name", () => {
       prefixer.prefix();
 
-      expectCDK(stack).to(
-        haveResource("AWS::DynamoDB::Table", {
-          TableName: "test-prefix-tableName",
-        })
-      );
+      Template.fromStack(stack).hasResourceProperties("AWS::DynamoDB::Table", {
+        TableName: "test-prefix-tableName",
+      });
     });
     test.todo("Truncates the table name if too long");
   });
@@ -55,7 +50,7 @@ describe("DynamoDB CfnTable Prefixer", () => {
       new DynamoDbCfnTablePrefixer(unknownResource, "prefix");
       Annotations.fromStack(stack).hasError(
         "/AspectTestStack/empty",
-        "Node is not a CfnTable and cannot be prefixed using this prefixer"
+        "Node is not a CfnTable and cannot be prefixed using this prefixer",
       );
     });
   });

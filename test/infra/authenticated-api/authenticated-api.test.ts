@@ -1,16 +1,9 @@
-import {
-  expect as expectCDK,
-  countResources,
-  haveOutput,
-  haveResource,
-  haveResourceLike,
-  stringLike,
-} from "@aws-cdk/assert";
-import * as apigatewayv2 from "@aws-cdk/aws-apigatewayv2";
-import * as ec2 from "@aws-cdk/aws-ec2";
-import * as cdk from "@aws-cdk/core";
+import * as cdk from "aws-cdk-lib";
+import { aws_ec2 as ec2 } from "aws-cdk-lib";
+import * as apigatewayv2_alpha from "@aws-cdk/aws-apigatewayv2-alpha";
+import { aws_sns as sns } from "aws-cdk-lib";
+import { Template, Match } from "aws-cdk-lib/assertions";
 import * as path from "path";
-import * as sns from "@aws-cdk/aws-sns";
 
 import { AuthenticatedApi, AuthenticatedApiFunction } from "../../../lib";
 
@@ -25,7 +18,7 @@ describe("AuthenticatedApi", () => {
         topicName: "TestAlarm",
       });
       const vpc = new ec2.Vpc(stack, "TheVPC", {
-        cidr: "10.0.0.0/16",
+        ipAddresses: ec2.IpAddresses.cidr("10.0.0.0/16"),
       });
 
       // Create the lambda's to be passed into the AuthenticatedApi construct
@@ -40,7 +33,7 @@ describe("AuthenticatedApi", () => {
           timeout: cdk.Duration.seconds(30),
           securityGroups: [],
           vpc: vpc,
-        }
+        },
       );
 
       const route2Handler = new AuthenticatedApiFunction(
@@ -54,7 +47,7 @@ describe("AuthenticatedApi", () => {
           timeout: cdk.Duration.seconds(30),
           securityGroups: [],
           vpc: vpc,
-        }
+        },
       );
 
       new AuthenticatedApi(stack, "MyTestAuthenticatedApi", {
@@ -64,7 +57,7 @@ describe("AuthenticatedApi", () => {
         stageName: "development", // This should be development / staging / production as appropriate
         alarmTopic,
         vpc,
-        vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT },
+        vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
         domainName: `test-simple-authenticated-api.talis.com`,
         certificateArn:
           "arn:aws:acm:eu-west-1:302477901552:certificate/46e0fb43-bba8-4aa7-bf98-a3b2038cf760",
@@ -84,13 +77,13 @@ describe("AuthenticatedApi", () => {
           {
             name: "route1",
             path: "/1/test-route-1",
-            method: apigatewayv2.HttpMethod.GET,
+            method: apigatewayv2_alpha.HttpMethod.GET,
             lambda: route1Handler,
           },
           {
             name: "route2",
             path: "/1/test-route-2",
-            method: apigatewayv2.HttpMethod.GET,
+            method: apigatewayv2_alpha.HttpMethod.GET,
             lambda: route2Handler,
             isPublic: true,
           },
@@ -99,95 +92,93 @@ describe("AuthenticatedApi", () => {
     });
 
     test("provisions an api", () => {
-      expectCDK(stack).to(countResources("AWS::ApiGatewayV2::Api", 1));
+      Template.fromStack(stack).resourceCountIs("AWS::ApiGatewayV2::Api", 1);
 
-      expectCDK(stack).to(
-        haveResource("AWS::ApiGatewayV2::Api", {
+      Template.fromStack(stack).hasResourceProperties(
+        "AWS::ApiGatewayV2::Api",
+        {
           Name: "test-MyTestAuthenticatedApi",
           ProtocolType: "HTTP",
-        })
+        },
       );
     });
 
     test("provisions routes", () => {
-      expectCDK(stack).to(countResources("AWS::ApiGatewayV2::Route", 2));
+      Template.fromStack(stack).resourceCountIs("AWS::ApiGatewayV2::Route", 2);
 
-      expectCDK(stack).to(
-        haveResource("AWS::ApiGatewayV2::Route", {
+      Template.fromStack(stack).hasResourceProperties(
+        "AWS::ApiGatewayV2::Route",
+        {
           RouteKey: "GET /1/test-route-1",
           AuthorizationType: "CUSTOM",
-        })
+        },
       );
-      expectCDK(stack).to(
-        haveResource("AWS::ApiGatewayV2::Route", {
+      Template.fromStack(stack).hasResourceProperties(
+        "AWS::ApiGatewayV2::Route",
+        {
           RouteKey: "GET /1/test-route-2",
           AuthorizationType: "NONE",
-        })
+        },
       );
     });
 
     test("provisions authorizer lambda", () => {
-      expectCDK(stack).to(countResources("AWS::Lambda::Function", 3));
+      Template.fromStack(stack).resourceCountIs("AWS::Lambda::Function", 3);
 
-      expectCDK(stack).to(
-        haveResourceLike("AWS::Lambda::Function", {
-          FunctionName: "test-MyTestAuthenticatedApi-authoriser",
-          Timeout: 120,
-          Handler: "index.validateToken",
-          Runtime: "nodejs14.x",
-          Environment: {
-            Variables: {
-              PERSONA_CLIENT_NAME: "test-MyTestAuthenticatedApi-authoriser",
-              PERSONA_HOST: "staging-users.talis.com",
-              PERSONA_SCHEME: "https",
-              PERSONA_PORT: "443",
-              PERSONA_OAUTH_ROUTE: "/oauth/tokens/",
-              AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1",
-              LAMBDA_EXECUTION_TIMEOUT: "120",
-            },
+      Template.fromStack(stack).hasResourceProperties("AWS::Lambda::Function", {
+        FunctionName: "test-MyTestAuthenticatedApi-authoriser",
+        Timeout: 120,
+        Handler: "index.validateToken",
+        Runtime: "nodejs18.x",
+        Environment: {
+          Variables: {
+            PERSONA_CLIENT_NAME: "test-MyTestAuthenticatedApi-authoriser",
+            PERSONA_HOST: "staging-users.talis.com",
+            PERSONA_SCHEME: "https",
+            PERSONA_PORT: "443",
+            PERSONA_OAUTH_ROUTE: "/oauth/tokens/",
+            AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1",
+            LAMBDA_EXECUTION_TIMEOUT: "120",
           },
-        })
-      );
+        },
+      });
     });
 
     test("provisions lambdas for the routes", () => {
-      expectCDK(stack).to(countResources("AWS::Lambda::Function", 3));
-      expectCDK(stack).to(
-        haveResourceLike("AWS::Lambda::Function", {
-          FunctionName: "test-route1-handler",
-          Timeout: 30,
-          Handler: "index.route",
-          Runtime: "nodejs14.x",
-          Environment: {
-            Variables: {
-              LAMBDA_EXECUTION_TIMEOUT: "30",
-            },
+      Template.fromStack(stack).resourceCountIs("AWS::Lambda::Function", 3);
+      Template.fromStack(stack).hasResourceProperties("AWS::Lambda::Function", {
+        FunctionName: "test-route1-handler",
+        Timeout: 30,
+        Handler: "index.route",
+        Runtime: "nodejs18.x",
+        Environment: {
+          Variables: {
+            LAMBDA_EXECUTION_TIMEOUT: "30",
           },
-        })
-      );
+        },
+      });
 
-      expectCDK(stack).to(
-        haveResourceLike("AWS::Lambda::Function", {
-          FunctionName: "test-route2-handler",
-          Timeout: 30,
-          Handler: "index.route",
-          Runtime: "nodejs14.x",
-          Environment: {
-            Variables: {
-              LAMBDA_EXECUTION_TIMEOUT: "30",
-            },
+      Template.fromStack(stack).hasResourceProperties("AWS::Lambda::Function", {
+        FunctionName: "test-route2-handler",
+        Timeout: 30,
+        Handler: "index.route",
+        Runtime: "nodejs18.x",
+        Environment: {
+          Variables: {
+            LAMBDA_EXECUTION_TIMEOUT: "30",
           },
-        })
-      );
+        },
+      });
     });
 
     test("provisions five alarms", () => {
-      expectCDK(stack).to(countResources("AWS::CloudWatch::Alarm", 5));
+      Template.fromStack(stack).resourceCountIs("AWS::CloudWatch::Alarm", 5);
     });
 
     test("provisions alarm to warn of latency on the api", () => {
-      expectCDK(stack).to(
-        haveResourceLike("AWS::CloudWatch::Alarm", {
+      Template.fromStack(stack).hasResourceProperties(
+        "AWS::CloudWatch::Alarm",
+        {
           AlarmName: "test-MyTestAuthenticatedApi-latency-alarm",
           AlarmDescription:
             "Alarm if latency on api test-MyTestAuthenticatedApi exceeds 60000 milliseconds",
@@ -207,13 +198,14 @@ describe("AuthenticatedApi", () => {
           ComparisonOperator: "GreaterThanOrEqualToThreshold",
           TreatMissingData: "ignore",
           OKActions: [{ Ref: "TestAlarm5A9EF6BD" }],
-        })
+        },
       );
     });
 
     test("provisions alarms on duration of lambda's", () => {
-      expectCDK(stack).to(
-        haveResourceLike("AWS::CloudWatch::Alarm", {
+      Template.fromStack(stack).hasResourceProperties(
+        "AWS::CloudWatch::Alarm",
+        {
           AlarmName: "test-MyTestAuthenticatedApi-route1-duration-alarm",
           AlarmDescription:
             "Alarm if duration of lambda for route test-MyTestAuthenticatedApi-route1 exceeds duration 60000 milliseconds",
@@ -233,11 +225,12 @@ describe("AuthenticatedApi", () => {
           ComparisonOperator: "GreaterThanOrEqualToThreshold",
           TreatMissingData: "ignore",
           OKActions: [{ Ref: "TestAlarm5A9EF6BD" }],
-        })
+        },
       );
 
-      expectCDK(stack).to(
-        haveResourceLike("AWS::CloudWatch::Alarm", {
+      Template.fromStack(stack).hasResourceProperties(
+        "AWS::CloudWatch::Alarm",
+        {
           AlarmName: "test-MyTestAuthenticatedApi-route2-duration-alarm",
           AlarmDescription:
             "Alarm if duration of lambda for route test-MyTestAuthenticatedApi-route2 exceeds duration 60000 milliseconds",
@@ -257,13 +250,14 @@ describe("AuthenticatedApi", () => {
           ComparisonOperator: "GreaterThanOrEqualToThreshold",
           TreatMissingData: "ignore",
           OKActions: [{ Ref: "TestAlarm5A9EF6BD" }],
-        })
+        },
       );
     });
 
     test("provisions alarms on errors of lambda's", () => {
-      expectCDK(stack).to(
-        haveResourceLike("AWS::CloudWatch::Alarm", {
+      Template.fromStack(stack).hasResourceProperties(
+        "AWS::CloudWatch::Alarm",
+        {
           AlarmName: "test-MyTestAuthenticatedApi-route1-errors-alarm",
           AlarmDescription:
             "Alarm if errors on api test-MyTestAuthenticatedApi-route1",
@@ -283,11 +277,12 @@ describe("AuthenticatedApi", () => {
           ComparisonOperator: "GreaterThanOrEqualToThreshold",
           TreatMissingData: "ignore",
           OKActions: [{ Ref: "TestAlarm5A9EF6BD" }],
-        })
+        },
       );
 
-      expectCDK(stack).to(
-        haveResourceLike("AWS::CloudWatch::Alarm", {
+      Template.fromStack(stack).hasResourceProperties(
+        "AWS::CloudWatch::Alarm",
+        {
           AlarmName: "test-MyTestAuthenticatedApi-route2-errors-alarm",
           AlarmDescription:
             "Alarm if errors on api test-MyTestAuthenticatedApi-route2",
@@ -307,7 +302,7 @@ describe("AuthenticatedApi", () => {
           ComparisonOperator: "GreaterThanOrEqualToThreshold",
           TreatMissingData: "ignore",
           OKActions: [{ Ref: "TestAlarm5A9EF6BD" }],
-        })
+        },
       );
     });
   });
@@ -322,7 +317,7 @@ describe("AuthenticatedApi", () => {
         topicName: "TestAlarm",
       });
       const vpc = new ec2.Vpc(stack, "TheVPC", {
-        cidr: "10.0.0.0/16",
+        ipAddresses: ec2.IpAddresses.cidr("10.0.0.0/16"),
       });
 
       new AuthenticatedApi(stack, "MyTestAuthenticatedApi", {
@@ -332,7 +327,7 @@ describe("AuthenticatedApi", () => {
         stageName: "development", // This should be development / staging / production as appropriate
         alarmTopic,
         vpc,
-        vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT },
+        vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
         domainName: `test-simple-authenticated-api.talis.com`,
         certificateArn:
           "arn:aws:acm:eu-west-1:302477901552:certificate/46e0fb43-bba8-4aa7-bf98-a3b2038cf760",
@@ -353,32 +348,34 @@ describe("AuthenticatedApi", () => {
             name: "route1",
             baseUrl: "https://www.example.com",
             path: "/api/index.html",
-            method: apigatewayv2.HttpMethod.GET,
+            method: apigatewayv2_alpha.HttpMethod.GET,
           },
           {
             name: "route2",
             baseUrl: "https://www.example.com",
             path: "/docs/index.html",
-            method: apigatewayv2.HttpMethod.GET,
+            method: apigatewayv2_alpha.HttpMethod.GET,
           },
         ],
       });
     });
 
     test("provisions routes", () => {
-      expectCDK(stack).to(countResources("AWS::ApiGatewayV2::Route", 2));
+      Template.fromStack(stack).resourceCountIs("AWS::ApiGatewayV2::Route", 2);
 
-      expectCDK(stack).to(
-        haveResource("AWS::ApiGatewayV2::Route", {
+      Template.fromStack(stack).hasResourceProperties(
+        "AWS::ApiGatewayV2::Route",
+        {
           RouteKey: "GET /api/index.html",
           AuthorizationType: "NONE",
-        })
+        },
       );
-      expectCDK(stack).to(
-        haveResource("AWS::ApiGatewayV2::Route", {
+      Template.fromStack(stack).hasResourceProperties(
+        "AWS::ApiGatewayV2::Route",
+        {
           RouteKey: "GET /docs/index.html",
           AuthorizationType: "NONE",
-        })
+        },
       );
     });
   });
@@ -416,7 +413,7 @@ describe("AuthenticatedApi", () => {
         alarmTopic,
       });
 
-      expectCDK(stack).to(countResources("AWS::Logs::LogGroup", 0));
+      Template.fromStack(stack).resourceCountIs("AWS::Logs::LogGroup", 0);
     });
 
     test("logging can be enabled", () => {
@@ -428,31 +425,28 @@ describe("AuthenticatedApi", () => {
         },
       });
 
-      expectCDK(stack).to(
-        haveResourceLike("AWS::Logs::LogGroup", {
-          LogGroupName:
-            "/aws/vendedlogs/test-MyTestAuthenticatedApiWithAccessLogs-accessLog",
-          RetentionInDays: 731,
-        })
-      );
+      Template.fromStack(stack).hasResourceProperties("AWS::Logs::LogGroup", {
+        LogGroupName:
+          "/aws/vendedlogs/test-MyTestAuthenticatedApiWithAccessLogs-accessLog",
+        RetentionInDays: 731,
+      });
 
-      expectCDK(stack).to(
-        haveOutput({
-          exportName:
-            "test-MyTestAuthenticatedApiWithAccessLogs-accessLogGroup",
-        })
-      );
-
-      expectCDK(stack).to(
-        haveResourceLike("AWS::ApiGatewayV2::Stage", {
+      Template.fromStack(stack).hasResourceProperties(
+        "AWS::ApiGatewayV2::Stage",
+        {
           StageName: "$default",
           AccessLogSettings: {
             DestinationArn: {
-              "Fn::GetAtt": [stringLike("MyTestAuthenticatedApi*"), "Arn"],
+              "Fn::GetAtt": [
+                Match.stringLikeRegexp("MyTestAuthenticatedApi*"),
+                "Arn",
+              ],
             },
-            Format: stringLike(`{"requestId":"$context.requestId",*}`),
+            Format: Match.stringLikeRegexp(
+              '{\\"requestId":\\"\\$context.requestId\\",*',
+            ),
           },
-        })
+        },
       );
     });
 
@@ -468,24 +462,26 @@ describe("AuthenticatedApi", () => {
         },
       });
 
-      expectCDK(stack).to(
-        haveResourceLike("AWS::Logs::LogGroup", {
-          LogGroupName:
-            "/aws/vendedlogs/test-MyTestAuthenticatedApiWithAccessLogs-accessLog",
-          RetentionInDays: 731,
-        })
-      );
+      Template.fromStack(stack).hasResourceProperties("AWS::Logs::LogGroup", {
+        LogGroupName:
+          "/aws/vendedlogs/test-MyTestAuthenticatedApiWithAccessLogs-accessLog",
+        RetentionInDays: 731,
+      });
 
-      expectCDK(stack).to(
-        haveResourceLike("AWS::ApiGatewayV2::Stage", {
+      Template.fromStack(stack).hasResourceProperties(
+        "AWS::ApiGatewayV2::Stage",
+        {
           StageName: "$default",
           AccessLogSettings: {
             DestinationArn: {
-              "Fn::GetAtt": [stringLike("MyTestAuthenticatedApi*"), "Arn"],
+              "Fn::GetAtt": [
+                Match.stringLikeRegexp("MyTestAuthenticatedApi*"),
+                "Arn",
+              ],
             },
             Format: apacheLikeFormat,
           },
-        })
+        },
       );
     });
 
@@ -499,13 +495,11 @@ describe("AuthenticatedApi", () => {
         },
       });
 
-      expectCDK(stack).to(
-        haveResourceLike("AWS::Logs::LogGroup", {
-          LogGroupName:
-            "/aws/vendedlogs/test-MyTestAuthenticatedApiWithAccessLogs-accessLog",
-          RetentionInDays: 90,
-        })
-      );
+      Template.fromStack(stack).hasResourceProperties("AWS::Logs::LogGroup", {
+        LogGroupName:
+          "/aws/vendedlogs/test-MyTestAuthenticatedApiWithAccessLogs-accessLog",
+        RetentionInDays: 90,
+      });
     });
   });
 });

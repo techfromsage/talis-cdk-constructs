@@ -21,7 +21,7 @@ describe("AuthenticatedApi", () => {
   let apiGatewayId: string;
 
   async function findApiGatewayId(
-    nextToken: string | undefined = undefined
+    nextToken: string | undefined = undefined,
   ): Promise<string> {
     const response = await api.getApis({ NextToken: nextToken }).promise();
 
@@ -47,7 +47,7 @@ describe("AuthenticatedApi", () => {
 
   async function getOAuthToken(
     client: string,
-    secret: string
+    secret: string,
   ): Promise<string> {
     const postData = "grant_type=client_credentials";
     const response = await axios.post(
@@ -62,7 +62,7 @@ describe("AuthenticatedApi", () => {
           username: client,
           password: secret,
         },
-      }
+      },
     );
 
     return response.data.access_token;
@@ -114,7 +114,7 @@ describe("AuthenticatedApi", () => {
       throw Error("Expected a 401 response");
     } catch (err) {
       expect((err as Error).message).toBe(
-        "Request failed with status code 401"
+        "Request failed with status code 401",
       );
     }
   });
@@ -122,7 +122,7 @@ describe("AuthenticatedApi", () => {
   test("returns 403 when token does not have required scope", async () => {
     const token = await getOAuthToken(
       TALIS_CDK_AUTH_API_MISSING_SCOPE_CLIENT,
-      TALIS_CDK_AUTH_API_MISSING_SCOPE_SECRET
+      TALIS_CDK_AUTH_API_MISSING_SCOPE_SECRET,
     );
     try {
       const axiosBadAuthInstance = axios.create({
@@ -133,7 +133,7 @@ describe("AuthenticatedApi", () => {
       throw Error("Expected a 403 response");
     } catch (err) {
       expect((err as Error).message).toBe(
-        "Request failed with status code 403"
+        "Request failed with status code 403",
       );
     }
   });
@@ -141,7 +141,7 @@ describe("AuthenticatedApi", () => {
   test("returns 200 when authorised", async () => {
     const token = await getOAuthToken(
       TALIS_CDK_AUTH_API_VALID_CLIENT,
-      TALIS_CDK_AUTH_API_VALID_SECRET
+      TALIS_CDK_AUTH_API_VALID_SECRET,
     );
     const axiosAuthInstance = axios.create({
       headers: { Authorization: `Bearer ${token}` },
@@ -164,7 +164,7 @@ describe("AuthenticatedApi", () => {
   test("returns 200 when routing to a url ending in a path argument", async () => {
     const token = await getOAuthToken(
       TALIS_CDK_AUTH_API_VALID_CLIENT,
-      TALIS_CDK_AUTH_API_VALID_SECRET
+      TALIS_CDK_AUTH_API_VALID_SECRET,
     );
     const axiosAuthInstance = axios.create({
       headers: { Authorization: `Bearer ${token}` },
@@ -178,7 +178,7 @@ describe("AuthenticatedApi", () => {
   test("returns 403 when routing to a url ending in a path argument", async () => {
     const token = await getOAuthToken(
       TALIS_CDK_AUTH_API_MISSING_SCOPE_CLIENT,
-      TALIS_CDK_AUTH_API_MISSING_SCOPE_SECRET
+      TALIS_CDK_AUTH_API_MISSING_SCOPE_SECRET,
     );
     try {
       const axiosBadAuthInstance = axios.create({
@@ -189,7 +189,7 @@ describe("AuthenticatedApi", () => {
       throw Error("Expected a 403 response");
     } catch (err) {
       expect((err as Error).message).toBe(
-        "Request failed with status code 403"
+        "Request failed with status code 403",
       );
     }
   });
@@ -197,7 +197,7 @@ describe("AuthenticatedApi", () => {
   test("returns 200 when routing to a url containing a path argument", async () => {
     const token = await getOAuthToken(
       TALIS_CDK_AUTH_API_VALID_CLIENT,
-      TALIS_CDK_AUTH_API_VALID_SECRET
+      TALIS_CDK_AUTH_API_VALID_SECRET,
     );
     const axiosAuthInstance = axios.create({
       headers: { Authorization: `Bearer ${token}` },
@@ -211,7 +211,7 @@ describe("AuthenticatedApi", () => {
   test("returns 403 when routing to a url containing a path argument", async () => {
     const token = await getOAuthToken(
       TALIS_CDK_AUTH_API_MISSING_SCOPE_CLIENT,
-      TALIS_CDK_AUTH_API_MISSING_SCOPE_SECRET
+      TALIS_CDK_AUTH_API_MISSING_SCOPE_SECRET,
     );
     try {
       const axiosBadAuthInstance = axios.create({
@@ -222,7 +222,7 @@ describe("AuthenticatedApi", () => {
       throw Error("Expected a 403 response");
     } catch (err) {
       expect((err as Error).message).toBe(
-        "Request failed with status code 403"
+        "Request failed with status code 403",
       );
     }
   });

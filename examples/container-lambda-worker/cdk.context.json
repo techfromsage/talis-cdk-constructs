@@ -2,6 +2,7 @@
   "vpc-provider:account=302477901552:filter.vpc-id=vpc-0155db5e1ab5c28b6:region=eu-west-1:returnAsymmetricSubnets=true": {
     "vpcId": "vpc-0155db5e1ab5c28b6",
     "vpcCidrBlock": "172.16.0.0/16",
+    "ownerAccountId": "302477901552",
     "availabilityZones": [],
     "subnetGroups": [
       {

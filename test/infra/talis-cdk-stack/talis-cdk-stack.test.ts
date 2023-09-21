@@ -1,5 +1,6 @@
-import * as cdk from "@aws-cdk/core";
-import * as sns from "@aws-cdk/aws-sns";
+import * as cdk from "aws-cdk-lib";
+import { aws_sns as sns } from "aws-cdk-lib";
+import { Match, Template } from "aws-cdk-lib/assertions";
 import {
   TalisDeploymentEnvironment,
   TalisCdkStack,
@@ -7,13 +8,6 @@ import {
   TalisShortRegion,
   TalisRegion,
 } from "../../../lib";
-import {
-  expect as expectCDK,
-  countResources,
-  haveResourceLike,
-  arrayWith,
-  objectLike,
-} from "@aws-cdk/assert";
 
 describe("Talis CDK Stack", () => {
   let stack: TalisCdkStack;
@@ -43,9 +37,9 @@ describe("Talis CDK Stack", () => {
       "Environment %s should have removal policy of %s",
       (environment, expected) => {
         expect(
-          stack.getRemovalPolicyForTalisDeploymentEnvironment(environment)
+          stack.getRemovalPolicyForTalisDeploymentEnvironment(environment),
         ).toBe(expected);
-      }
+      },
     );
   });
   describe("Tags are applied to resources", () => {
@@ -64,35 +58,33 @@ describe("Talis CDK Stack", () => {
         topicName: "TestAlarm",
       });
 
-      expectCDK(stack).to(countResources("AWS::SNS::Topic", 1));
+      Template.fromStack(stack).resourceCountIs("AWS::SNS::Topic", 1);
 
-      expectCDK(stack).to(
-        haveResourceLike("AWS::SNS::Topic", {
-          Tags: [
-            {
-              Key: "tfs-app",
-              Value: "depot",
-            },
-            {
-              Key: "tfs-environment",
-              Value: "test",
-            },
-            {
-              Key: "tfs-region",
-              Value: "eu",
-            },
-            {
-              Key: "tfs-release",
-              Value: "1234-105814f",
-            },
-            {
-              Key: "tfs-service",
-              Value: "depot-test-eu",
-            },
-          ],
-          TopicName: "TestAlarm",
-        })
-      );
+      Template.fromStack(stack).hasResourceProperties("AWS::SNS::Topic", {
+        Tags: [
+          {
+            Key: "tfs-app",
+            Value: "depot",
+          },
+          {
+            Key: "tfs-environment",
+            Value: "test",
+          },
+          {
+            Key: "tfs-region",
+            Value: "eu",
+          },
+          {
+            Key: "tfs-release",
+            Value: "1234-105814f",
+          },
+          {
+            Key: "tfs-service",
+            Value: "depot-test-eu",
+          },
+        ],
+        TopicName: "TestAlarm",
+      });
     });
     it("Should have correct tags when no environment", () => {
       app = new cdk.App();
@@ -106,27 +98,25 @@ describe("Talis CDK Stack", () => {
         topicName: "TestAlarm",
       });
 
-      expectCDK(stack).to(countResources("AWS::SNS::Topic", 1));
+      Template.fromStack(stack).resourceCountIs("AWS::SNS::Topic", 1);
 
-      expectCDK(stack).to(
-        haveResourceLike("AWS::SNS::Topic", {
-          Tags: [
-            {
-              Key: "tfs-app",
-              Value: "test-depot",
-            },
-            {
-              Key: "tfs-environment",
-              Value: "test",
-            },
-            {
-              Key: "tfs-release",
-              Value: "test1-105814f",
-            },
-          ],
-          TopicName: "TestAlarm",
-        })
-      );
+      Template.fromStack(stack).hasResourceProperties("AWS::SNS::Topic", {
+        Tags: [
+          {
+            Key: "tfs-app",
+            Value: "test-depot",
+          },
+          {
+            Key: "tfs-environment",
+            Value: "test",
+          },
+          {
+            Key: "tfs-release",
+            Value: "test1-105814f",
+          },
+        ],
+        TopicName: "TestAlarm",
+      });
     });
     describe("should set the correct tfs-region for all env.regions", () => {
       test.each([
@@ -150,18 +140,14 @@ describe("Talis CDK Stack", () => {
             topicName: "TestAlarm",
           });
 
-          expectCDK(stack).to(countResources("AWS::SNS::Topic", 1));
-          expectCDK(stack).to(
-            haveResourceLike("AWS::SNS::Topic", {
-              Tags: arrayWith(
-                objectLike({
-                  Key: "tfs-region",
-                  Value: expectedShortRegion,
-                })
-              ),
-            })
-          );
-        }
+          Template.fromStack(stack).resourceCountIs("AWS::SNS::Topic", 1);
+          console.log(expectedShortRegion); // Fix eslint until below is fixed
+          Template.fromStack(stack).hasResourceProperties("AWS::SNS::Topic", {
+            Tags: Match.arrayWith([
+              { Key: "tfs-region", Value: expectedShortRegion },
+            ]),
+          });
+        },
       );
     });
     describe("should set the correct tfs-service for all apps, dev environments and regions", () => {
@@ -218,17 +204,12 @@ describe("Talis CDK Stack", () => {
             topicName: "TestAlarm",
           });
 
-          expectCDK(stack).to(countResources("AWS::SNS::Topic", 1));
-          expectCDK(stack).to(
-            haveResourceLike("AWS::SNS::Topic", {
-              Tags: arrayWith(
-                objectLike({
-                  Key: "tfs-service",
-                  Value: testcase.expectedTfsService,
-                })
-              ),
-            })
-          );
+          Template.fromStack(stack).resourceCountIs("AWS::SNS::Topic", 1);
+          Template.fromStack(stack).hasResourceProperties("AWS::SNS::Topic", {
+            Tags: Match.arrayWith([
+              { Key: "tfs-service", Value: testcase.expectedTfsService },
+            ]),
+          });
         });
       });
     });

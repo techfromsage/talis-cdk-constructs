@@ -1,35 +1,34 @@
-import * as acm from "@aws-cdk/aws-certificatemanager";
-import * as apigatewayv2 from "@aws-cdk/aws-apigatewayv2";
-import * as apigateway2Integrations from "@aws-cdk/aws-apigatewayv2-integrations";
-import * as authorizers from "@aws-cdk/aws-apigatewayv2-authorizers";
-import * as awslogs from "@aws-cdk/aws-logs";
-import * as cdk from "@aws-cdk/core";
-import * as cloudwatch from "@aws-cdk/aws-cloudwatch";
-import * as cloudwatchActions from "@aws-cdk/aws-cloudwatch-actions";
-import * as iam from "@aws-cdk/aws-iam";
-import * as integrations from "@aws-cdk/aws-apigatewayv2-integrations";
-import * as lambda from "@aws-cdk/aws-lambda";
-import * as lambdaNodeJs from "@aws-cdk/aws-lambda-nodejs";
+import * as cdk from "aws-cdk-lib";
+import * as acm from "aws-cdk-lib/aws-certificatemanager";
+import { aws_apigatewayv2 as apigatewayv2 } from "aws-cdk-lib";
+import * as apigatewayv2_alpha from "@aws-cdk/aws-apigatewayv2-alpha";
+import * as authorizers_alpha from "@aws-cdk/aws-apigatewayv2-authorizers-alpha";
+import * as integrations_alpha from "@aws-cdk/aws-apigatewayv2-integrations-alpha";
+import { aws_cloudwatch as cloudwatch } from "aws-cdk-lib";
+import { aws_cloudwatch_actions as cloudwatchActions } from "aws-cdk-lib";
+import { aws_logs as awslogs } from "aws-cdk-lib";
+import { aws_lambda as lambda } from "aws-cdk-lib";
+import { aws_lambda_nodejs as lambdaNodeJs } from "aws-cdk-lib";
+import { Construct } from "constructs";
 import * as path from "path";
 
 import { AuthenticatedApiProps } from "./authenticated-api-props";
 import { RouteUrlProps } from "./route-url-props";
-import { IAlarmAction } from "@aws-cdk/aws-cloudwatch";
 import { buildLambdaEnvironment } from "../util/build-lambda-environment";
 
 const DEFAULT_API_LATENCY_THRESHOLD = cdk.Duration.minutes(1);
 const DEFAULT_LAMBDA_DURATION_THRESHOLD = cdk.Duration.minutes(1);
 
-export class AuthenticatedApi extends cdk.Construct {
+export class AuthenticatedApi extends Construct {
   readonly apiId: string;
   readonly httpApiId: string;
-  readonly domainName: apigatewayv2.DomainName;
+  readonly domainName: apigatewayv2_alpha.DomainName;
 
-  private httpApi: apigatewayv2.HttpApi;
-  private authorizer: apigatewayv2.IHttpRouteAuthorizer;
-  private alarmAction: IAlarmAction;
+  private httpApi: apigatewayv2_alpha.HttpApi;
+  private authorizer: apigatewayv2_alpha.IHttpRouteAuthorizer;
+  private alarmAction: cloudwatch.IAlarmAction;
 
-  constructor(scope: cdk.Construct, id: string, props: AuthenticatedApiProps) {
+  constructor(scope: Construct, id: string, props: AuthenticatedApiProps) {
     super(scope, id);
 
     if (
@@ -37,32 +36,36 @@ export class AuthenticatedApi extends cdk.Construct {
       (!props.domainName && props.certificateArn)
     ) {
       cdk.Annotations.of(scope).addError(
-        `To use a custom domain name both certificateArn and domainName must be specified`
+        `To use a custom domain name both certificateArn and domainName must be specified`,
       );
     }
-    this.domainName = new apigatewayv2.DomainName(this, "domain-name", {
+    this.domainName = new apigatewayv2_alpha.DomainName(this, "domain-name", {
       domainName: props.domainName,
       certificate: acm.Certificate.fromCertificateArn(
         this,
         "cert",
-        props.certificateArn
+        props.certificateArn,
       ),
     });
     const apiName = `${props.prefix}${props.name}`;
-    const apiGatewayProps: apigatewayv2.HttpApiProps = {
+    const apiGatewayProps: apigatewayv2_alpha.HttpApiProps = {
       apiName: apiName,
       defaultDomainMapping: { domainName: this.domainName },
       ...(props.corsDomain && {
         corsPreflight: {
           allowHeaders: ["*"],
-          allowMethods: [apigatewayv2.CorsHttpMethod.ANY],
+          allowMethods: [apigatewayv2_alpha.CorsHttpMethod.ANY],
           allowCredentials: true,
           allowOrigins: props.corsDomain,
         },
       }),
     };
 
-    this.httpApi = new apigatewayv2.HttpApi(this, apiName, apiGatewayProps);
+    this.httpApi = new apigatewayv2_alpha.HttpApi(
+      this,
+      apiName,
+      apiGatewayProps,
+    );
 
     this.apiId = this.httpApi.apiId;
     this.httpApiId = this.httpApi.httpApiId;
@@ -167,21 +170,21 @@ export class AuthenticatedApi extends cdk.Construct {
         }),
 
         awsSdkConnectionReuse: true,
-        runtime: lambda.Runtime.NODEJS_14_X,
+        runtime: lambda.Runtime.NODEJS_18_X,
         timeout: authLambdaTimeout,
         securityGroups: props.securityGroups,
         vpc: props.vpc,
         vpcSubnets: props.vpcSubnets,
-      }
+      },
     );
 
-    this.authorizer = new authorizers.HttpLambdaAuthorizer(
+    this.authorizer = new authorizers_alpha.HttpLambdaAuthorizer(
       "lambda-authorizer",
       authLambda,
       {
         authorizerName: `${apiName}-http-lambda-authoriser`,
-        responseTypes: [authorizers.HttpLambdaResponseType.SIMPLE], // Define if returns simple and/or iam response
-      }
+        responseTypes: [authorizers_alpha.HttpLambdaResponseType.SIMPLE], // Define if returns simple and/or iam response
+      },
     );
 
     if (props.urlRoutes) {
@@ -192,9 +195,9 @@ export class AuthenticatedApi extends cdk.Construct {
 
     if (props.lambdaRoutes) {
       for (const routeProps of props.lambdaRoutes) {
-        const integration = new integrations.HttpLambdaIntegration(
+        const integration = new integrations_alpha.HttpLambdaIntegration(
           "http-lambda-integration",
-          routeProps.lambda
+          routeProps.lambda,
         );
 
         if (routeProps.isPublic === true) {
@@ -240,7 +243,7 @@ export class AuthenticatedApi extends cdk.Construct {
             // Set treatMissingData to IGNORE
             // Stops alarms with minimal data having false alarms when they transition to this state
             treatMissingData: cloudwatch.TreatMissingData.IGNORE,
-          }
+          },
         );
         durationAlarm.addAlarmAction(this.alarmAction);
         durationAlarm.addOkAction(this.alarmAction);
@@ -264,7 +267,7 @@ export class AuthenticatedApi extends cdk.Construct {
             // Set treatMissingData to IGNORE
             // Stops alarms with minimal data having false alarms when they transition to this state
             treatMissingData: cloudwatch.TreatMissingData.IGNORE,
-          }
+          },
         );
         errorsAlarm.addAlarmAction(this.alarmAction);
         errorsAlarm.addOkAction(this.alarmAction);
@@ -296,7 +299,7 @@ export class AuthenticatedApi extends cdk.Construct {
         // Set treatMissingData to IGNORE
         // Stops alarms with minimal data having false alarms when they transition to this state
         treatMissingData: cloudwatch.TreatMissingData.IGNORE,
-      }
+      },
     );
     routeLatencyAlarm.addAlarmAction(this.alarmAction);
     routeLatencyAlarm.addOkAction(this.alarmAction);
@@ -306,12 +309,12 @@ export class AuthenticatedApi extends cdk.Construct {
     this.httpApi.addRoutes({
       path: routeProps.path,
       methods: [routeProps.method],
-      integration: new apigateway2Integrations.HttpUrlIntegration(
+      integration: new integrations_alpha.HttpUrlIntegration(
         routeProps.name,
         routeProps.baseUrl,
         {
           method: routeProps.method,
-        }
+        },
       ),
     });
   }

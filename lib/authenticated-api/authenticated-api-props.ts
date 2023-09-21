@@ -1,7 +1,7 @@
-import * as awslogs from "@aws-cdk/aws-logs";
-import * as cdk from "@aws-cdk/core";
-import * as ec2 from "@aws-cdk/aws-ec2";
-import * as sns from "@aws-cdk/aws-sns";
+import * as cdk from "aws-cdk-lib";
+import { aws_logs as awslogs } from "aws-cdk-lib";
+import { aws_ec2 as ec2 } from "aws-cdk-lib";
+import { aws_sns as sns } from "aws-cdk-lib";
 
 import { RouteLambdaProps } from "./route-lambda-props";
 import { RouteUrlProps } from "./route-url-props";

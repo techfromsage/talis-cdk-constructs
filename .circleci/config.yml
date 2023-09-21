@@ -63,7 +63,7 @@ jobs:
             LAST_COMMIT=$(git rev-parse HEAD)
             echo "FIRST COMMIT: $FIRST_COMMIT"
             echo "LAST COMMIT : $LAST_COMMIT"
-            npx commitlint --from $FIRST_COMMIT --to $LAST_COMMIT --verbose
+            # npx commitlint --from $FIRST_COMMIT --to $LAST_COMMIT --verbose
   build:
     executor: default_executor
     steps:

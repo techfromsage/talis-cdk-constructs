@@ -6,9 +6,3 @@ node_modules
 # CDK asset staging directory
 .cdk.staging
 cdk.out
-cdk.context.json
-
-!src/lambda/route1.js
-!src/lambda/route2.js
-!src/lambda/route3.js
-!src/lambda/route4.js

@@ -1,12 +1,10 @@
-import * as iam from "@aws-cdk/aws-iam";
-import * as cdk from "@aws-cdk/core";
+import * as cdk from "aws-cdk-lib";
+import { aws_iam as iam } from "aws-cdk-lib";
+import { Annotations, Match, Template } from "aws-cdk-lib/assertions";
 
-import { expect as expectCDK, haveResource } from "@aws-cdk/assert";
-import { Annotations } from "@aws-cdk/assertions";
 import { IamCfnRolePrefixer } from "../../../../lib";
 import { CfnRoleProperties } from "../../../fixtures/infra/aws-iam/cfn_role";
 import { EmptyResource } from "../../../fixtures/infra/empty_resource";
-import { Match, Template } from "@aws-cdk/assertions";
 
 describe("IAM CfnRole Prefixer", () => {
   let app: cdk.App;
@@ -27,11 +25,9 @@ describe("IAM CfnRole Prefixer", () => {
     test("Keeps role name the same", () => {
       emptyPrefixer.prefix();
 
-      expectCDK(stack).to(
-        haveResource("AWS::IAM::Role", {
-          RoleName: "roleName",
-        })
-      );
+      Template.fromStack(stack).hasResourceProperties("AWS::IAM::Role", {
+        RoleName: "roleName",
+      });
     });
   });
 
@@ -39,11 +35,9 @@ describe("IAM CfnRole Prefixer", () => {
     test("Adds prefix to the start of the role name", () => {
       prefixer.prefix();
 
-      expectCDK(stack).to(
-        haveResource("AWS::IAM::Role", {
-          RoleName: "test-prefix-roleName",
-        })
-      );
+      Template.fromStack(stack).hasResourceProperties("AWS::IAM::Role", {
+        RoleName: "test-prefix-roleName",
+      });
     });
 
     test("Adds prefix to the start of logical id if no role name given", () => {
@@ -82,7 +76,7 @@ describe("IAM CfnRole Prefixer", () => {
       new IamCfnRolePrefixer(unknownResource, "prefix");
       Annotations.fromStack(stack).hasError(
         "/AspectTestStack/empty",
-        "Node is not a CfnRole and cannot be prefixed using this prefixer"
+        "Node is not a CfnRole and cannot be prefixed using this prefixer",
       );
     });
   });

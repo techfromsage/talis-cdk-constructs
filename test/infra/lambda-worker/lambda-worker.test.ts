@@ -1,13 +1,9 @@
-import {
-  expect as expectCDK,
-  countResources,
-  haveResourceLike,
-  stringLike,
-} from "@aws-cdk/assert";
-import * as cdk from "@aws-cdk/core";
-import * as ec2 from "@aws-cdk/aws-ec2";
-import * as iam from "@aws-cdk/aws-iam";
-import * as sns from "@aws-cdk/aws-sns";
+import * as cdk from "aws-cdk-lib";
+import { aws_ec2 as ec2 } from "aws-cdk-lib";
+import { aws_iam as iam } from "aws-cdk-lib";
+import { aws_sns as sns } from "aws-cdk-lib";
+import { Template } from "aws-cdk-lib/assertions";
+
 import { LambdaWorker, LambdaWorkerProps } from "../../../lib/lambda-worker";
 
 describe("LambdaWorker", () => {
@@ -24,7 +20,7 @@ describe("LambdaWorker", () => {
         });
 
         const vpc = new ec2.Vpc(stack, "TheVPC", {
-          cidr: "10.0.0.0/16",
+          ipAddresses: ec2.IpAddresses.cidr("10.0.0.0/16"),
         });
 
         worker = new LambdaWorker(stack, "MyTestLambdaWorker", {
@@ -42,7 +38,7 @@ describe("LambdaWorker", () => {
             ],
             timeout: cdk.Duration.minutes(5),
             vpc: vpc,
-            vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT },
+            vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
           },
           queueProps: {},
           alarmTopic: alarmTopic,
@@ -50,22 +46,22 @@ describe("LambdaWorker", () => {
       });
 
       test("provisions a lambda", () => {
-        expectCDK(stack).to(countResources("AWS::Lambda::Function", 1));
-
-        expectCDK(stack).to(
-          haveResourceLike("AWS::Lambda::Function", {
+        Template.fromStack(stack).resourceCountIs("AWS::Lambda::Function", 1);
+        Template.fromStack(stack).hasResourceProperties(
+          "AWS::Lambda::Function",
+          {
             FunctionName: "MyTestLambdaWorker",
             MemorySize: 2048,
             Timeout: 300,
             Handler: "index.testWorker",
-            Runtime: "nodejs14.x",
+            Runtime: "nodejs18.x",
             Environment: {
               Variables: {
                 AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1",
                 LAMBDA_EXECUTION_TIMEOUT: "300",
               },
             },
-          })
+          },
         );
       });
 
@@ -84,41 +80,38 @@ describe("LambdaWorker", () => {
       });
 
       test("provisions SQS queue and dead letter queue", () => {
-        expectCDK(stack).to(countResources("AWS::SQS::Queue", 2));
+        Template.fromStack(stack).resourceCountIs("AWS::SQS::Queue", 2);
 
-        expectCDK(stack).to(
-          haveResourceLike("AWS::SQS::Queue", {
-            QueueName: "MyTestLambdaWorker-queue",
-            VisibilityTimeout: 1500, // 5 (default max receive count) * 300 (lambda timeout)
-            MessageRetentionPeriod: 1209600, // 14 days
-            RedrivePolicy: {
-              maxReceiveCount: 5,
-              deadLetterTargetArn: {
-                "Fn::GetAtt": [
-                  "MyTestLambdaWorkerMyTestLambdaWorkerdlq27BBFD95",
-                  "Arn",
-                ],
-              },
+        Template.fromStack(stack).hasResourceProperties("AWS::SQS::Queue", {
+          QueueName: "MyTestLambdaWorker-queue",
+          VisibilityTimeout: 1500, // 5 (default max receive count) * 300 (lambda timeout)
+          MessageRetentionPeriod: 1209600, // 14 days
+          RedrivePolicy: {
+            maxReceiveCount: 5,
+            deadLetterTargetArn: {
+              "Fn::GetAtt": [
+                "MyTestLambdaWorkerMyTestLambdaWorkerdlq27BBFD95",
+                "Arn",
+              ],
             },
-          })
-        );
+          },
+        });
 
-        expectCDK(stack).to(
-          haveResourceLike("AWS::SQS::Queue", {
-            QueueName: "MyTestLambdaWorker-dlq",
-            VisibilityTimeout: 1500, // 5 (default max receive count) * 300 (lambda timeout)
-            MessageRetentionPeriod: 1209600, // 14 days
-          })
-        );
+        Template.fromStack(stack).hasResourceProperties("AWS::SQS::Queue", {
+          QueueName: "MyTestLambdaWorker-dlq",
+          VisibilityTimeout: 1500, // 5 (default max receive count) * 300 (lambda timeout)
+          MessageRetentionPeriod: 1209600, // 14 days
+        });
       });
 
       test("provisions three alarms", () => {
-        expectCDK(stack).to(countResources("AWS::CloudWatch::Alarm", 3));
+        Template.fromStack(stack).resourceCountIs("AWS::CloudWatch::Alarm", 3);
       });
 
       test("provisions a message visible alarm on the dead letter queue", () => {
-        expectCDK(stack).to(
-          haveResourceLike("AWS::CloudWatch::Alarm", {
+        Template.fromStack(stack).hasResourceProperties(
+          "AWS::CloudWatch::Alarm",
+          {
             AlarmName: "MyTestLambdaWorker-dlq-messages-visible-alarm",
             AlarmDescription:
               "Alarm when the lambda worker fails to process a message and the message appears on the DLQ",
@@ -141,13 +134,14 @@ describe("LambdaWorker", () => {
             ComparisonOperator: "GreaterThanOrEqualToThreshold",
             TreatMissingData: "ignore",
             OKActions: [{ Ref: "TestAlarm5A9EF6BD" }],
-          })
+          },
         );
       });
 
       test("provisions a message visible alarm on the main queue", () => {
-        expectCDK(stack).to(
-          haveResourceLike("AWS::CloudWatch::Alarm", {
+        Template.fromStack(stack).hasResourceProperties(
+          "AWS::CloudWatch::Alarm",
+          {
             AlarmName: "MyTestLambdaWorker-queue-messages-visible-alarm",
             AlarmDescription:
               "Alarm when the lambda workers main trigger queue has more than 1000 messages on the queue",
@@ -170,13 +164,14 @@ describe("LambdaWorker", () => {
             ComparisonOperator: "GreaterThanOrEqualToThreshold",
             TreatMissingData: "ignore",
             OKActions: [{ Ref: "TestAlarm5A9EF6BD" }],
-          })
+          },
         );
       });
 
       test("provisions an age of oldest message alarm on the main queue", () => {
-        expectCDK(stack).to(
-          haveResourceLike("AWS::CloudWatch::Alarm", {
+        Template.fromStack(stack).hasResourceProperties(
+          "AWS::CloudWatch::Alarm",
+          {
             AlarmName: "MyTestLambdaWorker-queue-message-age-alarm",
             AlarmDescription:
               "Alarm when the lambda workers main trigger queue has messages older than 3600 seconds",
@@ -199,7 +194,7 @@ describe("LambdaWorker", () => {
             ComparisonOperator: "GreaterThanOrEqualToThreshold",
             TreatMissingData: "ignore",
             OKActions: [{ Ref: "TestAlarm5A9EF6BD" }],
-          })
+          },
         );
       });
     });
@@ -215,7 +210,7 @@ describe("LambdaWorker", () => {
         });
 
         const vpc = new ec2.Vpc(stack, "TheVPC", {
-          cidr: "10.0.0.0/16",
+          ipAddresses: ec2.IpAddresses.cidr("10.0.0.0/16"),
         });
 
         new LambdaWorker(stack, "MyTestLambdaWorker", {
@@ -226,7 +221,7 @@ describe("LambdaWorker", () => {
             memorySize: 2048,
             timeout: cdk.Duration.minutes(5),
             vpc: vpc,
-            vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE },
+            vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
 
             // Optional
             description: "Test Description",
@@ -242,15 +237,16 @@ describe("LambdaWorker", () => {
       });
 
       test("provisions a lambda", () => {
-        expectCDK(stack).to(countResources("AWS::Lambda::Function", 1));
+        Template.fromStack(stack).resourceCountIs("AWS::Lambda::Function", 1);
 
-        expectCDK(stack).to(
-          haveResourceLike("AWS::Lambda::Function", {
+        Template.fromStack(stack).hasResourceProperties(
+          "AWS::Lambda::Function",
+          {
             FunctionName: "MyTestLambdaWorker",
             MemorySize: 2048,
             Timeout: 300,
             Handler: "index.testWorker",
-            Runtime: "nodejs14.x",
+            Runtime: "nodejs18.x",
             //Optional
             Description: "Test Description",
             Environment: {
@@ -263,7 +259,7 @@ describe("LambdaWorker", () => {
               Size: 1024,
             },
             ReservedConcurrentExecutions: 10,
-          })
+          },
         );
       });
     });
@@ -282,7 +278,7 @@ describe("LambdaWorker", () => {
         });
 
         const vpc = new ec2.Vpc(stack, "TheVPC", {
-          cidr: "10.0.0.0/16",
+          ipAddresses: ec2.IpAddresses.cidr("10.0.0.0/16"),
         });
 
         new LambdaWorker(stack, "MyTestLambdaWorker", {
@@ -293,7 +289,7 @@ describe("LambdaWorker", () => {
             memorySize: 2048,
             timeout: cdk.Duration.minutes(5),
             vpc: vpc,
-            vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE },
+            vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
           },
           queueProps: {},
           alarmTopic: alarmTopic,
@@ -304,10 +300,11 @@ describe("LambdaWorker", () => {
       });
 
       test("subscribes to the topic", () => {
-        expectCDK(stack).to(countResources("AWS::SNS::Subscription", 1));
+        Template.fromStack(stack).resourceCountIs("AWS::SNS::Subscription", 1);
 
-        expectCDK(stack).to(
-          haveResourceLike("AWS::SNS::Subscription", {
+        Template.fromStack(stack).hasResourceProperties(
+          "AWS::SNS::Subscription",
+          {
             Protocol: "sqs",
             TopicArn: {
               Ref: "TestTopic339EC197",
@@ -318,7 +315,7 @@ describe("LambdaWorker", () => {
                 "Arn",
               ],
             },
-          })
+          },
         );
       });
     });
@@ -337,7 +334,7 @@ describe("LambdaWorker", () => {
         });
 
         const vpc = new ec2.Vpc(stack, "TheVPC", {
-          cidr: "10.0.0.0/16",
+          ipAddresses: ec2.IpAddresses.cidr("10.0.0.0/16"),
         });
 
         new LambdaWorker(stack, "MyTestLambdaWorker", {
@@ -349,7 +346,7 @@ describe("LambdaWorker", () => {
             timeout: cdk.Duration.minutes(5),
             enableQueue: false,
             vpc: vpc,
-            vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE },
+            vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
           },
           queueProps: {},
           alarmTopic: alarmTopic,
@@ -360,13 +357,15 @@ describe("LambdaWorker", () => {
       });
 
       test("provisions a lambda with disabled source", () => {
-        expectCDK(stack).to(countResources("AWS::Lambda::Function", 1));
-        expectCDK(stack).to(
-          countResources("AWS::Lambda::EventSourceMapping", 2)
+        Template.fromStack(stack).resourceCountIs("AWS::Lambda::Function", 1);
+        Template.fromStack(stack).resourceCountIs(
+          "AWS::Lambda::EventSourceMapping",
+          2,
         );
 
-        expectCDK(stack).to(
-          haveResourceLike("AWS::Lambda::EventSourceMapping", {
+        Template.fromStack(stack).hasResourceProperties(
+          "AWS::Lambda::EventSourceMapping",
+          {
             FunctionName: {
               Ref: "MyTestLambdaWorker107005A6",
             },
@@ -377,7 +376,7 @@ describe("LambdaWorker", () => {
                 "Arn",
               ],
             },
-          })
+          },
         );
       });
     });
@@ -396,7 +395,7 @@ describe("LambdaWorker", () => {
         });
 
         const vpc = new ec2.Vpc(stack, "TheVPC", {
-          cidr: "10.0.0.0/16",
+          ipAddresses: ec2.IpAddresses.cidr("10.0.0.0/16"),
         });
 
         new LambdaWorker(stack, "MyTestLambdaWorker", {
@@ -407,7 +406,7 @@ describe("LambdaWorker", () => {
             memorySize: 2048,
             timeout: cdk.Duration.minutes(5),
             vpc: vpc,
-            vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE },
+            vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
           },
           queueProps: {},
           alarmTopic: alarmTopic,
@@ -418,13 +417,15 @@ describe("LambdaWorker", () => {
       });
 
       test("provisions a lambda with enabled source", () => {
-        expectCDK(stack).to(countResources("AWS::Lambda::Function", 1));
-        expectCDK(stack).to(
-          countResources("AWS::Lambda::EventSourceMapping", 2)
+        Template.fromStack(stack).resourceCountIs("AWS::Lambda::Function", 1);
+        Template.fromStack(stack).resourceCountIs(
+          "AWS::Lambda::EventSourceMapping",
+          2,
         );
 
-        expectCDK(stack).to(
-          haveResourceLike("AWS::Lambda::EventSourceMapping", {
+        Template.fromStack(stack).hasResourceProperties(
+          "AWS::Lambda::EventSourceMapping",
+          {
             FunctionName: {
               Ref: "MyTestLambdaWorker107005A6",
             },
@@ -435,7 +436,7 @@ describe("LambdaWorker", () => {
                 "Arn",
               ],
             },
-          })
+          },
         );
       });
     });
@@ -443,7 +444,6 @@ describe("LambdaWorker", () => {
 
   describe("with fifo queue", () => {
     let stack: cdk.Stack;
-    let worker: LambdaWorker;
 
     beforeAll(() => {
       const app = new cdk.App();
@@ -453,10 +453,10 @@ describe("LambdaWorker", () => {
       });
 
       const vpc = new ec2.Vpc(stack, "TheVPC", {
-        cidr: "10.0.0.0/16",
+        ipAddresses: ec2.IpAddresses.cidr("10.0.0.0/16"),
       });
 
-      worker = new LambdaWorker(stack, "MyTestLambdaWorker", {
+      new LambdaWorker(stack, "MyTestLambdaWorker", {
         name: "MyTestLambdaWorker",
         lambdaProps: {
           entry: "examples/simple-lambda-worker/src/lambda/simple-worker.js",
@@ -471,7 +471,7 @@ describe("LambdaWorker", () => {
           ],
           timeout: cdk.Duration.minutes(5),
           vpc: vpc,
-          vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT },
+          vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
         },
         queueProps: {
           fifo: true,
@@ -482,34 +482,30 @@ describe("LambdaWorker", () => {
     });
 
     test("provisions fifo SQS queue and dead letter queue", () => {
-      expectCDK(stack).to(countResources("AWS::SQS::Queue", 2));
+      Template.fromStack(stack).resourceCountIs("AWS::SQS::Queue", 2);
 
-      expectCDK(stack).to(
-        haveResourceLike("AWS::SQS::Queue", {
-          QueueName: "MyTestLambdaWorker-queue.fifo",
-          VisibilityTimeout: 1500, // 5 (default max receive count) * 300 (lambda timeout)
-          FifoQueue: true,
-          ContentBasedDeduplication: true,
-          RedrivePolicy: {
-            maxReceiveCount: 5,
-            deadLetterTargetArn: {
-              "Fn::GetAtt": [
-                "MyTestLambdaWorkerMyTestLambdaWorkerdlq27BBFD95",
-                "Arn",
-              ],
-            },
+      Template.fromStack(stack).hasResourceProperties("AWS::SQS::Queue", {
+        QueueName: "MyTestLambdaWorker-queue.fifo",
+        VisibilityTimeout: 1500, // 5 (default max receive count) * 300 (lambda timeout)
+        FifoQueue: true,
+        ContentBasedDeduplication: true,
+        RedrivePolicy: {
+          maxReceiveCount: 5,
+          deadLetterTargetArn: {
+            "Fn::GetAtt": [
+              "MyTestLambdaWorkerMyTestLambdaWorkerdlq27BBFD95",
+              "Arn",
+            ],
           },
-        })
-      );
+        },
+      });
 
-      expectCDK(stack).to(
-        haveResourceLike("AWS::SQS::Queue", {
-          QueueName: "MyTestLambdaWorker-dlq.fifo",
-          VisibilityTimeout: 1500, // 5 (default max receive count) * 300 (lambda timeout)
-          FifoQueue: true,
-          // ContentBasedDeduplication: true, // not set on the dlq. If it fails - we don't want it de duplicated for some reason.
-        })
-      );
+      Template.fromStack(stack).hasResourceProperties("AWS::SQS::Queue", {
+        QueueName: "MyTestLambdaWorker-dlq.fifo",
+        VisibilityTimeout: 1500, // 5 (default max receive count) * 300 (lambda timeout)
+        FifoQueue: true,
+        // ContentBasedDeduplication: true, // not set on the dlq. If it fails - we don't want it de duplicated for some reason.
+      });
     });
   });
 
@@ -526,7 +522,7 @@ describe("LambdaWorker", () => {
         });
 
         const vpc = new ec2.Vpc(stack, "TheVPC", {
-          cidr: "10.0.0.0/16",
+          ipAddresses: ec2.IpAddresses.cidr("10.0.0.0/16"),
         });
 
         worker = new LambdaWorker(stack, "MyTestLambdaWorker", {
@@ -546,7 +542,7 @@ describe("LambdaWorker", () => {
             ],
             timeout: cdk.Duration.minutes(5),
             vpc: vpc,
-            vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE },
+            vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
           },
           queueProps: {},
           alarmTopic: alarmTopic,
@@ -554,10 +550,11 @@ describe("LambdaWorker", () => {
       });
 
       test("provisions a lambda", () => {
-        expectCDK(stack).to(countResources("AWS::Lambda::Function", 1));
+        Template.fromStack(stack).resourceCountIs("AWS::Lambda::Function", 1);
 
-        expectCDK(stack).to(
-          haveResourceLike("AWS::Lambda::Function", {
+        Template.fromStack(stack).hasResourceProperties(
+          "AWS::Lambda::Function",
+          {
             FunctionName: "MyTestLambdaWorker",
             ImageConfig: {
               Command: ["./src/script"],
@@ -578,7 +575,7 @@ describe("LambdaWorker", () => {
                 ],
               },
             },
-          })
+          },
         );
       });
 
@@ -597,39 +594,36 @@ describe("LambdaWorker", () => {
       });
 
       test("provisions SQS queue and dead letter queue", () => {
-        expectCDK(stack).to(countResources("AWS::SQS::Queue", 2));
+        Template.fromStack(stack).resourceCountIs("AWS::SQS::Queue", 2);
 
-        expectCDK(stack).to(
-          haveResourceLike("AWS::SQS::Queue", {
-            QueueName: "MyTestLambdaWorker-queue",
-            VisibilityTimeout: 1500, // 5 (default max receive count) * 300 (lambda timeout)
-            RedrivePolicy: {
-              maxReceiveCount: 5,
-              deadLetterTargetArn: {
-                "Fn::GetAtt": [
-                  "MyTestLambdaWorkerMyTestLambdaWorkerdlq27BBFD95",
-                  "Arn",
-                ],
-              },
+        Template.fromStack(stack).hasResourceProperties("AWS::SQS::Queue", {
+          QueueName: "MyTestLambdaWorker-queue",
+          VisibilityTimeout: 1500, // 5 (default max receive count) * 300 (lambda timeout)
+          RedrivePolicy: {
+            maxReceiveCount: 5,
+            deadLetterTargetArn: {
+              "Fn::GetAtt": [
+                "MyTestLambdaWorkerMyTestLambdaWorkerdlq27BBFD95",
+                "Arn",
+              ],
             },
-          })
-        );
+          },
+        });
 
-        expectCDK(stack).to(
-          haveResourceLike("AWS::SQS::Queue", {
-            QueueName: "MyTestLambdaWorker-dlq",
-            VisibilityTimeout: 1500, // 5 (default max receive count) * 300 (lambda timeout)
-          })
-        );
+        Template.fromStack(stack).hasResourceProperties("AWS::SQS::Queue", {
+          QueueName: "MyTestLambdaWorker-dlq",
+          VisibilityTimeout: 1500, // 5 (default max receive count) * 300 (lambda timeout)
+        });
       });
 
       test("provisions three alarms", () => {
-        expectCDK(stack).to(countResources("AWS::CloudWatch::Alarm", 3));
+        Template.fromStack(stack).resourceCountIs("AWS::CloudWatch::Alarm", 3);
       });
 
       test("provisions a message visible alarm on the dead letter queue", () => {
-        expectCDK(stack).to(
-          haveResourceLike("AWS::CloudWatch::Alarm", {
+        Template.fromStack(stack).hasResourceProperties(
+          "AWS::CloudWatch::Alarm",
+          {
             AlarmName: "MyTestLambdaWorker-dlq-messages-visible-alarm",
             AlarmDescription:
               "Alarm when the lambda worker fails to process a message and the message appears on the DLQ",
@@ -652,13 +646,14 @@ describe("LambdaWorker", () => {
             ComparisonOperator: "GreaterThanOrEqualToThreshold",
             TreatMissingData: "ignore",
             OKActions: [{ Ref: "TestAlarm5A9EF6BD" }],
-          })
+          },
         );
       });
 
       test("provisions a message visible alarm on the main queue", () => {
-        expectCDK(stack).to(
-          haveResourceLike("AWS::CloudWatch::Alarm", {
+        Template.fromStack(stack).hasResourceProperties(
+          "AWS::CloudWatch::Alarm",
+          {
             AlarmName: "MyTestLambdaWorker-queue-messages-visible-alarm",
             AlarmDescription:
               "Alarm when the lambda workers main trigger queue has more than 1000 messages on the queue",
@@ -681,13 +676,14 @@ describe("LambdaWorker", () => {
             ComparisonOperator: "GreaterThanOrEqualToThreshold",
             TreatMissingData: "ignore",
             OKActions: [{ Ref: "TestAlarm5A9EF6BD" }],
-          })
+          },
         );
       });
 
       test("provisions an age of oldest message alarm on the main queue", () => {
-        expectCDK(stack).to(
-          haveResourceLike("AWS::CloudWatch::Alarm", {
+        Template.fromStack(stack).hasResourceProperties(
+          "AWS::CloudWatch::Alarm",
+          {
             AlarmName: "MyTestLambdaWorker-queue-message-age-alarm",
             AlarmDescription:
               "Alarm when the lambda workers main trigger queue has messages older than 3600 seconds",
@@ -710,7 +706,7 @@ describe("LambdaWorker", () => {
             ComparisonOperator: "GreaterThanOrEqualToThreshold",
             TreatMissingData: "ignore",
             OKActions: [{ Ref: "TestAlarm5A9EF6BD" }],
-          })
+          },
         );
       });
     });
@@ -726,7 +722,7 @@ describe("LambdaWorker", () => {
         });
 
         const vpc = new ec2.Vpc(stack, "TheVPC", {
-          cidr: "10.0.0.0/16",
+          ipAddresses: ec2.IpAddresses.cidr("10.0.0.0/16"),
         });
 
         new LambdaWorker(stack, "MyTestLambdaWorker", {
@@ -746,7 +742,7 @@ describe("LambdaWorker", () => {
             ],
             timeout: cdk.Duration.minutes(5),
             vpc: vpc,
-            vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE },
+            vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
           },
           queueProps: {},
           alarmTopic: alarmTopic,
@@ -754,10 +750,11 @@ describe("LambdaWorker", () => {
       });
 
       test("provisions a lambda", () => {
-        expectCDK(stack).to(countResources("AWS::Lambda::Function", 1));
+        Template.fromStack(stack).resourceCountIs("AWS::Lambda::Function", 1);
 
-        expectCDK(stack).to(
-          haveResourceLike("AWS::Lambda::Function", {
+        Template.fromStack(stack).hasResourceProperties(
+          "AWS::Lambda::Function",
+          {
             FunctionName: "MyTestLambdaWorker",
             // Command removed. There doesn't seem to be a way to verify that properties do not exist.
             //
@@ -782,7 +779,7 @@ describe("LambdaWorker", () => {
                 ],
               },
             },
-          })
+          },
         );
       });
     });
@@ -810,9 +807,9 @@ describe("LambdaWorker", () => {
           ],
           timeout: cdk.Duration.minutes(5),
           vpc: new ec2.Vpc(stack, "TheVPC", {
-            cidr: "10.0.0.0/16",
+            ipAddresses: ec2.IpAddresses.cidr("10.0.0.0/16"),
           }),
-          vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT },
+          vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
         };
       });
 
@@ -829,34 +826,20 @@ describe("LambdaWorker", () => {
           alarmTopic: alarmTopic,
         });
 
-        expectCDK(stack).to(countResources("AWS::Lambda::Function", 1));
+        Template.fromStack(stack).resourceCountIs("AWS::Lambda::Function", 1);
 
-        expectCDK(stack).to(
-          haveResourceLike("AWS::Lambda::Function", {
+        // TODO: IS this image uri not going to keep changing?
+        Template.fromStack(stack).hasResourceProperties(
+          "AWS::Lambda::Function",
+          {
             PackageType: "Image",
             Code: {
-              // This is how the CDK generates the image uri with legacy synthesizer (CDK v1 only)
               ImageUri: {
-                "Fn::Join": [
-                  "",
-                  [
-                    {
-                      Ref: "AWS::AccountId",
-                    },
-                    ".dkr.ecr.",
-                    {
-                      Ref: "AWS::Region",
-                    },
-                    ".",
-                    {
-                      Ref: "AWS::URLSuffix",
-                    },
-                    stringLike("/aws-cdk/assets:*"),
-                  ],
-                ],
+                "Fn::Sub":
+                  "${AWS::AccountId}.dkr.ecr.${AWS::Region}.${AWS::URLSuffix}/cdk-hnb659fds-container-assets-${AWS::AccountId}-${AWS::Region}:4cf46eba6932d8b82d75ff231d64f6eb5c2c8a5b843e7100222cab515bd5e5f2",
               },
             },
-          })
+          },
         );
       });
 
@@ -880,37 +863,23 @@ describe("LambdaWorker", () => {
           alarmTopic: alarmTopic,
         });
 
-        expectCDK(stack).to(countResources("AWS::Lambda::Function", 1));
+        Template.fromStack(stack).resourceCountIs("AWS::Lambda::Function", 1);
 
-        expectCDK(stack).to(
-          haveResourceLike("AWS::Lambda::Function", {
+        // TODO: IS this image uri not going to keep changing?
+        Template.fromStack(stack).hasResourceProperties(
+          "AWS::Lambda::Function",
+          {
             PackageType: "Image",
             Code: {
-              // This is how the CDK generates the image uri with legacy synthesizer (CDK v1 only)
               ImageUri: {
-                "Fn::Join": [
-                  "",
-                  [
-                    {
-                      Ref: "AWS::AccountId",
-                    },
-                    ".dkr.ecr.",
-                    {
-                      Ref: "AWS::Region",
-                    },
-                    ".",
-                    {
-                      Ref: "AWS::URLSuffix",
-                    },
-                    stringLike("/aws-cdk/assets:*"),
-                  ],
-                ],
+                "Fn::Sub":
+                  "${AWS::AccountId}.dkr.ecr.${AWS::Region}.${AWS::URLSuffix}/cdk-hnb659fds-container-assets-${AWS::AccountId}-${AWS::Region}:752308ac702b0693e5a4d833bf88b14ed00bb217f0c168b8a645051d1c8a3274",
               },
             },
             ImageConfig: {
               Command: ["app.handler"],
             },
-          })
+          },
         );
       });
     });
@@ -925,7 +894,7 @@ describe("LambdaWorker", () => {
       });
 
       const vpc = new ec2.Vpc(stack, "TheVPC", {
-        cidr: "10.0.0.0/16",
+        ipAddresses: ec2.IpAddresses.cidr("10.0.0.0/16"),
       });
 
       expect(() => {
@@ -937,7 +906,7 @@ describe("LambdaWorker", () => {
             memorySize: 2048,
             timeout: cdk.Duration.seconds(5),
             vpc: vpc,
-            vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE },
+            vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
           },
           queueProps: {},
           alarmTopic: alarmTopic,
@@ -955,7 +924,7 @@ describe("LambdaWorker", () => {
       });
 
       const vpc = new ec2.Vpc(stack, "TheVPC", {
-        cidr: "10.0.0.0/16",
+        ipAddresses: ec2.IpAddresses.cidr("10.0.0.0/16"),
       });
 
       expect(() => {
@@ -967,13 +936,13 @@ describe("LambdaWorker", () => {
             memorySize: 512,
             timeout: cdk.Duration.minutes(5),
             vpc: vpc,
-            vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE },
+            vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
           },
           queueProps: {},
           alarmTopic: alarmTopic,
         });
       }).toThrow(
-        "Invalid lambdaProps.memorySize value of 512. Minimum value is 1024"
+        "Invalid lambdaProps.memorySize value of 512. Minimum value is 1024",
       );
     });
   });
@@ -1065,7 +1034,7 @@ describe("LambdaWorker", () => {
         });
 
         const vpc = new ec2.Vpc(stack, "TheVPC", {
-          cidr: "10.0.0.0/16",
+          ipAddresses: ec2.IpAddresses.cidr("10.0.0.0/16"),
         });
 
         expect(() => {
@@ -1081,13 +1050,13 @@ describe("LambdaWorker", () => {
               memorySize: 2048,
               timeout: cdk.Duration.minutes(5),
               vpc: vpc,
-              vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE },
+              vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
             },
             queueProps: {},
             alarmTopic: alarmTopic,
           });
         }).toThrow(
-          "Invalid lambdaProps only dockerImageTag/ecrRepositoryArn/ecrRepositoryName or handler/entry can be specified."
+          "Invalid lambdaProps only dockerImageTag/ecrRepositoryArn/ecrRepositoryName or handler/entry can be specified.",
         );
       });
     });

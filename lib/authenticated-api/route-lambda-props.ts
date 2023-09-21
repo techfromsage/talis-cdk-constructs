@@ -1,12 +1,12 @@
-import * as apigatewayv2 from "@aws-cdk/aws-apigatewayv2";
-import * as cdk from "@aws-cdk/core";
+import * as cdk from "aws-cdk-lib";
+import * as apigatewayv2_alpha from "@aws-cdk/aws-apigatewayv2-alpha";
 
 import { AuthenticatedApiFunction } from "./authenticated-api-function";
 
 export interface RouteLambdaProps {
   name: string;
   path: string;
-  method: apigatewayv2.HttpMethod;
+  method: apigatewayv2_alpha.HttpMethod;
   isPublic?: boolean; // Defaults to false
   requiredScope?: string;
   lambda: AuthenticatedApiFunction;
