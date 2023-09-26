@@ -1,6 +1,15 @@
 {
   "name": "talis-cdk-constructs",
   "version": "0.1.0",
+  "files": [
+    "lib/**/*.d.ts",
+    "lib/**/*.js",
+    "src/**/*.js",
+    "src/lambda/api/authorizer.ts",
+    "src/lambda/api/authorizer.d.ts"
+  ],
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "bin": {
     "cdk": "bin/cdk.js"
   },
