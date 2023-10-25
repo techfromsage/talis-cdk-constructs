@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-import 'source-map-support/register';
-import * as cdk from 'aws-cdk-lib';
-import { SimpleCdnSiteHostingConstructStack } from '../lib/simple-cdn-site-hosting-construct-stack';
+import "source-map-support/register";
+import * as cdk from "aws-cdk-lib";
+import { SimpleCdnSiteHostingConstructStack } from "../lib/simple-cdn-site-hosting-construct-stack";
 
 const app = new cdk.App();
 new SimpleCdnSiteHostingConstructStack(
