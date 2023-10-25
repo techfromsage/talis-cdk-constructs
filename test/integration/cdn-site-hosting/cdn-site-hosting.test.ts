@@ -11,10 +11,12 @@ async function assertWebsiteCreated(url: string, content: string) {
 async function assertWebsiteDoesNotExist(url: string, content: string) {
   try {
     await axios.get(url);
-    fail('Expected to fail');
+    fail("Expected to fail");
   } catch (err: any | AxiosError) {
     if (axios.isAxiosError(err)) {
-      expect(err.message).toBe(`getaddrinfo ENOTFOUND ${process.env.AWS_PREFIX}cdn-site-hosting-construct.talis.io`);
+      expect(err.message).toBe(
+        `getaddrinfo ENOTFOUND ${process.env.AWS_PREFIX}cdn-site-hosting-construct.talis.io`,
+      );
     } else {
       throw err;
     }
