@@ -90,8 +90,12 @@ describe("CdnSiteHostingConstruct with no DNS", () => {
       `${process.env.AWS_PREFIX}cdn-site-hosting-construct.talis.io`,
     );
     expect(aliases.length).toBe(2);
-    expect(aliases).toContain(`${process.env.AWS_PREFIX}cdn-site-hosting-construct.talis.io`);
-    expect(aliases).toContain(`${process.env.AWS_PREFIX}cdn-site-hosting-construct-alias.talis.io`);
+    expect(aliases).toContain(
+      `${process.env.AWS_PREFIX}cdn-site-hosting-construct.talis.io`,
+    );
+    expect(aliases).toContain(
+      `${process.env.AWS_PREFIX}cdn-site-hosting-construct-alias.talis.io`,
+    );
   });
 });
 
@@ -113,6 +117,8 @@ describe("CdnSiteHostingWithDnsConstruct", () => {
       `${process.env.AWS_PREFIX}cdn-site-hosting-with-dns-construct.talis.io`,
     );
     expect(aliases.length).toBe(1);
-    expect(aliases).toContain(`${process.env.AWS_PREFIX}cdn-site-hosting-with-dns-construct.talis.io`);
+    expect(aliases).toContain(
+      `${process.env.AWS_PREFIX}cdn-site-hosting-with-dns-construct.talis.io`,
+    );
   });
 });

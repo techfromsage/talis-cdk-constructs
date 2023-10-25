@@ -13,5 +13,4 @@ export const getAliases = (props: {
     : [];
   aliases.push(getSiteDomain(props));
   return aliases;
-}
-
+};
