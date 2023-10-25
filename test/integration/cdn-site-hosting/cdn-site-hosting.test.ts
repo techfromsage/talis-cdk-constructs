@@ -1,5 +1,4 @@
 import axios from "axios";
-import { AxiosError } from "axios";
 import { CloudFront } from "aws-sdk";
 
 async function assertWebsiteCreated(url: string, content: string) {
@@ -8,11 +7,11 @@ async function assertWebsiteCreated(url: string, content: string) {
   expect(response.data).toContain(content);
 }
 
-async function assertWebsiteDoesNotExist(url: string, content: string) {
+async function assertWebsiteDoesNotExist(url: string) {
   try {
     await axios.get(url);
     fail("Expected to fail");
-  } catch (err: any | AxiosError) {
+  } catch (err) {
     if (axios.isAxiosError(err)) {
       expect(err.message).toBe(
         `getaddrinfo ENOTFOUND ${process.env.AWS_PREFIX}cdn-site-hosting-construct.talis.io`,
@@ -55,7 +54,7 @@ describe("CdnSiteHostingConstruct with no DNS", () => {
 
   test("does not create static website accessable at alias", async () => {
     const domainName = `${process.env.AWS_PREFIX}cdn-site-hosting-construct.talis.io`;
-    await assertWebsiteDoesNotExist(`https://${domainName}`, "Test Deployment");
+    await assertWebsiteDoesNotExist(`https://${domainName}`);
   });
 });
 
