@@ -30,25 +30,23 @@ describe("CdnSiteHostingConstruct", () => {
   }
 
   test("successfully hosts static website without dns name at cloudfront distribution", async () => {
-    const domainName = await findCloudfrontDistributionDomainName(`${process.env.AWS_PREFIX}cdn-site-hosting-construct.talis.io`);
-    await assertWebsiteCreated(
-      `https://${domainName}`,
-      'Test Deployment'
+    const domainName = await findCloudfrontDistributionDomainName(
+      `${process.env.AWS_PREFIX}cdn-site-hosting-construct.talis.io`,
     );
+    await assertWebsiteCreated(`https://${domainName}`, "Test Deployment");
   });
 
   test("successfully hosts static website with dns name at cloudfront domain name", async () => {
-    const domainName = await findCloudfrontDistributionDomainName(`${process.env.AWS_PREFIX}cdn-site-hosting-with-dns-construct.talis.io`);
-    await assertWebsiteCreated(
-      `https://${domainName}`,
-      'Test Deployment'
+    const domainName = await findCloudfrontDistributionDomainName(
+      `${process.env.AWS_PREFIX}cdn-site-hosting-with-dns-construct.talis.io`,
     );
+    await assertWebsiteCreated(`https://${domainName}`, "Test Deployment");
   });
 
   test("successfully hosts static website with dns name at given address", async () => {
     await assertWebsiteCreated(
       `https://${process.env.AWS_PREFIX}cdn-site-hosting-with-dns-construct.talis.io`,
-      'Test Deployment'
+      "Test Deployment",
     );
   });
 });
