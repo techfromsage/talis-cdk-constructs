@@ -30,8 +30,10 @@ export class SimpleCdnSiteHostingConstructStack extends cdk.Stack {
       {
         domainName: "talis.io",
         removalPolicy: cdk.RemovalPolicy.DESTROY,
-        siteSubDomain: `${prefix}cdn-site-hosting-construct`, // This would be the watermarked domain name e.g. elevate-20231025 from https://elevate-20231025.talis.com
-        aliasSubDomains: [`${prefix}cdn-site-hosting-construct-alias`], // The production stack would supply this alias, e.g. elevate.talis.com
+        // siteDomain: This would be the watermarked domain name e.g. elevate-20231025 from https://elevate-20231025.talis.com
+        siteSubDomain: `${prefix}cdn-site-hosting-construct`,
+        // aliasSubDomains: The production stack would supply this alias, e.g. elevate.talis.com
+        aliasSubDomains: [`${prefix}cdn-site-hosting-construct-alias`],
         sources: [
           s3deploy.Source.asset(path.resolve(__dirname, "./static-site")),
         ],
@@ -47,7 +49,10 @@ export class SimpleCdnSiteHostingConstructStack extends cdk.Stack {
       {
         domainName: "talis.io",
         removalPolicy: cdk.RemovalPolicy.DESTROY,
+        // siteSubDomain: This would be the watermarked domain name e.g. elevate-20231025 from https://elevate-20231025.talis.com
         siteSubDomain: `${prefix}cdn-site-hosting-with-dns-construct`,
+        // aliasSubDomains: The production stack would supply this alias, e.g. elevate.talis.com
+        aliasSubDomains: [`${prefix}cdn-site-hosting-with-dns-construct-alias`],
         sources: [
           s3deploy.Source.asset(path.resolve(__dirname, "./static-site")),
         ],

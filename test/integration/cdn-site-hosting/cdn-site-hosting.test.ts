@@ -107,18 +107,26 @@ describe("CdnSiteHostingWithDnsConstruct", () => {
     await assertWebsiteCreated(`https://${domainName}`, "Test Deployment");
   });
 
-  test("successfully creates static website accessable at alias", async () => {
+  test("successfully creates static website accessable at given dns", async () => {
     const domainName = `${process.env.AWS_PREFIX}cdn-site-hosting-with-dns-construct.talis.io`;
     await assertWebsiteCreated(`https://${domainName}`, "Test Deployment");
   });
 
-  test("creates an aliase on the cloudfront distribution", async () => {
+  test("successfully creates static website accessable at alias dns", async () => {
+    const domainName = `${process.env.AWS_PREFIX}cdn-site-hosting-with-dns-construct-alias.talis.io`;
+    await assertWebsiteCreated(`https://${domainName}`, "Test Deployment");
+  });
+
+  test("creates multiple aliases on the cloudfront distribution", async () => {
     const aliases = await findCloudfrontDistributionAliases(
       `${process.env.AWS_PREFIX}cdn-site-hosting-with-dns-construct.talis.io`,
     );
-    expect(aliases.length).toBe(1);
+    expect(aliases.length).toBe(2);
     expect(aliases).toContain(
       `${process.env.AWS_PREFIX}cdn-site-hosting-with-dns-construct.talis.io`,
+    );
+    expect(aliases).toContain(
+      `${process.env.AWS_PREFIX}cdn-site-hosting-with-dns-construct-alias.talis.io`,
     );
   });
 });
