@@ -5,12 +5,10 @@ export const getSiteDomain = (props: {
 
 export const getAliases = (props: {
   domainName: string;
-  siteSubDomain: string;
   aliasSubDomains?: string[];
 }): string[] => {
   const aliases = props.aliasSubDomains
     ? props.aliasSubDomains.map((alias) => `${alias}.${props.domainName}`)
     : [];
-  aliases.push(getSiteDomain(props));
   return aliases;
 };

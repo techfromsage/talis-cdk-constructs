@@ -46,8 +46,7 @@ export class CdnSiteHostingConstruct extends Construct {
         props.certificateArn,
       ),
       {
-        // aliases: [siteDomain],
-        aliases: aliases,
+        aliases: [siteDomain, ...aliases],
         sslMethod: cloudfront.SSLMethod.SNI,
         securityPolicy: cloudfront.SecurityPolicyProtocol.TLS_V1_1_2016,
       },
