@@ -32,7 +32,7 @@ It's best practice NOT to create a DNS entry for a production website within a c
 best practice is to be bring up a cloud formation stack and manually point a route 53 entry to the cloud front distribution.
 
 Why? We want the ability, if necessary, to bring up a new cloud formation stack and when we are happy that it is working
-as expected, switch the DNS manually to point to the new stack. 
+as expected, switch the DNS manually to point to the new stack.
 
 Therefore, production deployments should use the CdnSiteHostingConstruct and set a watermarked sub domain name. For example:
 
@@ -89,13 +89,13 @@ Therefore - when bringing up a new watermarked stack alongside an already live p
     );
 ```
 
-This will mean the new stack can be deployed and tested at the watermarked DNS name, e.g. `production-eu-20231026-talis-app.talis.io`. 
+This will mean the new stack can be deployed and tested at the watermarked DNS name, e.g. `production-eu-20231026-talis-app.talis.io`.
 
 When ready to switch the stacks in production, the `talis-app.talis.io` alias needs to be deleted from the old stack and added to the new stack manually.
 The DNS is then switched from the old cloud front distribution to the new one.
 
 If this was a simple DNS change, there would be no downtime. But due to the need to delete and recreate the alias on the cloud front distribution, there is a small
-period where the website is in accessible. Therefore, for a production site, ONLY when switching to a new cloud formation stack, NOT on every release, a maintenance 
+period where the website is in accessible. Therefore, for a production site, ONLY when switching to a new cloud formation stack, NOT on every release, a maintenance
 window is required for the switch over.
 
 Subsequent deployments after the stack switch over DO need to add in the `talis-app` alias to the aliasSubDomains property of the construct. If they do not,
