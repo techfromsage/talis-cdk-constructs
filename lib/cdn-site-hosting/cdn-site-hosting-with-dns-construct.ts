@@ -73,5 +73,19 @@ export class CdnSiteHostingWithDnsConstruct extends Construct {
       ),
       zone,
     });
+
+    if (props.aliasSubDomains) {
+      for (const aliasSubDomain of props.aliasSubDomains) {
+        new route53.ARecord(this, `${aliasSubDomain}-SiteAliasRecord`, {
+          recordName: aliasSubDomain,
+          target: route53.RecordTarget.fromAlias(
+            new targets.CloudFrontTarget(
+              this.cdnSiteHosting.cloudfrontWebDistribution,
+            ),
+          ),
+          zone,
+        });
+      }
+    }
   }
 }

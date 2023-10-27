@@ -3,7 +3,7 @@ import { aws_certificatemanager as certificatemanager } from "aws-cdk-lib";
 import { aws_cloudfront as cloudfront } from "aws-cdk-lib";
 import { aws_s3 as s3 } from "aws-cdk-lib";
 import { aws_s3_deployment as s3deploy } from "aws-cdk-lib";
-import { getSiteDomain } from "./utils";
+import { getSiteDomain, getAliases } from "./utils";
 import { CommonCdnSiteHostingProps } from "./cdn-site-hosting-props";
 import { Construct } from "constructs";
 
@@ -36,6 +36,8 @@ export class CdnSiteHostingConstruct extends Construct {
 
     const siteDomain = getSiteDomain(props);
 
+    const aliases = getAliases(props);
+
     // certificate
     const viewerCertificate = cloudfront.ViewerCertificate.fromAcmCertificate(
       certificatemanager.Certificate.fromCertificateArn(
@@ -44,7 +46,7 @@ export class CdnSiteHostingConstruct extends Construct {
         props.certificateArn,
       ),
       {
-        aliases: [siteDomain],
+        aliases: [siteDomain, ...aliases],
         sslMethod: cloudfront.SSLMethod.SNI,
         securityPolicy: cloudfront.SecurityPolicyProtocol.TLS_V1_1_2016,
       },
