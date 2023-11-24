@@ -107,7 +107,6 @@ contain the additional alias.
 
 This will require logic in both the hercules script and the projects CDK deployment code to ensure this property is set correctly.
 
-
 ### Smalti Example
 
 This is an example of the best practice described above using smalti app (i.e. the Admin UI project) as an example.
@@ -120,7 +119,7 @@ The default command to deploy the smalti admin ui is
 @hercules smalti-app deploy <environment> <region> <version>
 ```
 
-e.g. 
+e.g.
 
 ```
 @hercules smalti-app deploy production eu 63-14c218fb2c88afc0905be5c4e65af7a50cfe1071
@@ -131,29 +130,28 @@ This deploys a new version of the smalti-app to the existing stack. This is the 
 In the hercules script [here](https://github.com/talis/hercules/blob/master/scripts/smalti-app.js#L23) the watermarks of the current live stacks are
 defined in the config:
 
-
 ```javascript
 const ENVIRONMENT_CONFIGS = {
   staging: {
     eu: {
       circleciDeployContext: CIRCLECI_CONTEXT_CDK_DEPLOY_TO_SHARED_ASPIRE,
       circleciRegionContext: CIRCLECI_CONTEXT_AWS_REGION_EU,
-      appEnvironment: 'staging-eu',
-      releaseWatermark: '231114',
+      appEnvironment: "staging-eu",
+      releaseWatermark: "231114",
     },
   },
   production: {
     eu: {
       circleciDeployContext: CIRCLECI_CONTEXT_CDK_DEPLOY_TO_DEVOPS_ASPIRE,
       circleciRegionContext: CIRCLECI_CONTEXT_AWS_REGION_EU,
-      appEnvironment: 'production-eu',
-      releaseWatermark: '231115',
+      appEnvironment: "production-eu",
+      releaseWatermark: "231115",
     },
     ca: {
       circleciDeployContext: CIRCLECI_CONTEXT_CDK_DEPLOY_TO_DEVOPS_ASPIRE,
       circleciRegionContext: CIRCLECI_CONTEXT_AWS_REGION_CA,
-      appEnvironment: 'production-ca',
-      releaseWatermark: '231115',
+      appEnvironment: "production-ca",
+      releaseWatermark: "231115",
     },
   },
 };
@@ -163,7 +161,6 @@ Hercules passes this default `releaseWatermark` to circle which will deploy the 
 stack is named `production-eu-231115-smalti-app`,
 
 This is done [here](https://github.com/talis/hercules/blob/master/scripts/smalti-app.js#L112):
-
 
 ```
     const parameters = {
@@ -199,7 +196,7 @@ However, when creating a new stack alongside a currently live stack, the hercule
 @hercules smalti-app deploy <environment> <region> <version> [<watermark>]
 ```
 
-e.g. 
+e.g.
 
 ```
 @hercules smalti-app deploy production eu 63-14c218fb2c88afc0905be5c4e65af7a50cfe1071 231124
@@ -207,8 +204,8 @@ e.g.
 
 This results in a new stack being created alongside the existing live one. The two stacks in production would be:
 
-* `production-eu-231115-smalti-app`
-* `production-eu-231124-smalti-app`
+- `production-eu-231115-smalti-app`
+- `production-eu-231124-smalti-app`
 
 The `is_live` flag passed to circle by hercules, is set to false - because the watermark is not the watermark from the config:
 
@@ -277,8 +274,8 @@ Specifically here:
 
 This means that:
 
-* live stacks will have the `aliasSubdomains` set. Repeated deployments will not delete it. 
-* new deployments, with a new watermark will not have any `aliasSubDomains` set. This is what we want. They can not exist in two places at once and have to be moved at the time of making the new stack live.
+- live stacks will have the `aliasSubdomains` set. Repeated deployments will not delete it.
+- new deployments, with a new watermark will not have any `aliasSubDomains` set. This is what we want. They can not exist in two places at once and have to be moved at the time of making the new stack live.
 
 #### Post Making The New Stack Live
 
