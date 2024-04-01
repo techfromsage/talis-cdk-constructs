@@ -52,6 +52,7 @@ export class ContainerLambdaWorkerStack extends cdk.Stack {
       {
         name: `${prefix}container-lambda-worker`,
         lambdaProps: {
+          queueMaxConcurrency: 100,
           environment: {
             EXAMPLE_ENV_VAR: "example value",
           },
