@@ -26,6 +26,7 @@ describe("LambdaWorker", () => {
         worker = new LambdaWorker(stack, "MyTestLambdaWorker", {
           name: "MyTestLambdaWorker",
           lambdaProps: {
+            queueMaxConcurrency: 5,
             entry: "examples/simple-lambda-worker/src/lambda/simple-worker.js",
             handler: "testWorker",
             memorySize: 2048,
@@ -216,6 +217,7 @@ describe("LambdaWorker", () => {
         new LambdaWorker(stack, "MyTestLambdaWorker", {
           name: "MyTestLambdaWorker",
           lambdaProps: {
+            queueMaxConcurrency: 5,
             entry: "examples/simple-lambda-worker/src/lambda/simple-worker.js",
             handler: "testWorker",
             memorySize: 2048,
@@ -284,6 +286,7 @@ describe("LambdaWorker", () => {
         new LambdaWorker(stack, "MyTestLambdaWorker", {
           name: "MyTestLambdaWorker",
           lambdaProps: {
+            queueMaxConcurrency: 5,
             entry: "examples/simple-lambda-worker/src/lambda/simple-worker.js",
             handler: "testWorker",
             memorySize: 2048,
@@ -340,6 +343,7 @@ describe("LambdaWorker", () => {
         new LambdaWorker(stack, "MyTestLambdaWorker", {
           name: "MyTestLambdaWorker",
           lambdaProps: {
+            queueMaxConcurrency: 5,
             entry: "examples/simple-lambda-worker/src/lambda/simple-worker.js",
             handler: "testWorker",
             memorySize: 2048,
@@ -401,6 +405,7 @@ describe("LambdaWorker", () => {
         new LambdaWorker(stack, "MyTestLambdaWorker", {
           name: "MyTestLambdaWorker",
           lambdaProps: {
+            queueMaxConcurrency: 5,
             entry: "examples/simple-lambda-worker/src/lambda/simple-worker.js",
             handler: "testWorker",
             memorySize: 2048,
@@ -436,6 +441,9 @@ describe("LambdaWorker", () => {
                 "Arn",
               ],
             },
+            ScalingConfig: {
+              MaximumConcurrency: 5,
+            },
           },
         );
       });
@@ -459,6 +467,7 @@ describe("LambdaWorker", () => {
       new LambdaWorker(stack, "MyTestLambdaWorker", {
         name: "MyTestLambdaWorker",
         lambdaProps: {
+          queueMaxConcurrency: 5,
           entry: "examples/simple-lambda-worker/src/lambda/simple-worker.js",
           handler: "testWorker",
           memorySize: 2048,
@@ -528,6 +537,7 @@ describe("LambdaWorker", () => {
         worker = new LambdaWorker(stack, "MyTestLambdaWorker", {
           name: "MyTestLambdaWorker",
           lambdaProps: {
+            queueMaxConcurrency: 5,
             dockerImageTag: "test-lambda-12345",
             ecrRepositoryArn: "arn:aws:ecr:eu-west-1:012345678910:repository",
             ecrRepositoryName: "repository",
@@ -728,6 +738,7 @@ describe("LambdaWorker", () => {
         new LambdaWorker(stack, "MyTestLambdaWorker", {
           name: "MyTestLambdaWorker",
           lambdaProps: {
+            queueMaxConcurrency: 5,
             dockerImageTag: "test-lambda-12345",
             ecrRepositoryArn: "arn:aws:ecr:eu-west-1:012345678910:repository",
             ecrRepositoryName: "repository",
@@ -797,6 +808,7 @@ describe("LambdaWorker", () => {
         });
 
         lambdaProps = {
+          queueMaxConcurrency: 5,
           memorySize: 2048,
           policyStatements: [
             new iam.PolicyStatement({
@@ -901,6 +913,7 @@ describe("LambdaWorker", () => {
         new LambdaWorker(stack, "MyTestLambdaWorker", {
           name: "MyTestLambdaWorker",
           lambdaProps: {
+            queueMaxConcurrency: 5,
             entry: "examples/simple-lambda-worker/src/lambda/simple-worker.js",
             handler: "testWorker",
             memorySize: 2048,
@@ -931,6 +944,7 @@ describe("LambdaWorker", () => {
         new LambdaWorker(stack, "MyTestLambdaWorker", {
           name: "MyTestLambdaWorker",
           lambdaProps: {
+            queueMaxConcurrency: 5,
             entry: "examples/simple-lambda-worker/src/lambda/simple-worker.js",
             handler: "testWorker",
             memorySize: 512,
@@ -1041,6 +1055,7 @@ describe("LambdaWorker", () => {
           new LambdaWorker(stack, "MyTestLambdaWorker", {
             name: "MyTestLambdaWorker",
             lambdaProps: {
+              queueMaxConcurrency: 5,
               entry: config.entry,
               handler: config.handler,
               dockerCommand: config.dockerCommand,

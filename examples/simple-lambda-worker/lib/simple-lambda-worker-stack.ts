@@ -80,6 +80,7 @@ export class SimpleLambdaWorkerStack extends cdk.Stack {
       {
         name: `${prefix}simple-lambda-worker`,
         lambdaProps: {
+          queueMaxConcurrency: 5,
           environment: {
             EXAMPLE_ENV_VAR: "example value",
             SUCCESS_QUEUE_URL: successQueue.queueUrl,
