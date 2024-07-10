@@ -9,7 +9,7 @@ import {
 } from "../../../lib";
 
 export const STAGING_TALIS_IO_TLS_CERT_ARN =
-  "arn:aws:acm:us-east-1:302477901552:certificate/7973186a-2f4f-4d4e-92c7-d50f92f32718";
+  "arn:aws:acm:us-east-1:302477901552:certificate/2c1d71da-2bb8-421d-abf8-6db2b48e689d";
 
 export class SimpleCdnSiteHostingConstructStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
