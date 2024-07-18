@@ -37,6 +37,7 @@ export class AuthenticatedApiFunction extends lambdaNode.NodejsFunction {
       securityGroups: props.securityGroups,
       vpc: props.vpc,
       vpcSubnets: props.vpcSubnets,
+      bundling: props.bundling,
     });
   }
 }

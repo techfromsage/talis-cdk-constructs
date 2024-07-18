@@ -1,5 +1,5 @@
 import * as cdk from "aws-cdk-lib";
-import { aws_ec2 as ec2 } from "aws-cdk-lib";
+import { BundlingOptions, aws_ec2 as ec2 } from "aws-cdk-lib";
 
 export interface AuthenticatedApiFunctionProps {
   name: string;
@@ -11,4 +11,5 @@ export interface AuthenticatedApiFunctionProps {
   vpcSubnets?: ec2.SubnetSelection;
   securityGroups?: Array<ec2.ISecurityGroup>;
   memorySize?: number;
+  bundling?: BundlingOptions;
 }
