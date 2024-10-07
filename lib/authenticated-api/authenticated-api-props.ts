@@ -19,6 +19,7 @@ export interface AuthenticatedApiProps {
   domainName: string;
   certificateArn: string;
   corsDomain?: string[];
+  corsAllowCredentials?: boolean;
 
   // Access logs via CloudWatch log group
   logging?: {

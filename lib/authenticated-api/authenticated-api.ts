@@ -55,7 +55,7 @@ export class AuthenticatedApi extends Construct {
         corsPreflight: {
           allowHeaders: ["*"],
           allowMethods: [apigatewayv2_alpha.CorsHttpMethod.ANY],
-          allowCredentials: true,
+          allowCredentials: props.corsAllowCredentials ?? true,
           allowOrigins: props.corsDomain,
         },
       }),
