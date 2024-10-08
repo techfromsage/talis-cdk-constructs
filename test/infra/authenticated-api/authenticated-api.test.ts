@@ -99,6 +99,15 @@ describe("AuthenticatedApi", () => {
         {
           Name: "test-MyTestAuthenticatedApi",
           ProtocolType: "HTTP",
+          CorsConfiguration: {
+            AllowCredentials: true,
+            AllowHeaders: ["*"],
+            AllowMethods: ["*"],
+            AllowOrigins: [
+              "http://localhost:4200",
+              `https://test-simple-authenticated-api.talis.com`,
+            ],
+          },
         },
       );
     });
