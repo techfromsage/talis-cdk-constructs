@@ -1,6 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import { aws_ec2 as ec2 } from "aws-cdk-lib";
-import * as apigatewayv2_alpha from "@aws-cdk/aws-apigatewayv2-alpha";
+import * as apigatewayv2 from "aws-cdk-lib/aws-apigatewayv2";
 import { aws_sns as sns } from "aws-cdk-lib";
 import { Template, Match } from "aws-cdk-lib/assertions";
 import * as path from "path";
@@ -77,13 +77,13 @@ describe("AuthenticatedApi", () => {
           {
             name: "route1",
             path: "/1/test-route-1",
-            method: apigatewayv2_alpha.HttpMethod.GET,
+            method: apigatewayv2.HttpMethod.GET,
             lambda: route1Handler,
           },
           {
             name: "route2",
             path: "/1/test-route-2",
-            method: apigatewayv2_alpha.HttpMethod.GET,
+            method: apigatewayv2.HttpMethod.GET,
             lambda: route2Handler,
             isPublic: true,
           },
@@ -357,13 +357,13 @@ describe("AuthenticatedApi", () => {
             name: "route1",
             baseUrl: "https://www.example.com",
             path: "/api/index.html",
-            method: apigatewayv2_alpha.HttpMethod.GET,
+            method: apigatewayv2.HttpMethod.GET,
           },
           {
             name: "route2",
             baseUrl: "https://www.example.com",
             path: "/docs/index.html",
-            method: apigatewayv2_alpha.HttpMethod.GET,
+            method: apigatewayv2.HttpMethod.GET,
           },
         ],
       });

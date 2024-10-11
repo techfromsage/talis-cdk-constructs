@@ -1,5 +1,5 @@
 import { aws_dynamodb as dynamodb } from "aws-cdk-lib";
-import * as apigatewayv2_alpha from "@aws-cdk/aws-apigatewayv2-alpha";
+import * as apigatewayv2 from "aws-cdk-lib/aws-apigatewayv2";
 import { Construct } from "constructs";
 import { Constructor } from "../../../lib";
 
@@ -27,7 +27,7 @@ export const ResourcePrefixerTestCases: Array<ResourcePrefixerTestCase> = [
     },
   },
   {
-    resourceType: apigatewayv2_alpha.HttpApi,
+    resourceType: apigatewayv2.HttpApi,
     resourceProps: {
       apiName: "api-name",
     },
