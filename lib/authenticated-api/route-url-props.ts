@@ -1,10 +1,10 @@
-import * as apigatewayv2_alpha from "@aws-cdk/aws-apigatewayv2-alpha";
+import * as apigatewayv2 from "aws-cdk-lib/aws-apigatewayv2";
 
 export interface RouteUrlProps {
   name: string;
   baseUrl: string;
   path: string;
-  method: apigatewayv2_alpha.HttpMethod;
+  method: apigatewayv2.HttpMethod;
   isPublic?: boolean; // Defaults to false
   requiredScope?: string;
 }

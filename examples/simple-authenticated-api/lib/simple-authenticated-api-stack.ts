@@ -2,7 +2,7 @@ import * as cdk from "aws-cdk-lib";
 // import { aws_ec2 as ec2 } from "aws-cdk-lib";
 import { aws_s3 as s3 } from "aws-cdk-lib";
 import { aws_sns as sns } from "aws-cdk-lib";
-import * as apigatewayv2_alpha from "@aws-cdk/aws-apigatewayv2-alpha";
+import * as apigatewayv2 from "aws-cdk-lib/aws-apigatewayv2";
 import { Construct } from "constructs";
 
 import { AuthenticatedApi, AuthenticatedApiFunction } from "../../../lib";
@@ -152,28 +152,28 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
           {
             name: "route1",
             path: "/1/route1",
-            method: apigatewayv2_alpha.HttpMethod.GET,
+            method: apigatewayv2.HttpMethod.GET,
             lambda: route1Handler,
             requiredScope: "analytics:admin",
           },
           {
             name: "route2",
             path: "/1/route2",
-            method: apigatewayv2_alpha.HttpMethod.GET,
+            method: apigatewayv2.HttpMethod.GET,
             lambda: route2Handler,
             isPublic: true,
           },
           {
             name: "route3",
             path: "/1/route3/{id}",
-            method: apigatewayv2_alpha.HttpMethod.GET,
+            method: apigatewayv2.HttpMethod.GET,
             lambda: route3Handler,
             requiredScope: "analytics:admin",
           },
           {
             name: "route4",
             path: "/1/route4/{id}/route4",
-            method: apigatewayv2_alpha.HttpMethod.GET,
+            method: apigatewayv2.HttpMethod.GET,
             lambda: route4Handler,
             requiredScope: "analytics:admin",
           },
@@ -208,7 +208,7 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
       name: "simple authenticated api docs",
       baseUrl: `${documentationBucket.bucketWebsiteUrl}/api-documentation/index.html`,
       path: "/api-documentation",
-      method: apigatewayv2_alpha.HttpMethod.GET,
+      method: apigatewayv2.HttpMethod.GET,
     });
 
     console.log(`Regional domain name: ${api.domainName.regionalDomainName}`);

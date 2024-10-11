@@ -1,9 +1,8 @@
 import * as cdk from "aws-cdk-lib";
 import * as acm from "aws-cdk-lib/aws-certificatemanager";
-import { aws_apigatewayv2 as apigatewayv2 } from "aws-cdk-lib";
-import * as apigatewayv2_alpha from "@aws-cdk/aws-apigatewayv2-alpha";
-import * as authorizers_alpha from "@aws-cdk/aws-apigatewayv2-authorizers-alpha";
-import * as integrations_alpha from "@aws-cdk/aws-apigatewayv2-integrations-alpha";
+import * as apigatewayv2 from "aws-cdk-lib/aws-apigatewayv2";
+import * as authorizers from "aws-cdk-lib/aws-apigatewayv2-authorizers";
+import * as integrations from "aws-cdk-lib/aws-apigatewayv2-integrations";
 import { aws_cloudwatch as cloudwatch } from "aws-cdk-lib";
 import { aws_cloudwatch_actions as cloudwatchActions } from "aws-cdk-lib";
 import { aws_logs as awslogs } from "aws-cdk-lib";
@@ -22,10 +21,10 @@ const DEFAULT_LAMBDA_DURATION_THRESHOLD = cdk.Duration.minutes(1);
 export class AuthenticatedApi extends Construct {
   readonly apiId: string;
   readonly httpApiId: string;
-  readonly domainName: apigatewayv2_alpha.DomainName;
+  readonly domainName: apigatewayv2.DomainName;
 
-  private httpApi: apigatewayv2_alpha.HttpApi;
-  private authorizer: apigatewayv2_alpha.IHttpRouteAuthorizer;
+  private httpApi: apigatewayv2.HttpApi;
+  private authorizer: apigatewayv2.IHttpRouteAuthorizer;
   private alarmAction: cloudwatch.IAlarmAction;
 
   constructor(scope: Construct, id: string, props: AuthenticatedApiProps) {
@@ -39,7 +38,7 @@ export class AuthenticatedApi extends Construct {
         `To use a custom domain name both certificateArn and domainName must be specified`,
       );
     }
-    this.domainName = new apigatewayv2_alpha.DomainName(this, "domain-name", {
+    this.domainName = new apigatewayv2.DomainName(this, "domain-name", {
       domainName: props.domainName,
       certificate: acm.Certificate.fromCertificateArn(
         this,
@@ -48,20 +47,20 @@ export class AuthenticatedApi extends Construct {
       ),
     });
     const apiName = `${props.prefix}${props.name}`;
-    const apiGatewayProps: apigatewayv2_alpha.HttpApiProps = {
+    const apiGatewayProps: apigatewayv2.HttpApiProps = {
       apiName: apiName,
       defaultDomainMapping: { domainName: this.domainName },
       ...(props.corsDomain && {
         corsPreflight: {
           allowHeaders: ["*"],
-          allowMethods: [apigatewayv2_alpha.CorsHttpMethod.ANY],
+          allowMethods: [apigatewayv2.CorsHttpMethod.ANY],
           allowCredentials: props.corsAllowCredentials ?? true,
           allowOrigins: props.corsDomain,
         },
       }),
     };
 
-    this.httpApi = new apigatewayv2_alpha.HttpApi(
+    this.httpApi = new apigatewayv2.HttpApi(
       this,
       apiName,
       apiGatewayProps,
@@ -178,12 +177,12 @@ export class AuthenticatedApi extends Construct {
       },
     );
 
-    this.authorizer = new authorizers_alpha.HttpLambdaAuthorizer(
+    this.authorizer = new authorizers.HttpLambdaAuthorizer(
       "lambda-authorizer",
       authLambda,
       {
         authorizerName: `${apiName}-http-lambda-authoriser`,
-        responseTypes: [authorizers_alpha.HttpLambdaResponseType.SIMPLE], // Define if returns simple and/or iam response
+        responseTypes: [authorizers.HttpLambdaResponseType.SIMPLE], // Define if returns simple and/or iam response
       },
     );
 
@@ -195,7 +194,7 @@ export class AuthenticatedApi extends Construct {
 
     if (props.lambdaRoutes) {
       for (const routeProps of props.lambdaRoutes) {
-        const integration = new integrations_alpha.HttpLambdaIntegration(
+        const integration = new integrations.HttpLambdaIntegration(
           "http-lambda-integration",
           routeProps.lambda,
         );
@@ -309,7 +308,7 @@ export class AuthenticatedApi extends Construct {
     this.httpApi.addRoutes({
       path: routeProps.path,
       methods: [routeProps.method],
-      integration: new integrations_alpha.HttpUrlIntegration(
+      integration: new integrations.HttpUrlIntegration(
         routeProps.name,
         routeProps.baseUrl,
         {
