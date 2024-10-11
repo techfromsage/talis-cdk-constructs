@@ -60,11 +60,7 @@ export class AuthenticatedApi extends Construct {
       }),
     };
 
-    this.httpApi = new apigatewayv2.HttpApi(
-      this,
-      apiName,
-      apiGatewayProps,
-    );
+    this.httpApi = new apigatewayv2.HttpApi(this, apiName, apiGatewayProps);
 
     this.apiId = this.httpApi.apiId;
     this.httpApiId = this.httpApi.httpApiId;
