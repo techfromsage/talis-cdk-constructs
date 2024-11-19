@@ -105,6 +105,30 @@ describe("LambdaWorker", () => {
         });
       });
 
+      test("provisions Lambda EventSourceMapping", () => {
+        Template.fromStack(stack).hasResourceProperties(
+          "AWS::Lambda::EventSourceMapping",
+          {
+            Enabled: true,
+            BatchSize: 1,
+            ScalingConfig: {
+              MaximumConcurrency: 5,
+            },
+          },
+        );
+
+        Template.fromStack(stack).hasResourceProperties(
+          "AWS::Lambda::EventSourceMapping",
+          {
+            Enabled: false,
+            BatchSize: 1,
+            ScalingConfig: {
+              MaximumConcurrency: 5,
+            },
+          },
+        );
+      });
+
       test("provisions three alarms", () => {
         Template.fromStack(stack).resourceCountIs("AWS::CloudWatch::Alarm", 3);
       });
