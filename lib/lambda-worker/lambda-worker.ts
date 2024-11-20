@@ -148,6 +148,7 @@ export class LambdaWorker extends Construct {
       new SqsEventSource(lambdaDLQ, {
         enabled: false,
         batchSize: 1,
+        maxConcurrency: props.lambdaProps.queueMaxConcurrency,
       }),
     );
 
