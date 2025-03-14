@@ -5,8 +5,8 @@
     "lib/**/*.d.ts",
     "lib/**/*.js",
     "src/**/*.js",
-    "src/lambda/api/authorizer.ts",
-    "src/lambda/api/authorizer.d.ts"
+    "src/package-lock.json",
+    "src/package.json"
   ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -52,9 +52,6 @@
     "ts-node": "^10.9.1",
     "typescript": "~5.2.2",
     "uuid": "^9.0.1"
-  },
-  "dependencies": {
-    "talis-node": "github:talis/talis-node#v0.2.1"
   },
   "peerDependencies": {
     "aws-cdk-lib": "^2.162.0",
