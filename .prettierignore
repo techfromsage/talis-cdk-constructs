@@ -4,6 +4,7 @@ node_modules
 cdk.out/
 
 # Typescript is our source-code; generated JS and d.ts is left unlinted.
+src/**/npm-shrinkwrap.json
 src/**/*.js
 src/**/*.d.ts
 lib/**/*.js
