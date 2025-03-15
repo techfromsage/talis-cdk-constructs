@@ -128,7 +128,7 @@ export class AuthenticatedApi extends Construct {
 
     const authLambdaTimeout = cdk.Duration.minutes(2);
 
-    const srcPath = path.resolve(__dirname, "../../src");
+    const libPath = path.resolve(__dirname, "../../");
 
     // Auth Lambda
     const authLambda = new lambdaNodeJs.NodejsFunction(
@@ -137,8 +137,8 @@ export class AuthenticatedApi extends Construct {
       {
         functionName: `${apiName}-authoriser`,
 
-        depsLockFilePath: path.resolve(srcPath, "package-lock.json"),
-        entry: path.resolve(srcPath, "lambda/api/authorizer.js"),
+        depsLockFilePath: path.resolve(libPath, "src/npm-shrinkwrap.json"),
+        entry: path.resolve(libPath, "src/lambda/api/authorizer.js"),
         handler: "validateToken",
 
         bundling: {

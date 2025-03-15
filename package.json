@@ -5,7 +5,8 @@
     "lib/**/*.d.ts",
     "lib/**/*.js",
     "src/**/*.js",
-    "src/package-lock.json",
+    "!src/node_modules/**",
+    "src/npm-shrinkwrap.json",
     "src/package.json"
   ],
   "main": "lib/index.js",
