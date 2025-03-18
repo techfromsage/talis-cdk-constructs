@@ -232,6 +232,7 @@ export class PersonaAuthorizer {
         persona_scheme: process.env["PERSONA_SCHEME"],
         persona_port: process.env["PERSONA_PORT"],
         persona_oauth_route: process.env["PERSONA_OAUTH_ROUTE"],
+        cert_background_refresh: false,
       };
 
       this.personaClient = persona.createClient(
