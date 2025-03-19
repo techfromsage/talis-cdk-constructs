@@ -38,6 +38,10 @@ export class CdnSiteHostingConstruct extends Construct {
 
     const aliases = getAliases(props);
 
+    const securityPolicProtocol = props.securityPolicyProtocol
+      ? props.securityPolicyProtocol
+      : cloudfront.SecurityPolicyProtocol.TLS_V1_1_2016;
+
     // certificate
     const viewerCertificate = cloudfront.ViewerCertificate.fromAcmCertificate(
       certificatemanager.Certificate.fromCertificateArn(
@@ -48,7 +52,7 @@ export class CdnSiteHostingConstruct extends Construct {
       {
         aliases: [siteDomain, ...aliases],
         sslMethod: cloudfront.SSLMethod.SNI,
-        securityPolicy: cloudfront.SecurityPolicyProtocol.TLS_V1_1_2016,
+        securityPolicy: securityPolicProtocol,
       },
     );
 

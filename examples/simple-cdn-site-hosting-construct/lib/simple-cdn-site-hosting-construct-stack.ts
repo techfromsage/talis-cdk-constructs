@@ -1,4 +1,5 @@
 import * as cdk from "aws-cdk-lib";
+import { aws_cloudfront as cloudfront } from "aws-cdk-lib";
 import { aws_s3_deployment as s3deploy } from "aws-cdk-lib";
 import { Construct } from "constructs";
 import * as path from "path";
@@ -39,6 +40,7 @@ export class SimpleCdnSiteHostingConstructStack extends cdk.Stack {
         ],
         websiteIndexDocument: "index.html",
         certificateArn: STAGING_TALIS_IO_TLS_CERT_ARN,
+        securityPolicyProtocol: cloudfront.SecurityPolicyProtocol.TLS_V1_2_2021,
       },
     );
 
