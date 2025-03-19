@@ -331,7 +331,7 @@ describe("CdnSiteHostingConstruct", () => {
         sources: [s3deploy.Source.asset("./")],
         websiteErrorDocument: "error.html",
         websiteIndexDocument: "index.html",
-        securityPolicyProtocol: cloudfront.SecurityPolicyProtocol.TLS_V1_2_2018,
+        securityPolicyProtocol: cloudfront.SecurityPolicyProtocol.TLS_V1_2_2021,
       });
     });
 
@@ -348,7 +348,7 @@ describe("CdnSiteHostingConstruct", () => {
             DefaultRootObject: "index.html",
             ViewerCertificate: {
               AcmCertificateArn: fakeCertificateArn,
-              MinimumProtocolVersion: "TLSv1.2_2018",
+              MinimumProtocolVersion: "TLSv1.2_2021",
               SslSupportMethod: "sni-only",
             },
             Origins: [
