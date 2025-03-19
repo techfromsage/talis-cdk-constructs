@@ -19,5 +19,5 @@ export interface CommonCdnSiteHostingProps {
   sourcesWithDeploymentOptions?: SourcesWithDeploymentOptions[];
   websiteErrorDocument?: string;
   websiteIndexDocument: string;
-  SecurityPolicyProtocol?: cloudfront.SecurityPolicyProtocol;
+  securityPolicyProtocol?: cloudfront.SecurityPolicyProtocol;
 }

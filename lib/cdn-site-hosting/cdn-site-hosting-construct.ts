@@ -38,8 +38,8 @@ export class CdnSiteHostingConstruct extends Construct {
 
     const aliases = getAliases(props);
 
-    const securityPolicProtocol = props.SecurityPolicyProtocol
-      ? props.SecurityPolicyProtocol
+    const securityPolicProtocol = props.securityPolicyProtocol
+      ? props.securityPolicyProtocol
       : cloudfront.SecurityPolicyProtocol.TLS_V1_1_2016;
 
     // certificate

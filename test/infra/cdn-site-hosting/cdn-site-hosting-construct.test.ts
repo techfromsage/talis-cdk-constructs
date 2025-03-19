@@ -1,4 +1,5 @@
 import * as cdk from "aws-cdk-lib";
+import { aws_cloudfront as cloudfront } from "aws-cdk-lib";
 import { aws_s3_deployment as s3deploy } from "aws-cdk-lib";
 import { Template } from "aws-cdk-lib/assertions";
 import { CdnSiteHostingConstruct } from "../../../lib/cdn-site-hosting";
@@ -56,6 +57,8 @@ describe("CdnSiteHostingConstruct", () => {
             DefaultRootObject: "index.html",
             ViewerCertificate: {
               AcmCertificateArn: fakeCertificateArn,
+              MinimumProtocolVersion: "TLSv1.1_2016",
+              SslSupportMethod: "sni-only",
             },
             Origins: [
               {
@@ -311,6 +314,53 @@ describe("CdnSiteHostingConstruct", () => {
       );
       expect(secondDeployment.DependsOn).toBeDefined();
       expect(secondDeployment.DependsOn).toContain(firstDeploymentId);
+    });
+  });
+
+  describe("can be provisioned with a specific TSL version", () => {
+    let stack: cdk.Stack;
+
+    beforeAll(() => {
+      const app = new cdk.App();
+      stack = new cdk.Stack(app, "TestStack", { env: testEnv });
+      new CdnSiteHostingConstruct(stack, "MyTestConstruct", {
+        certificateArn: fakeCertificateArn,
+        siteSubDomain: fakeSiteSubDomain,
+        domainName: fakeDomain,
+        removalPolicy: cdk.RemovalPolicy.DESTROY,
+        sources: [s3deploy.Source.asset("./")],
+        websiteErrorDocument: "error.html",
+        websiteIndexDocument: "index.html",
+        securityPolicyProtocol: cloudfront.SecurityPolicyProtocol.TLS_V1_2_2018,
+      });
+    });
+
+    test("provisions a CloudFront distribution linked to S3", () => {
+      Template.fromStack(stack).resourceCountIs(
+        "AWS::CloudFront::Distribution",
+        1,
+      );
+      Template.fromStack(stack).hasResourceProperties(
+        "AWS::CloudFront::Distribution",
+        {
+          DistributionConfig: {
+            Aliases: [fakeFqdn],
+            DefaultRootObject: "index.html",
+            ViewerCertificate: {
+              AcmCertificateArn: fakeCertificateArn,
+              MinimumProtocolVersion: "TLSv1.2_2018",
+              SslSupportMethod: "sni-only",
+            },
+            Origins: [
+              {
+                CustomOriginConfig: {
+                  OriginProtocolPolicy: "http-only",
+                },
+              },
+            ],
+          },
+        },
+      );
     });
   });
 });
