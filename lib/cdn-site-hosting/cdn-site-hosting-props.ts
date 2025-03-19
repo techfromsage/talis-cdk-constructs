@@ -1,4 +1,5 @@
 import * as cdk from "aws-cdk-lib";
+import { aws_cloudfront as cloudfront } from "aws-cdk-lib";
 import { aws_s3_deployment as s3deploy } from "aws-cdk-lib";
 
 export interface SourcesWithDeploymentOptions {
@@ -18,4 +19,5 @@ export interface CommonCdnSiteHostingProps {
   sourcesWithDeploymentOptions?: SourcesWithDeploymentOptions[];
   websiteErrorDocument?: string;
   websiteIndexDocument: string;
+  SecurityPolicyProtocol?: cloudfront.SecurityPolicyProtocol;
 }
