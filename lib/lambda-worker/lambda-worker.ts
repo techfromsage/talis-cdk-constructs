@@ -277,8 +277,6 @@ export class LambdaWorker extends Construct {
 
       // Pass through props from lambda props object
       // Documented here https://docs.aws.amazon.com/cdk/api/latest/docs/@aws-cdk_aws-lambda-nodejs.NodejsFunctionProps.html
-      entry: props.lambdaProps.entry,
-      handler: props.lambdaProps.handler,
       description: props.lambdaProps.description,
       environment: buildLambdaEnvironment({
         environment: props.lambdaProps.environment,
@@ -295,9 +293,14 @@ export class LambdaWorker extends Construct {
       vpcSubnets: props.lambdaProps.vpcSubnets,
       filesystem: props.lambdaProps.filesystem,
 
-      // Enforce the following properties
-      awsSdkConnectionReuse: true,
-      runtime: lambda.Runtime.NODEJS_18_X,
+      // NodejsFunction-only props
+      entry: props.lambdaProps.entry,
+      handler: props.lambdaProps.handler,
+      runtime: props.lambdaProps.runtime ?? lambda.Runtime.NODEJS_18_X,
+      awsSdkConnectionReuse: props.lambdaProps.awsSdkConnectionReuse ?? true,
+      depsLockFilePath: props.lambdaProps.depsLockFilePath,
+      bundling: props.lambdaProps.bundling,
+      projectRoot: props.lambdaProps.projectRoot,
     });
   }
 

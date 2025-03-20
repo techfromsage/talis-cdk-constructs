@@ -2,6 +2,7 @@ import * as cdk from "aws-cdk-lib";
 import { aws_ec2 as ec2 } from "aws-cdk-lib";
 import * as apigatewayv2 from "aws-cdk-lib/aws-apigatewayv2";
 import { aws_sns as sns } from "aws-cdk-lib";
+import { aws_lambda as lambda } from "aws-cdk-lib";
 import { Template, Match } from "aws-cdk-lib/assertions";
 import * as path from "path";
 
@@ -41,12 +42,21 @@ describe("AuthenticatedApi", () => {
         `test-simple-authenticated-api-route2-handler`,
         {
           name: `test-route2-handler`,
-          entry: `${path.resolve(__dirname)}/routes/route2.js`,
           environment: {},
-          handler: "route",
           timeout: cdk.Duration.seconds(30),
           securityGroups: [],
           vpc: vpc,
+
+          // NodejsFunction props
+          entry: path.resolve(__dirname, "routes/route2.js"),
+          handler: "route",
+          projectRoot: path.resolve(__dirname, "../../.."),
+          depsLockFilePath: "package-lock.json",
+          runtime: lambda.Runtime.NODEJS_20_X,
+          awsSdkConnectionReuse: false,
+          bundling: {
+            minify: true,
+          },
         },
       );
 
@@ -171,7 +181,7 @@ describe("AuthenticatedApi", () => {
         FunctionName: "test-route2-handler",
         Timeout: 30,
         Handler: "index.route",
-        Runtime: "nodejs18.x",
+        Runtime: "nodejs20.x",
         Environment: {
           Variables: {
             LAMBDA_EXECUTION_TIMEOUT: "30",

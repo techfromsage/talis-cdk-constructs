@@ -3,11 +3,24 @@ import { aws_ec2 as ec2 } from "aws-cdk-lib";
 import { aws_iam as iam } from "aws-cdk-lib";
 import { aws_sns as sns } from "aws-cdk-lib";
 import { aws_lambda as lambda } from "aws-cdk-lib";
+import { aws_lambda_nodejs as lambda_nodejs } from "aws-cdk-lib";
 
 // Lambda properties for different runtimes
-export interface FunctionLambdaProps {
+export interface FunctionLambdaProps
+  extends Pick<
+    lambda_nodejs.NodejsFunctionProps,
+    | "entry"
+    | "handler"
+    | "runtime"
+    | "awsSdkConnectionReuse"
+    | "depsLockFilePath"
+    | "bundling"
+    | "projectRoot"
+  > {
   handler: string;
   entry: string;
+  /** @default true */
+  awsSdkConnectionReuse?: boolean;
 }
 
 export interface ContainerFromEcrLambdaProps {
