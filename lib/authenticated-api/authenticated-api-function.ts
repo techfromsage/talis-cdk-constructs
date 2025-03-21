@@ -22,22 +22,24 @@ export class AuthenticatedApiFunction extends lambdaNode.NodejsFunction {
 
     super(scope, id, {
       functionName: `${props.name}`,
-      entry: props.entry,
       environment: buildLambdaEnvironment({
         environment: props.environment,
         timeout: props.timeout,
       }),
-      handler: props.handler,
       memorySize: props.memorySize ?? MINIMUM_MEMORY_SIZE,
-
-      // Enforce the following properties
-      awsSdkConnectionReuse: true,
-      runtime: lambda.Runtime.NODEJS_18_X,
       timeout: props.timeout,
       securityGroups: props.securityGroups,
       vpc: props.vpc,
       vpcSubnets: props.vpcSubnets,
+
+      // NodejsFunction-only props
+      entry: props.entry,
+      handler: props.handler,
+      runtime: props.runtime ?? lambda.Runtime.NODEJS_18_X,
+      awsSdkConnectionReuse: props.awsSdkConnectionReuse ?? true,
       bundling: props.bundling,
+      depsLockFilePath: props.depsLockFilePath,
+      projectRoot: props.projectRoot,
     });
   }
 }

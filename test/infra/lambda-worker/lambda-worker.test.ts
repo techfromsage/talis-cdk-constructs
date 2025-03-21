@@ -1,7 +1,9 @@
 import * as cdk from "aws-cdk-lib";
+import * as path from "path";
 import { aws_ec2 as ec2 } from "aws-cdk-lib";
 import { aws_iam as iam } from "aws-cdk-lib";
 import { aws_sns as sns } from "aws-cdk-lib";
+import { aws_lambda as lambda } from "aws-cdk-lib";
 import { Template } from "aws-cdk-lib/assertions";
 
 import { LambdaWorker, LambdaWorkerProps } from "../../../lib/lambda-worker";
@@ -285,6 +287,60 @@ describe("LambdaWorker", () => {
               Size: 1024,
             },
             ReservedConcurrentExecutions: 10,
+          },
+        );
+      });
+    });
+
+    describe("with NodejsFunction props", () => {
+      let stack: cdk.Stack;
+
+      beforeAll(() => {
+        const app = new cdk.App();
+        stack = new cdk.Stack(app, "TestStack");
+        const alarmTopic = new sns.Topic(stack, "TestAlarm", {
+          topicName: "TestAlarm",
+        });
+
+        new LambdaWorker(stack, "MyTestLambdaWorker", {
+          name: "MyTestLambdaWorker",
+          lambdaProps: {
+            queueMaxConcurrency: 5,
+            memorySize: 2048,
+            timeout: cdk.Duration.minutes(5),
+
+            // NodejsFunction props
+            entry: "examples/simple-lambda-worker/src/lambda/simple-worker.js",
+            handler: "testWorker",
+            projectRoot: path.resolve(
+              __dirname,
+              "../../../examples/simple-lambda-worker",
+            ),
+            depsLockFilePath: "examples/simple-lambda-worker/package-lock.json",
+            runtime: lambda.Runtime.NODEJS_20_X,
+            awsSdkConnectionReuse: false,
+            bundling: {
+              minify: true,
+            },
+          },
+          alarmTopic: alarmTopic,
+        });
+      });
+
+      test("provisions a lambda", () => {
+        Template.fromStack(stack).resourceCountIs("AWS::Lambda::Function", 1);
+
+        console.dir(Template.fromStack(stack).toJSON(), { depth: Infinity });
+
+        Template.fromStack(stack).hasResourceProperties(
+          "AWS::Lambda::Function",
+          {
+            FunctionName: "MyTestLambdaWorker",
+            MemorySize: 2048,
+            Timeout: 300,
+            Handler: "index.testWorker",
+            Runtime: "nodejs20.x",
+            Environment: { Variables: { LAMBDA_EXECUTION_TIMEOUT: "300" } },
           },
         );
       });
