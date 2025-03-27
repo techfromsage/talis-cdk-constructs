@@ -27,7 +27,7 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
     // Can we pull in this alarm which is defined in terraform as an example of how to do that
     const alarmTopic = new sns.Topic(
       this,
-      `${prefix}simple-lambda-Worker-alarm`,
+      `${prefix}simple-authenticated-api-alarm`,
       { topicName: `${prefix}simple-authenticated-api-alarm` },
     );
 
