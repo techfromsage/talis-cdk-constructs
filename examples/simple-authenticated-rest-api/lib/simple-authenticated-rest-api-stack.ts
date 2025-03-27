@@ -59,7 +59,7 @@ export class SimpleAuthenticatedRestApiStack extends cdk.Stack {
     // ];
 
     // Create the lambda's to be passed into the AuthenticatedApi construct
-    const route1Handler = new AuthenticatedRestApiFunction(
+    /* const route1Handler = */ new AuthenticatedRestApiFunction(
       this,
       `${prefix}simple-authenticated-rest-api-route1-handler`,
       {
