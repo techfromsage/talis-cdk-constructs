@@ -5,7 +5,8 @@ import { aws_sns as sns } from "aws-cdk-lib";
 // import * as apigatewayv2 from "aws-cdk-lib/aws-apigatewayv2";
 import { Construct } from "constructs";
 
-// import { AuthenticatedApi, AuthenticatedApiFunction } from "../../../lib";
+// import { AuthenticatedRestApi, AuthenticatedRestApiFunction } from "../../../lib";
+import { AuthenticatedRestApiFunction } from "../../../lib";
 
 export const STAGING_TALIS_TLS_CERT_ARN =
   "arn:aws:acm:eu-west-1:302477901552:certificate/46e0fb43-bba8-4aa7-bf98-a3b2038cf760";
@@ -57,23 +58,23 @@ export class SimpleAuthenticatedRestApiStack extends cdk.Stack {
     //   ),
     // ];
 
-    // // Create the lambda's to be passed into the AuthenticatedApi construct
-    // const route1Handler = new AuthenticatedApiFunction(
-    //   this,
-    //   `${prefix}simple-authenticated-rest-api-route1-handler`,
-    //   {
-    //     name: `${prefix}route1-handler`,
-    //     entry: "src/lambda/route1.js",
-    //     environment: {},
-    //     handler: "route",
-    //     timeout: cdk.Duration.seconds(30),
-    //     // A security group is optional. If you need to specify one, you would do so here:
-    //     // securityGroups: lambdaSecurityGroups,
-    //     // A VPC is optional. If you need to specify one, you would do so here:
-    //     // vpc: vpc,
-    //     // vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT },
-    //   },
-    // );
+    // Create the lambda's to be passed into the AuthenticatedApi construct
+    const route1Handler = new AuthenticatedRestApiFunction(
+      this,
+      `${prefix}simple-authenticated-rest-api-route1-handler`,
+      {
+        name: `${prefix}route1-handler`,
+        entry: "src/lambda/route1.js",
+        environment: {},
+        handler: "route",
+        timeout: cdk.Duration.seconds(30),
+        // A security group is optional. If you need to specify one, you would do so here:
+        // securityGroups: lambdaSecurityGroups,
+        // A VPC is optional. If you need to specify one, you would do so here:
+        // vpc: vpc,
+        // vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT },
+      },
+    );
 
     // const route2Handler = new AuthenticatedApiFunction(
     //   this,
