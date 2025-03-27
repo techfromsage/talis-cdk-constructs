@@ -53,18 +53,14 @@ export class AuthenticatedRestApi extends Construct {
       ...(props.corsDomain && {
         corsPreflight: {
           allowHeaders: ["*"],
-          allowMethods: ['ANY'],
+          allowMethods: ["ANY"],
           allowCredentials: true,
           allowOrigins: props.corsDomain,
         },
       }),
     };
 
-    this.restApi = new apigateway.RestApi(
-      this,
-      apiName,
-      apiGatewayProps,
-    );
+    this.restApi = new apigateway.RestApi(this, apiName, apiGatewayProps);
 
     this.restApiId = this.restApi.restApiId;
 
@@ -154,7 +150,7 @@ export class AuthenticatedRestApi extends Construct {
       {
         handler: authLambda,
         resultsCacheTtl: cdk.Duration.seconds(0),
-      }
+      },
     );
 
     if (props.resourceProps) {
@@ -194,33 +190,32 @@ export class AuthenticatedRestApi extends Construct {
     routeLatencyAlarm.addOkAction(this.alarmAction);
   }
 
-  addResource(apiName: string, resourceProps: ResourceProps, authorizer: apigateway.IAuthorizer, parent?: apigateway.Resource ) {
+  addResource(
+    apiName: string,
+    resourceProps: ResourceProps,
+    authorizer: apigateway.IAuthorizer,
+    parent?: apigateway.Resource,
+  ) {
     let actualParent = this.restApi.root;
     if (parent) {
       actualParent = parent;
     }
 
-    const resource: apigateway.Resource = actualParent.addResource(resourceProps.name);
+    const resource: apigateway.Resource = actualParent.addResource(
+      resourceProps.name,
+    );
     for (const method in resourceProps.methods) {
       const integration = new apigateway.LambdaIntegration(
         resourceProps.methods[method].function,
       );
       if (resourceProps.methods[method].isPublic === true) {
-        resource.addMethod(
-          method,
-          integration,
-          { 
-            requestParameters: resourceProps.methods[method].requestParameters,
-          },
-        );
+        resource.addMethod(method, integration, {
+          requestParameters: resourceProps.methods[method].requestParameters,
+        });
       } else {
-        resource.addMethod(
-          method,
-          integration,
-          {
-            authorizer,
-          }
-        );
+        resource.addMethod(method, integration, {
+          authorizer,
+        });
       }
 
       // Add Cloudwatch alarms for this route
@@ -231,7 +226,8 @@ export class AuthenticatedRestApi extends Construct {
       }
 
       // Add an alarm on the duration of the lambda dealing with the HTTP Request
-      const durationThreshold = resourceProps.methods[method].lambdaDurationAlarmThreshold
+      const durationThreshold = resourceProps.methods[method]
+        .lambdaDurationAlarmThreshold
         ? resourceProps.methods[method].lambdaDurationAlarmThreshold
         : DEFAULT_LAMBDA_DURATION_THRESHOLD;
       const durationMetric = resourceProps.methods[method].function
@@ -282,6 +278,8 @@ export class AuthenticatedRestApi extends Construct {
       errorsAlarm.addOkAction(this.alarmAction);
     }
 
-    resourceProps.nestedResources?.map(nestedResource => this.addResource(apiName, nestedResource, authorizer, resource));
+    resourceProps.nestedResources?.map((nestedResource) =>
+      this.addResource(apiName, nestedResource, authorizer, resource),
+    );
   }
 }
