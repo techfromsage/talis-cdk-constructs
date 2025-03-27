@@ -1,8 +1,8 @@
 {
-  "name": "simple-authenticated-api",
+  "name": "simple-authenticated-rest-api",
   "version": "0.1.0",
   "bin": {
-    "simple-authenticated-api": "bin/simple-authenticated-api.js"
+    "simple-authenticated-rest-api": "bin/simple-authenticated-rest-api.js"
   },
   "scripts": {
     "build": "tsc",
