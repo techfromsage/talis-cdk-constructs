@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-import 'source-map-support/register';
-import * as cdk from 'aws-cdk-lib';
-import { SimpleAuthenticatedRestApiStack } from '../lib/simple-authenticated-rest-api-stack';
+import "source-map-support/register";
+import * as cdk from "aws-cdk-lib";
+import { SimpleAuthenticatedRestApiStack } from "../lib/simple-authenticated-rest-api-stack";
 
 const app = new cdk.App();
 new SimpleAuthenticatedRestApiStack(
