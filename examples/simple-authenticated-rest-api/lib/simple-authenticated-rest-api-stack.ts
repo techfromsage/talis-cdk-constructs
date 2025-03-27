@@ -1,8 +1,8 @@
 import * as cdk from "aws-cdk-lib";
 // import { aws_ec2 as ec2 } from "aws-cdk-lib";
-import { aws_s3 as s3 } from "aws-cdk-lib";
+// import { aws_s3 as s3 } from "aws-cdk-lib";
 import { aws_sns as sns } from "aws-cdk-lib";
-import * as apigatewayv2 from "aws-cdk-lib/aws-apigatewayv2";
+// import * as apigatewayv2 from "aws-cdk-lib/aws-apigatewayv2";
 import { Construct } from "constructs";
 
 // import { AuthenticatedApi, AuthenticatedApiFunction } from "../../../lib";
@@ -25,7 +25,7 @@ export class SimpleAuthenticatedRestApiStack extends cdk.Stack {
     // AuthenticatedApi requires an existing SNS topic to publish alarms to.
     // TODO : A real app would not create this topic which is already created by terraform.
     // Can we pull in this alarm which is defined in terraform as an example of how to do that
-    const alarmTopic = new sns.Topic(
+    /*const alarmTopic = */ new sns.Topic(
       this,
       `${prefix}simple-authenticated-rest-api-alarm`,
       { topicName: `${prefix}simple-authenticated-rest-api-alarm` },
