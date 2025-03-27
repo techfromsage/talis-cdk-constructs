@@ -6,7 +6,7 @@ import { Construct } from "constructs";
 import { AuthenticatedRestApiFunctionProps } from "./authenticated-rest-api-function-props";
 import { buildLambdaEnvironment } from "../util/build-lambda-environment";
 
-export const MINIMUM_MEMORY_SIZE = 1024;
+const MINIMUM_MEMORY_SIZE = 1024;
 
 export class AuthenticatedRestApiFunction extends lambdaNode.NodejsFunction {
   constructor(
