@@ -5,7 +5,10 @@ import { aws_sns as sns } from "aws-cdk-lib";
 // import * as apigatewayv2 from "aws-cdk-lib/aws-apigatewayv2";
 import { Construct } from "constructs";
 
-import { AuthenticatedRestApi, AuthenticatedRestApiFunction } from "../../../lib";
+import {
+  AuthenticatedRestApi,
+  AuthenticatedRestApiFunction,
+} from "../../../lib";
 
 export const STAGING_TALIS_TLS_CERT_ARN =
   "arn:aws:acm:eu-west-1:302477901552:certificate/46e0fb43-bba8-4aa7-bf98-a3b2038cf760";
@@ -23,7 +26,7 @@ export class SimpleAuthenticatedRestApiStack extends cdk.Stack {
       : "development-xx-";
 
     // AuthenticatedApi requires an existing SNS topic to publish alarms to.
-    const alarmTopic =  new sns.Topic(
+    const alarmTopic = new sns.Topic(
       this,
       `${prefix}simple-authenticated-rest-api-alarm`,
       { topicName: `${prefix}simple-authenticated-rest-api-alarm` },
@@ -123,7 +126,7 @@ export class SimpleAuthenticatedRestApiStack extends cdk.Stack {
       `${prefix}simple-authenticated-rest-api`,
       {
         prefix: prefix,
-        name: 'simple-authentiacted-rest-api',
+        name: "simple-authentiacted-rest-api",
         description: "Simple Authenticated Rest API",
         stageName: "development", // This should be development / staging / production as appropriate
         alarmTopic,
@@ -141,39 +144,39 @@ export class SimpleAuthenticatedRestApiStack extends cdk.Stack {
           {
             name: "resource1",
             methods: {
-              "GET": {
+              GET: {
                 function: route1Handler,
                 lambdaDurationAlarmThreshold: cdk.Duration.seconds(30),
-              }
+              },
             },
-              // {
-              //   name: "resource2",
-              //   methods: {
-              //     "GET": {
-              //       function: route2Handler,
-              //       lambdaDurationAlarmThreshold: cdk.Duration.seconds(30),
-              //     }
-              //   },
-              //   nestedResources: [
-              //     {
-              //       name: "{resource2Id}",
-              //       nestedResources: [
-              //         {
-              //           name: "resource3",
-              //           methods: {
-              //             "GET": {
-              //               function: route3Handler,
-              //               lambdaDurationAlarmThreshold: cdk.Duration.seconds(30),
-              //               requestParameters: {
-              //                 "resource2Id": true,
-              //               },
-              //             }
-              //           }
-              //         },
-              //       ],
-              //     },
-              //   ]
-              // },
+            // {
+            //   name: "resource2",
+            //   methods: {
+            //     "GET": {
+            //       function: route2Handler,
+            //       lambdaDurationAlarmThreshold: cdk.Duration.seconds(30),
+            //     }
+            //   },
+            //   nestedResources: [
+            //     {
+            //       name: "{resource2Id}",
+            //       nestedResources: [
+            //         {
+            //           name: "resource3",
+            //           methods: {
+            //             "GET": {
+            //               function: route3Handler,
+            //               lambdaDurationAlarmThreshold: cdk.Duration.seconds(30),
+            //               requestParameters: {
+            //                 "resource2Id": true,
+            //               },
+            //             }
+            //           }
+            //         },
+            //       ],
+            //     },
+            //   ]
+            // },
           },
         ],
       },
