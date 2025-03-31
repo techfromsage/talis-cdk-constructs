@@ -63,7 +63,7 @@ export class SimpleAuthenticatedRestApiStack extends cdk.Stack {
       this,
       `${prefix}simple-authenticated-rest-api-route1-handler`,
       {
-        name: `${prefix}route1-handler`,
+        name: `${prefix}-rest-api-route1-handler`,
         entry: "src/lambda/route1.js",
         environment: {},
         handler: "route",
