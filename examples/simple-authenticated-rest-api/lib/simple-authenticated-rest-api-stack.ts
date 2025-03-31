@@ -121,7 +121,7 @@ export class SimpleAuthenticatedRestApiStack extends cdk.Stack {
     //   },
     // );
 
-    const api = new AuthenticatedRestApi(
+    /* const api = */ new AuthenticatedRestApi(
       this,
       `${prefix}simple-authenticated-rest-api`,
       {
