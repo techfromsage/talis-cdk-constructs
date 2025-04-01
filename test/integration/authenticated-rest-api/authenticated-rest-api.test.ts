@@ -20,7 +20,8 @@ describe("AuthenticatedRestApi", () => {
 
     for (const item of response.Items) {
       if (
-        item.Name === `${process.env.AWS_PREFIX}simple-authenticated-rest-api` &&
+        item.Name ===
+          `${process.env.AWS_PREFIX}simple-authenticated-rest-api` &&
         item.ApiId
       ) {
         return item.ApiId;
