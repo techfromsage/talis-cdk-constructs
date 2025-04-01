@@ -125,4 +125,13 @@ describe("AuthenticatedRestApi", () => {
     expect(response.status).toBe(200);
     expect(response.data).toBe("route 2");
   });
+
+  test("returns 200 for a more deeply nested route", async () => {
+    const axiosNoAuthInstance = axios.create({
+      baseURL: `https://${apiGatewayId}.execute-api.eu-west-1.amazonaws.com/development`,
+    });
+    const response = await axiosNoAuthInstance.get("simple-resource/id1/child-resource/id2", {});
+    expect(response.status).toBe(200);
+    expect(response.data).toBe("route 4");
+  });
 });

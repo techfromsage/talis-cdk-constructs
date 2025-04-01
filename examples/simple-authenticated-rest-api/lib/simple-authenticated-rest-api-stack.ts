@@ -199,19 +199,19 @@ export class SimpleAuthenticatedRestApiStack extends cdk.Stack {
                         name: "{childResourceId}",
                         methods: {
                           GET: {
-                            function: route1Handler,
+                            function: route4Handler,
                             lambdaDurationAlarmThreshold:
                               cdk.Duration.seconds(30),
                             isPublic: true,
                           },
                           PUT: {
-                            function: route2Handler,
+                            function: route4Handler,
                             lambdaDurationAlarmThreshold:
                               cdk.Duration.seconds(30),
                             isPublic: false, // This is the default
                           },
                           DELETE: {
-                            function: route3Handler,
+                            function: route4Handler,
                             lambdaDurationAlarmThreshold:
                               cdk.Duration.seconds(30),
                             isPublic: false, // This is the default
