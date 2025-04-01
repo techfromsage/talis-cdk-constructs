@@ -1,7 +1,8 @@
 import * as _ from "lodash";
 import { persona, PersonaClient } from "talis-node";
 
-let AuthPolicy = require("./authPolicy");
+/* eslint-disable @typescript-eslint/no-var-requires */
+const AuthPolicy = require("./authPolicy");
 
 type ParsedArn = {
   method: string;
