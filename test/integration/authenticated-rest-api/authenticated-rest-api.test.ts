@@ -125,5 +125,4 @@ describe("AuthenticatedRestApi", () => {
     expect(response.status).toBe(200);
     expect(response.data).toBe("route 2");
   });
-
 });

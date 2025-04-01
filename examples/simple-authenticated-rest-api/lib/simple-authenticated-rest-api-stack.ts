@@ -200,17 +200,20 @@ export class SimpleAuthenticatedRestApiStack extends cdk.Stack {
                         methods: {
                           GET: {
                             function: route1Handler,
-                            lambdaDurationAlarmThreshold: cdk.Duration.seconds(30),
+                            lambdaDurationAlarmThreshold:
+                              cdk.Duration.seconds(30),
                             isPublic: true,
                           },
                           PUT: {
                             function: route2Handler,
-                            lambdaDurationAlarmThreshold: cdk.Duration.seconds(30),
+                            lambdaDurationAlarmThreshold:
+                              cdk.Duration.seconds(30),
                             isPublic: false, // This is the default
                           },
                           DELETE: {
                             function: route3Handler,
-                            lambdaDurationAlarmThreshold: cdk.Duration.seconds(30),
+                            lambdaDurationAlarmThreshold:
+                              cdk.Duration.seconds(30),
                             isPublic: false, // This is the default
                           },
                         },
