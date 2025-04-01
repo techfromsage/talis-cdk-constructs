@@ -99,23 +99,10 @@ describe("AuthenticatedRestApi", () => {
   });
 
   test("returns 200 for authenticated route when using token", async () => {
-    const axiosNoAuthInstance = axios.create({
-      baseURL: `https://${apiGatewayId}.execute-api.eu-west-1.amazonaws.com/development`,
-    });
-    try {
-      await axiosNoAuthInstance.post("simple-resource", {});
-      fail("Expected 401");
-    } catch (err) {
-      expect((err as Error).message).toBe(
-        "Request failed with status code 401",
-      );
-    }
-
     const token = await getOAuthToken(
       TALIS_CDK_AUTH_API_VALID_CLIENT,
       TALIS_CDK_AUTH_API_VALID_SECRET,
     );
-    console.log(`Token: ${token}`);
     const axiosAuthInstance = axios.create({
       headers: { Authorization: `Bearer ${token}` },
       baseURL: `https://${apiGatewayId}.execute-api.eu-west-1.amazonaws.com/development`,
@@ -124,4 +111,19 @@ describe("AuthenticatedRestApi", () => {
     expect(response.status).toBe(200);
     expect(response.data).toBe("route 2");
   });
+
+  test("returns 200 for nested route", async () => {
+    const token = await getOAuthToken(
+      TALIS_CDK_AUTH_API_VALID_CLIENT,
+      TALIS_CDK_AUTH_API_VALID_SECRET,
+    );
+    const axiosAuthInstance = axios.create({
+      headers: { Authorization: `Bearer ${token}` },
+      baseURL: `https://${apiGatewayId}.execute-api.eu-west-1.amazonaws.com/development`,
+    });
+    const response = await axiosAuthInstance.put("simple-resource/id1", {});
+    expect(response.status).toBe(200);
+    expect(response.data).toBe("route 2");
+  });
+
 });

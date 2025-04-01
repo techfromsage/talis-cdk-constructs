@@ -107,19 +107,19 @@ export class SimpleAuthenticatedRestApiStack extends cdk.Stack {
       },
     );
 
-    // const route4Handler = new AuthenticatedRestApiFunction(
-    //   this,
-    //   `${prefix}simple-authenticated-rest-api-route4-handler`,
-    //   {
-    //     name: `${prefix}-rest-api-route4-handler`,
-    //     entry: "src/lambda/route4.js",
-    //     environment: {},
-    //     handler: "route",
-    //     timeout: cdk.Duration.seconds(30),
-    //     // A security group is optional. If you need to specify one, you would do so here:
-    //     // securityGroups: lambdaSecurityGroups,
-    //   },
-    // );
+    const route4Handler = new AuthenticatedRestApiFunction(
+      this,
+      `${prefix}simple-authenticated-rest-api-route4-handler`,
+      {
+        name: `${prefix}-rest-api-route4-handler`,
+        entry: "src/lambda/route4.js",
+        environment: {},
+        handler: "route",
+        timeout: cdk.Duration.seconds(30),
+        // A security group is optional. If you need to specify one, you would do so here:
+        // securityGroups: lambdaSecurityGroups,
+      },
+    );
 
     /* const api = */ new AuthenticatedRestApi(
       this,
@@ -142,6 +142,7 @@ export class SimpleAuthenticatedRestApiStack extends cdk.Stack {
 
         resourceProps: [
           {
+            // www.example.com/simple-resource
             name: "simple-resource",
             methods: {
               GET: {
@@ -157,21 +158,66 @@ export class SimpleAuthenticatedRestApiStack extends cdk.Stack {
             },
             nestedResources: [
               {
+                // www.example.com/simple-resource/<simpleResourceId>
                 name: "{simpleResourceId}",
                 methods: {
                   GET: {
                     function: route1Handler,
                     lambdaDurationAlarmThreshold: cdk.Duration.seconds(30),
+                    isPublic: true,
                   },
                   PUT: {
                     function: route2Handler,
                     lambdaDurationAlarmThreshold: cdk.Duration.seconds(30),
+                    isPublic: false, // This is the default
                   },
                   DELETE: {
                     function: route3Handler,
                     lambdaDurationAlarmThreshold: cdk.Duration.seconds(30),
+                    isPublic: false, // This is the default
                   },
                 },
+                nestedResources: [
+                  {
+                    // www.example.com/simple-resource/<simpleResourceId>/child-resource
+                    name: "child-resource",
+                    methods: {
+                      GET: {
+                        function: route4Handler,
+                        lambdaDurationAlarmThreshold: cdk.Duration.seconds(30),
+                        isPublic: true,
+                      },
+                      POST: {
+                        function: route4Handler,
+                        lambdaDurationAlarmThreshold: cdk.Duration.seconds(30),
+                        isPublic: false, // This is the default
+                      },
+                    },
+                    nestedResources: [
+                      {
+                        // www.example.com/simple-resource/<simpleResourceId>/child-resource/<childResourceId>
+                        name: "{childResourceId}",
+                        methods: {
+                          GET: {
+                            function: route1Handler,
+                            lambdaDurationAlarmThreshold: cdk.Duration.seconds(30),
+                            isPublic: true,
+                          },
+                          PUT: {
+                            function: route2Handler,
+                            lambdaDurationAlarmThreshold: cdk.Duration.seconds(30),
+                            isPublic: false, // This is the default
+                          },
+                          DELETE: {
+                            function: route3Handler,
+                            lambdaDurationAlarmThreshold: cdk.Duration.seconds(30),
+                            isPublic: false, // This is the default
+                          },
+                        },
+                      },
+                    ],
+                  },
+                ],
               },
             ],
           },
