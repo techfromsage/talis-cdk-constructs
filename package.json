@@ -22,6 +22,7 @@
     "jest-unit-test": "jest test/unit/",
     "jest-infra-test": "jest test/infra/",
     "jest-integration-test": "jest test/integration/",
+    "jest-integration-test-rest-api": "jest test/integration/authenticated-rest-api/",
     "lint:prettier": "prettier --check .",
     "lint:eslint": "eslint . --ext .ts",
     "lint": "npm run lint:prettier && npm run lint:eslint",

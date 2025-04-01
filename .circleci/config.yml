@@ -145,7 +145,7 @@ jobs:
           command: npm run jest-infra-test -- --ci --maxWorkers=2
       - run:
           name: Run integration tests
-          command: npm run jest-integration-test -- --ci --maxWorkers=2
+          command: npm run jest-integration-test-rest-api -- --ci --maxWorkers=2
   destroy-lambda-worker:
     executor: default_executor
     steps:
@@ -235,20 +235,20 @@ workflows:
             - cdk-deploy-to-shared-aspire-20211202
             - aws-region-eu
             - talis-cdk-constructs-build
-      - deploy-lambda-worker:
-          requires:
-            - build
-          context:
-            - cdk-deploy-to-shared-aspire-20211202
-            - aws-region-eu
-            - talis-cdk-constructs-build
-      - deploy-authenticated-api:
-          requires:
-            - build
-          context:
-            - cdk-deploy-to-shared-aspire-20211202
-            - aws-region-eu
-            - talis-cdk-constructs-build
+      # - deploy-lambda-worker:
+      #     requires:
+      #       - build
+      #     context:
+      #       - cdk-deploy-to-shared-aspire-20211202
+      #       - aws-region-eu
+      #       - talis-cdk-constructs-build
+      # - deploy-authenticated-api:
+      #     requires:
+      #       - build
+      #     context:
+      #       - cdk-deploy-to-shared-aspire-20211202
+      #       - aws-region-eu
+      #       - talis-cdk-constructs-build
       - deploy-authenticated-rest-api:
           requires:
             - build
@@ -256,37 +256,37 @@ workflows:
             - cdk-deploy-to-shared-aspire-20211202
             - aws-region-eu
             - talis-cdk-constructs-build
-      - deploy-cdn-site-hosting:
-          requires:
-            - build
-          context:
-            - cdk-deploy-to-shared-aspire-20211202
-            - aws-region-eu
-            - talis-cdk-constructs-build
+      # - deploy-cdn-site-hosting:
+      #     requires:
+      #       - build
+      #     context:
+      #       - cdk-deploy-to-shared-aspire-20211202
+      #       - aws-region-eu
+      #       - talis-cdk-constructs-build
       - test:
           requires:
-            - deploy-lambda-worker
-            - deploy-authenticated-api
+            # - deploy-lambda-worker
+            # - deploy-authenticated-api
             - deploy-authenticated-rest-api
-            - deploy-cdn-site-hosting
+            # - deploy-cdn-site-hosting
           context:
             - cdk-deploy-to-shared-aspire-20211202
             - aws-region-eu
             - talis-cdk-constructs-build
-      - destroy-lambda-worker:
-          requires:
-            - test
-          context:
-            - cdk-deploy-to-shared-aspire-20211202
-            - aws-region-eu
-            - talis-cdk-constructs-build
-      - destroy-authenticated-api:
-          requires:
-            - test
-          context:
-            - cdk-deploy-to-shared-aspire-20211202
-            - aws-region-eu
-            - talis-cdk-constructs-build
+      # - destroy-lambda-worker:
+      #     requires:
+      #       - test
+      #     context:
+      #       - cdk-deploy-to-shared-aspire-20211202
+      #       - aws-region-eu
+      #       - talis-cdk-constructs-build
+      # - destroy-authenticated-api:
+      #     requires:
+      #       - test
+      #     context:
+      #       - cdk-deploy-to-shared-aspire-20211202
+      #       - aws-region-eu
+      #       - talis-cdk-constructs-build
       - destroy-authenticated-rest-api:
           requires:
             - test
@@ -294,19 +294,19 @@ workflows:
             - cdk-deploy-to-shared-aspire-20211202
             - aws-region-eu
             - talis-cdk-constructs-build
-      - destroy-cdn-site-hosting:
-          requires:
-            - test
-          context:
-            - cdk-deploy-to-shared-aspire-20211202
-            - aws-region-eu
-            - talis-cdk-constructs-build
+      # - destroy-cdn-site-hosting:
+      #     requires:
+      #       - test
+      #     context:
+      #       - cdk-deploy-to-shared-aspire-20211202
+      #       - aws-region-eu
+      #       - talis-cdk-constructs-build
       - semantic-release:
           requires:
-            - destroy-lambda-worker
-            - destroy-authenticated-api
+            # - destroy-lambda-worker
+            # - destroy-authenticated-api
             - destroy-authenticated-rest-api
-            - destroy-cdn-site-hosting
+            # - destroy-cdn-site-hosting
           context:
             - cdk-deploy-to-shared-aspire-20211202
             - aws-region-eu

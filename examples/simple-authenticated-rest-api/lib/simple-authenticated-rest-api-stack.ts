@@ -76,7 +76,7 @@ export class SimpleAuthenticatedRestApiStack extends cdk.Stack {
       },
     );
 
-    const route2Handler = new AuthenticatedApiFunction(
+    const route2Handler = new AuthenticatedRestApiFunction(
       this,
       `${prefix}simple-authenticated-rest-api-route2-handler`,
       {
@@ -93,7 +93,7 @@ export class SimpleAuthenticatedRestApiStack extends cdk.Stack {
       },
     );
 
-    const route3Handler = new AuthenticatedApiFunction(
+    const route3Handler = new AuthenticatedRestApiFunction(
       this,
       `${prefix}simple-authenticated-rest-api-route3-handler`,
       {
@@ -107,19 +107,19 @@ export class SimpleAuthenticatedRestApiStack extends cdk.Stack {
       },
     );
 
-    const route4Handler = new AuthenticatedApiFunction(
-      this,
-      `${prefix}simple-authenticated-rest-api-route4-handler`,
-      {
-        name: `${prefix}-rest-api-route4-handler`,
-        entry: "src/lambda/route4.js",
-        environment: {},
-        handler: "route",
-        timeout: cdk.Duration.seconds(30),
-        // A security group is optional. If you need to specify one, you would do so here:
-        // securityGroups: lambdaSecurityGroups,
-      },
-    );
+    // const route4Handler = new AuthenticatedRestApiFunction(
+    //   this,
+    //   `${prefix}simple-authenticated-rest-api-route4-handler`,
+    //   {
+    //     name: `${prefix}-rest-api-route4-handler`,
+    //     entry: "src/lambda/route4.js",
+    //     environment: {},
+    //     handler: "route",
+    //     timeout: cdk.Duration.seconds(30),
+    //     // A security group is optional. If you need to specify one, you would do so here:
+    //     // securityGroups: lambdaSecurityGroups,
+    //   },
+    // );
 
     /* const api = */ new AuthenticatedRestApi(
       this,
@@ -152,43 +152,26 @@ export class SimpleAuthenticatedRestApiStack extends cdk.Stack {
                 function: route2Handler,
                 lambdaDurationAlarmThreshold: cdk.Duration.seconds(30),
               },
-              PUT: {
-                function: route3Handler,
-                lambdaDurationAlarmThreshold: cdk.Duration.seconds(30),
-              },
-              DELETE: {
-                function: route4Handler,
-                lambdaDurationAlarmThreshold: cdk.Duration.seconds(30),
-              },
             },
-            // {
-            //   name: "resource2",
-            //   methods: {
-            //     "GET": {
-            //       function: route2Handler,
-            //       lambdaDurationAlarmThreshold: cdk.Duration.seconds(30),
-            //     }
-            //   },
-            //   nestedResources: [
-            //     {
-            //       name: "{resource2Id}",
-            //       nestedResources: [
-            //         {
-            //           name: "resource3",
-            //           methods: {
-            //             "GET": {
-            //               function: route3Handler,
-            //               lambdaDurationAlarmThreshold: cdk.Duration.seconds(30),
-            //               requestParameters: {
-            //                 "resource2Id": true,
-            //               },
-            //             }
-            //           }
-            //         },
-            //       ],
-            //     },
-            //   ]
-            // },
+            nestedResources: [
+              {
+                name: "{simpleResourceId}",
+                methods: {
+                  GET: {
+                    function: route1Handler,
+                    lambdaDurationAlarmThreshold: cdk.Duration.seconds(30),
+                  },
+                  PUT: {
+                    function: route2Handler,
+                    lambdaDurationAlarmThreshold: cdk.Duration.seconds(30),
+                  },
+                  DELETE: {
+                    function: route3Handler,
+                    lambdaDurationAlarmThreshold: cdk.Duration.seconds(30),
+                  },
+                },
+              },
+            ],
           },
         ],
       },
