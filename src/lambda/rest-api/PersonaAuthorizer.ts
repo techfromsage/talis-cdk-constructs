@@ -1,7 +1,7 @@
 import * as _ from "lodash";
 import { persona, PersonaClient } from "talis-node";
 
-let AuthPolicy = require('./authPolicy');
+let AuthPolicy = require("./authPolicy");
 
 type ParsedArn = {
   method: string;
@@ -67,7 +67,10 @@ export class PersonaAuthorizer {
   async handle() {
     console.log("Received event", this.event);
 
-    if (!this.event?.authorizationToken || this.event.authorizationToken == null) {
+    if (
+      !this.event?.authorizationToken ||
+      this.event.authorizationToken == null
+    ) {
       console.log("Missing auth token");
       return this.context.fail("Unauthorized");
     }
@@ -79,11 +82,7 @@ export class PersonaAuthorizer {
     console.log(`Method has scope: ${scope}`);
 
     let validationOpts = {
-      token: _.replace(
-        this.event.authorizationToken,
-        "Bearer",
-        "",
-      ).trim(),
+      token: _.replace(this.event.authorizationToken, "Bearer", "").trim(),
     };
     if (scope != null) {
       validationOpts = _.merge(validationOpts, { scope });
@@ -102,7 +101,7 @@ export class PersonaAuthorizer {
 
     try {
       const decodedToken = await this.validateToken(validationOpts);
-      const principalId = _.get(decodedToken, 'aud', 'invalid_oauth');
+      const principalId = _.get(decodedToken, "aud", "invalid_oauth");
       const authPolicy = this.buildAuthPolicy(
         principalId,
         parsedMethodArn,
@@ -112,11 +111,11 @@ export class PersonaAuthorizer {
     } catch (err) {
       console.log("token validation failed", err);
 
-      // In the case of suceess - the principal id is coming from the 
+      // In the case of suceess - the principal id is coming from the
       // decoded token. We don't have it here for the case of an invalid token.
       // Leaving the proncipal id blank in the auth policy for deny for now.
       // But could this be found?
-      const principalId = ''; 
+      const principalId = "";
 
       const authPolicy = this.buildAuthPolicy(
         principalId,
@@ -204,6 +203,7 @@ export class PersonaAuthorizer {
         stage: apiGatewayArnParts[STAGE_INDEX],
       },
       awsAccountId: methodArnParts[ACCOUNT_ID_INDEX],
+      apiVersion: apiGatewayArnParts[API_ID_INDEX],
     };
   }
 
@@ -288,23 +288,22 @@ export class PersonaAuthorizer {
     const policy = new AuthPolicy(
       principalId,
       parsedMethodArn.awsAccountId,
-      parsedMethodArn.apiOptions
+      parsedMethodArn.apiOptions,
     );
 
     // const versionedResourcePath = `/${parsedMethodArn.apiVersion}${parsedMethodArn.resourcePath}`;
     const versionedResourcePath = parsedMethodArn.resourcePath;
     if (allow === true) {
-      console.log('allowing request for', principalId);
+      console.log("allowing request for", principalId);
       policy.allowMethod(parsedMethodArn.method, versionedResourcePath);
     } else {
-      console.log('denying request for', principalId);
+      console.log("denying request for", principalId);
       policy.denyMethod(parsedMethodArn.method, versionedResourcePath);
     }
 
     const builtPolicy = policy.build();
-    console.log('applying policy', builtPolicy);
+    console.log("applying policy", builtPolicy);
     return builtPolicy;
-  };
-
+  }
 }
 /* eslint-enable @typescript-eslint/no-explicit-any */

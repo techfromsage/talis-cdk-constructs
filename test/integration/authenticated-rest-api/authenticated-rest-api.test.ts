@@ -21,7 +21,9 @@ describe("AuthenticatedRestApi", () => {
   async function findApiGatewayId(
     position: string | undefined = undefined,
   ): Promise<string> {
-    console.log(`Searching for API: ${process.env.AWS_PREFIX}simple-authenticated-rest-api`)
+    console.log(
+      `Searching for API: ${process.env.AWS_PREFIX}simple-authenticated-rest-api`,
+    );
     const response = await api.getRestApis({ position: position }).promise();
 
     if (!response.items) {
@@ -68,7 +70,6 @@ describe("AuthenticatedRestApi", () => {
 
     return response.data.access_token;
   }
-
 
   beforeAll(async () => {
     apiGatewayId = await findApiGatewayId();
