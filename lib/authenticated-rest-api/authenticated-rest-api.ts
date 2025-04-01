@@ -106,7 +106,7 @@ export class AuthenticatedRestApi extends Construct {
       {
         functionName: `${apiName}-authoriser`,
 
-        entry: `${path.resolve(__dirname)}/../../src/lambda/api/authorizer.ts`,
+        entry: `${path.resolve(__dirname)}/../../src/lambda/rest-api/authorizer.ts`,
         handler: "validateToken",
 
         bundling: {
