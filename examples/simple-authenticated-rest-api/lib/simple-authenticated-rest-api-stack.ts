@@ -76,50 +76,50 @@ export class SimpleAuthenticatedRestApiStack extends cdk.Stack {
       },
     );
 
-    // const route2Handler = new AuthenticatedApiFunction(
-    //   this,
-    //   `${prefix}simple-authenticated-rest-api-route2-handler`,
-    //   {
-    //     name: `${prefix}-rest-api-route2-handler`,
-    //     entry: "src/lambda/route2.js",
-    //     environment: {},
-    //     handler: "route",
-    //     timeout: cdk.Duration.seconds(30),
-    //     // A security group is optional. If you need to specify one, you would do so here:
-    //     // securityGroups: lambdaSecurityGroups,
-    //     // A VPC is optional. If you need to specify one, you would do so here:
-    //     // vpc: vpc,
-    //     // vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT },
-    //   },
-    // );
+    const route2Handler = new AuthenticatedApiFunction(
+      this,
+      `${prefix}simple-authenticated-rest-api-route2-handler`,
+      {
+        name: `${prefix}-rest-api-route2-handler`,
+        entry: "src/lambda/route2.js",
+        environment: {},
+        handler: "route",
+        timeout: cdk.Duration.seconds(30),
+        // A security group is optional. If you need to specify one, you would do so here:
+        // securityGroups: lambdaSecurityGroups,
+        // A VPC is optional. If you need to specify one, you would do so here:
+        // vpc: vpc,
+        // vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT },
+      },
+    );
 
-    // const route3Handler = new AuthenticatedApiFunction(
-    //   this,
-    //   `${prefix}simple-authenticated-rest-api-route3-handler`,
-    //   {
-    //     name: `${prefix}-rest-api-route3-handler`,
-    //     entry: "src/lambda/route3.js",
-    //     environment: {},
-    //     handler: "route",
-    //     timeout: cdk.Duration.seconds(30),
-    //     // A security group is optional. If you need to specify one, you would do so here:
-    //     // securityGroups: lambdaSecurityGroups,
-    //   },
-    // );
+    const route3Handler = new AuthenticatedApiFunction(
+      this,
+      `${prefix}simple-authenticated-rest-api-route3-handler`,
+      {
+        name: `${prefix}-rest-api-route3-handler`,
+        entry: "src/lambda/route3.js",
+        environment: {},
+        handler: "route",
+        timeout: cdk.Duration.seconds(30),
+        // A security group is optional. If you need to specify one, you would do so here:
+        // securityGroups: lambdaSecurityGroups,
+      },
+    );
 
-    // const route4Handler = new AuthenticatedApiFunction(
-    //   this,
-    //   `${prefix}simple-authenticated-rest-api-route4-handler`,
-    //   {
-    //     name: `${prefix}-rest-api-route4-handler`,
-    //     entry: "src/lambda/route4.js",
-    //     environment: {},
-    //     handler: "route",
-    //     timeout: cdk.Duration.seconds(30),
-    //     // A security group is optional. If you need to specify one, you would do so here:
-    //     // securityGroups: lambdaSecurityGroups,
-    //   },
-    // );
+    const route4Handler = new AuthenticatedApiFunction(
+      this,
+      `${prefix}simple-authenticated-rest-api-route4-handler`,
+      {
+        name: `${prefix}-rest-api-route4-handler`,
+        entry: "src/lambda/route4.js",
+        environment: {},
+        handler: "route",
+        timeout: cdk.Duration.seconds(30),
+        // A security group is optional. If you need to specify one, you would do so here:
+        // securityGroups: lambdaSecurityGroups,
+      },
+    );
 
     /* const api = */ new AuthenticatedRestApi(
       this,
@@ -142,10 +142,22 @@ export class SimpleAuthenticatedRestApiStack extends cdk.Stack {
 
         resourceProps: [
           {
-            name: "resource1",
+            name: "simple-resource",
             methods: {
               GET: {
                 function: route1Handler,
+                lambdaDurationAlarmThreshold: cdk.Duration.seconds(30),
+              },
+              POST: {
+                function: route2Handler,
+                lambdaDurationAlarmThreshold: cdk.Duration.seconds(30),
+              },
+              PUT: {
+                function: route3Handler,
+                lambdaDurationAlarmThreshold: cdk.Duration.seconds(30),
+              },
+              DELETE: {
+                function: route4Handler,
                 lambdaDurationAlarmThreshold: cdk.Duration.seconds(30),
               },
             },
