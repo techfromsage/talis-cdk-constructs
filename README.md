@@ -28,7 +28,7 @@ Builds are conducted by CircleCI, and upon successful build of the `main` branch
   - Built in optional Persona authentication on routes
   - Details [here](/examples/simple-authenticated-api/README.md).
 
-- `AuthenticatedResApi`(rest api)
+- `AuthenticatedRestApi`(rest api)
 
   - An API Gateway Rest API
   - Built in optional Persona authentication on routes
