@@ -159,9 +159,7 @@ export class AuthenticatedRestApi extends Construct {
       `${apiName}-latency-alarm`,
       {
         alarmName: `${apiName}-latency-alarm`,
-        alarmDescription: `Alarm if latency on api ${props.prefix}${
-          props.name
-        } exceeds ${latencyThreshold.toMilliseconds()} milliseconds`,
+        alarmDescription: `Alarm if latency on api ${apiName} exceeds ${latencyThreshold.toMilliseconds()} milliseconds`,
         actionsEnabled: true,
         metric: metricLatency,
         evaluationPeriods: 1,
