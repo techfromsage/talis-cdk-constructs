@@ -130,7 +130,10 @@ describe("AuthenticatedRestApi", () => {
     const axiosNoAuthInstance = axios.create({
       baseURL: `https://${apiGatewayId}.execute-api.eu-west-1.amazonaws.com/development`,
     });
-    const response = await axiosNoAuthInstance.get("simple-resource/id1/child-resource/id2", {});
+    const response = await axiosNoAuthInstance.get(
+      "simple-resource/id1/child-resource/id2",
+      {},
+    );
     expect(response.status).toBe(200);
     expect(response.data).toBe("route 4");
   });
