@@ -118,111 +118,107 @@ export class SimpleAuthenticatedRestApiStack extends cdk.Stack {
       },
     );
 
-    new AuthenticatedRestApi(
-      this,
-      `${prefix}simple-authenticated-rest-api`,
-      {
-        prefix: prefix,
-        name: "simple-authenticated-rest-api",
-        description: "Simple Authenticated Rest API",
-        stageName: "development", // This should be development / staging / production as appropriate
-        alarmTopic,
-        domainName: `${prefix}simple-authenticated-rest-api.talis.com`,
-        certificateArn: STAGING_TALIS_TLS_CERT_ARN,
+    new AuthenticatedRestApi(this, `${prefix}simple-authenticated-rest-api`, {
+      prefix: prefix,
+      name: "simple-authenticated-rest-api",
+      description: "Simple Authenticated Rest API",
+      stageName: "development", // This should be development / staging / production as appropriate
+      alarmTopic,
+      domainName: `${prefix}simple-authenticated-rest-api.talis.com`,
+      certificateArn: STAGING_TALIS_TLS_CERT_ARN,
 
-        persona: {
-          host: "staging-users.talis.com",
-          scheme: "https",
-          port: "443",
-          oauth_route: "/oauth/tokens/",
-        },
+      persona: {
+        host: "staging-users.talis.com",
+        scheme: "https",
+        port: "443",
+        oauth_route: "/oauth/tokens/",
+      },
 
-        resourceProps: [
-          {
-            // www.example.com/simple-resource
-            name: "simple-resource",
-            methods: {
-              GET: {
-                function: route1Handler,
-                lambdaDurationAlarmThreshold: cdk.Duration.seconds(30),
-                isPublic: true,
-              },
-              POST: {
-                function: route2Handler,
-                lambdaDurationAlarmThreshold: cdk.Duration.seconds(30),
-                isPublic: false, // This is the default
-              },
+      resourceProps: [
+        {
+          // www.example.com/simple-resource
+          name: "simple-resource",
+          methods: {
+            GET: {
+              function: route1Handler,
+              lambdaDurationAlarmThreshold: cdk.Duration.seconds(30),
+              isPublic: true,
             },
-            nestedResources: [
-              {
-                // www.example.com/simple-resource/<simpleResourceId>
-                name: "{simpleResourceId}",
-                methods: {
-                  GET: {
-                    function: route1Handler,
-                    lambdaDurationAlarmThreshold: cdk.Duration.seconds(30),
-                    isPublic: true,
-                  },
-                  PUT: {
-                    function: route2Handler,
-                    lambdaDurationAlarmThreshold: cdk.Duration.seconds(30),
-                    isPublic: false, // This is the default
-                  },
-                  DELETE: {
-                    function: route3Handler,
-                    lambdaDurationAlarmThreshold: cdk.Duration.seconds(30),
-                    isPublic: false, // This is the default
-                  },
+            POST: {
+              function: route2Handler,
+              lambdaDurationAlarmThreshold: cdk.Duration.seconds(30),
+              isPublic: false, // This is the default
+            },
+          },
+          nestedResources: [
+            {
+              // www.example.com/simple-resource/<simpleResourceId>
+              name: "{simpleResourceId}",
+              methods: {
+                GET: {
+                  function: route1Handler,
+                  lambdaDurationAlarmThreshold: cdk.Duration.seconds(30),
+                  isPublic: true,
                 },
-                nestedResources: [
-                  {
-                    // www.example.com/simple-resource/<simpleResourceId>/child-resource
-                    name: "child-resource",
-                    methods: {
-                      GET: {
-                        function: route4Handler,
-                        lambdaDurationAlarmThreshold: cdk.Duration.seconds(30),
-                        isPublic: true,
-                      },
-                      POST: {
-                        function: route4Handler,
-                        lambdaDurationAlarmThreshold: cdk.Duration.seconds(30),
-                        isPublic: false, // This is the default
-                      },
+                PUT: {
+                  function: route2Handler,
+                  lambdaDurationAlarmThreshold: cdk.Duration.seconds(30),
+                  isPublic: false, // This is the default
+                },
+                DELETE: {
+                  function: route3Handler,
+                  lambdaDurationAlarmThreshold: cdk.Duration.seconds(30),
+                  isPublic: false, // This is the default
+                },
+              },
+              nestedResources: [
+                {
+                  // www.example.com/simple-resource/<simpleResourceId>/child-resource
+                  name: "child-resource",
+                  methods: {
+                    GET: {
+                      function: route4Handler,
+                      lambdaDurationAlarmThreshold: cdk.Duration.seconds(30),
+                      isPublic: true,
                     },
-                    nestedResources: [
-                      {
-                        // www.example.com/simple-resource/<simpleResourceId>/child-resource/<childResourceId>
-                        name: "{childResourceId}",
-                        methods: {
-                          GET: {
-                            function: route4Handler,
-                            lambdaDurationAlarmThreshold:
-                              cdk.Duration.seconds(30),
-                            isPublic: true,
-                          },
-                          PUT: {
-                            function: route4Handler,
-                            lambdaDurationAlarmThreshold:
-                              cdk.Duration.seconds(30),
-                            isPublic: false, // This is the default
-                          },
-                          DELETE: {
-                            function: route4Handler,
-                            lambdaDurationAlarmThreshold:
-                              cdk.Duration.seconds(30),
-                            isPublic: false, // This is the default
-                          },
+                    POST: {
+                      function: route4Handler,
+                      lambdaDurationAlarmThreshold: cdk.Duration.seconds(30),
+                      isPublic: false, // This is the default
+                    },
+                  },
+                  nestedResources: [
+                    {
+                      // www.example.com/simple-resource/<simpleResourceId>/child-resource/<childResourceId>
+                      name: "{childResourceId}",
+                      methods: {
+                        GET: {
+                          function: route4Handler,
+                          lambdaDurationAlarmThreshold:
+                            cdk.Duration.seconds(30),
+                          isPublic: true,
+                        },
+                        PUT: {
+                          function: route4Handler,
+                          lambdaDurationAlarmThreshold:
+                            cdk.Duration.seconds(30),
+                          isPublic: false, // This is the default
+                        },
+                        DELETE: {
+                          function: route4Handler,
+                          lambdaDurationAlarmThreshold:
+                            cdk.Duration.seconds(30),
+                          isPublic: false, // This is the default
                         },
                       },
-                    ],
-                  },
-                ],
-              },
-            ],
-          },
-        ],
-      },
-    );
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    });
   }
 }
