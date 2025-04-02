@@ -1,7 +1,4 @@
-import {
-  PersonaAuthorizer,
-  ParsedArn,
-} from "../../../../src/lambda/rest-api/PersonaAuthorizer";
+import { PersonaAuthorizer } from "../../../../src/lambda/rest-api/PersonaAuthorizer";
 
 describe("authorizer", () => {
   describe("parseMethodArn", () => {
