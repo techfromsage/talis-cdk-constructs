@@ -28,14 +28,6 @@ export class AuthenticatedRestApi extends Construct {
   constructor(scope: Construct, id: string, props: AuthenticatedRestApiProps) {
     super(scope, id);
 
-    if (
-      (props.domainName && !props.certificateArn) ||
-      (!props.domainName && props.certificateArn)
-    ) {
-      cdk.Annotations.of(scope).addError(
-        `To use a custom domain name both certificateArn and domainName must be specified`,
-      );
-    }
     this.domainName = new apigateway.DomainName(this, "domain-name", {
       domainName: props.domainName,
       certificate: acm.Certificate.fromCertificateArn(
