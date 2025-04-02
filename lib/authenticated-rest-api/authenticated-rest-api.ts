@@ -183,10 +183,7 @@ export class AuthenticatedRestApi extends Construct {
     authorizer: apigateway.IAuthorizer,
     parent?: apigateway.Resource,
   ) {
-    let actualParent = this.restApi.root;
-    if (parent) {
-      actualParent = parent;
-    }
+    const actualParent = parent ?? this.restApi.root;
 
     const resource: apigateway.Resource = actualParent.addResource(
       resourceProps.name,
