@@ -73,7 +73,6 @@ export class AuthenticatedRestApi extends Construct {
 
     this.alarmAction = new cloudwatchActions.SnsAction(props.alarmTopic);
 
-    // TODO: Validation of scopes is not yet implemented.
     const scopeConfig: { [k: string]: string } = {};
 
     const authLambdaTimeout = cdk.Duration.minutes(2);
