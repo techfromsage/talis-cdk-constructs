@@ -4,7 +4,7 @@ import { persona, PersonaClient } from "talis-node";
 /* eslint-disable @typescript-eslint/no-var-requires */
 const AuthPolicy = require("./authPolicy");
 
-type ParsedArn = {
+export type ParsedArn = {
   method: string;
   resourcePath: string;
   apiVersion: string;
