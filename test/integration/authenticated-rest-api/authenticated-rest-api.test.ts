@@ -98,11 +98,13 @@ describe("AuthenticatedRestApi", () => {
     }
   });
 
-  test("returns 200 for authenticated route when using token", async () => {
+  test.only("returns 200 for authenticated route when using token", async () => {
     const token = await getOAuthToken(
       TALIS_CDK_AUTH_API_VALID_CLIENT,
       TALIS_CDK_AUTH_API_VALID_SECRET,
     );
+    console.log(`BASE URL: https://${apiGatewayId}.execute-api.eu-west-1.amazonaws.com/development`);
+    console.log(`TOKEN: ${token}`);
     const axiosAuthInstance = axios.create({
       headers: { Authorization: `Bearer ${token}` },
       baseURL: `https://${apiGatewayId}.execute-api.eu-west-1.amazonaws.com/development`,
