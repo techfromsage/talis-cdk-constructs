@@ -5,6 +5,9 @@ lib/**/*.js
 lib/**/*.d.ts
 test/**/*.js
 test/**/*.d.ts
+src/lambda/**/*.js
+src/lambda/**/*.d.ts
+!src/lambda/rest-api/authPolicy.js
 
 # CDK asset staging directory
 .cdk.staging
