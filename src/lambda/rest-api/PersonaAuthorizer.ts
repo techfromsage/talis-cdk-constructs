@@ -114,7 +114,6 @@ export class PersonaAuthorizer {
       // In the case of success - the principal id is coming from the
       // decoded token. We don't have it here for the case of an invalid token.
       // Leaving the proncipal id blank in the auth policy for deny for now.
-      // But could this be found?
       const principalId = "";
 
       const authPolicy = this.buildAuthPolicy(
