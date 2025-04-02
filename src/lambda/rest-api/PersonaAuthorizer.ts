@@ -290,7 +290,6 @@ export class PersonaAuthorizer {
       parsedMethodArn.apiOptions,
     );
 
-    // const versionedResourcePath = `/${parsedMethodArn.apiVersion}${parsedMethodArn.resourcePath}`;
     const versionedResourcePath = parsedMethodArn.resourcePath;
     if (allow === true) {
       console.log("allowing request for", principalId);
