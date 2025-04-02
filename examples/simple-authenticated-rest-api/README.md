@@ -15,7 +15,7 @@ The AuthenticatedRestApi:
 
 ## Construct Diagram
 
-![Authenticated Rest Api Construct diagram](AuthenticatedRestApi.drawio.png | width=20)
+![Authenticated Rest Api Construct diagram](AuthenticatedRestApi.drawio.png | width=20%)
 
 ## This Example
 
