@@ -3,9 +3,6 @@ import { aws_logs as awslogs } from "aws-cdk-lib";
 import { aws_ec2 as ec2 } from "aws-cdk-lib";
 import { aws_sns as sns } from "aws-cdk-lib";
 
-// import { RouteLambdaProps } from "./route-lambda-props";
-// import { RouteUrlProps } from "./route-url-props";
-
 import { ResourceProps } from "./resource-props";
 
 export interface AuthenticatedRestApiProps {
@@ -13,8 +10,6 @@ export interface AuthenticatedRestApiProps {
   name: string;
   description: string;
   stageName: string;
-  // lambdaRoutes?: Array<RouteLambdaProps>;
-  // urlRoutes?: Array<RouteUrlProps>;
   resourceProps: ResourceProps[];
   securityGroups?: Array<ec2.ISecurityGroup>;
   vpc?: ec2.IVpc;

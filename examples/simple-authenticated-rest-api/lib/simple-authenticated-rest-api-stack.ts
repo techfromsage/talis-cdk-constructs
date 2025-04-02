@@ -1,8 +1,5 @@
 import * as cdk from "aws-cdk-lib";
-// import { aws_ec2 as ec2 } from "aws-cdk-lib";
-// import { aws_s3 as s3 } from "aws-cdk-lib";
 import { aws_sns as sns } from "aws-cdk-lib";
-// import * as apigatewayv2 from "aws-cdk-lib/aws-apigatewayv2";
 import { Construct } from "constructs";
 
 import {
@@ -121,7 +118,7 @@ export class SimpleAuthenticatedRestApiStack extends cdk.Stack {
       },
     );
 
-    /* const api = */ new AuthenticatedRestApi(
+    new AuthenticatedRestApi(
       this,
       `${prefix}simple-authenticated-rest-api`,
       {

@@ -81,21 +81,8 @@ export class AuthenticatedRestApi extends Construct {
 
     this.alarmAction = new cloudwatchActions.SnsAction(props.alarmTopic);
 
-    // TODO: Metatron does not require any scopes - any authorised user has access.
-    // The below adding of required scopes needs to be resolved before this construct could be
-    // moved to the construct library where scopes may be a requirement.
-
-    // Routes may contain required scopes. These scopes need to be in the config
-    // of the authorization lambda. Create this config ahead of creating the authorization lambda
-
+    // TODO: Validation of scopes is not yet implemented.
     const scopeConfig: { [k: string]: string } = {};
-    // if (props.lambdaRoutes) {
-    //   for (const routeProps of props.lambdaRoutes) {
-    //     if (routeProps.requiredScope) {
-    //       scopeConfig[routeProps.path] = routeProps.requiredScope;
-    //     }
-    //   }
-    // }
 
     const authLambdaTimeout = cdk.Duration.minutes(2);
 
