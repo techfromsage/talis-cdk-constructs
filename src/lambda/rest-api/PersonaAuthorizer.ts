@@ -68,9 +68,7 @@ export class PersonaAuthorizer {
   async handle() {
     console.log("Received event", this.event);
 
-    if (
-      !this.event?.authorizationToken
-    ) {
+    if (!this.event?.authorizationToken) {
       console.log("Missing auth token");
       return this.context.fail("Unauthorized");
     }

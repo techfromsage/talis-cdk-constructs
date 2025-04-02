@@ -1,11 +1,15 @@
-import { PersonaAuthorizer, ParsedArn } from "../../../../src/lambda/rest-api/PersonaAuthorizer";
+import {
+  PersonaAuthorizer,
+  ParsedArn,
+} from "../../../../src/lambda/rest-api/PersonaAuthorizer";
 
 describe("authorizer", () => {
   describe("parseMethodArn", () => {
     const parseMethodArnTests = [
       {
         title: "parses simple method arn",
-        methodArn: "arn:aws:execute-api:us-west-2:123456789012:api-id/stage/GET/resource",
+        methodArn:
+          "arn:aws:execute-api:us-west-2:123456789012:api-id/stage/GET/resource",
         parsedArn: {
           method: "GET",
           resourcePath: "/resource",
@@ -20,7 +24,8 @@ describe("authorizer", () => {
       },
       {
         title: "parses resource method arn",
-        methodArn: "arn:aws:execute-api:eu-west-1:302477901552:atpstdpb1c/*/PUT/simple-resource/{simpleResourceId}",
+        methodArn:
+          "arn:aws:execute-api:eu-west-1:302477901552:atpstdpb1c/*/PUT/simple-resource/{simpleResourceId}",
         parsedArn: {
           method: "PUT",
           resourcePath: "/simple-resource/{simpleResourceId}",
@@ -35,10 +40,12 @@ describe("authorizer", () => {
       },
       {
         title: "parses nested resource method arn",
-        methodArn: "arn:aws:execute-api:eu-west-1:302477901552:atpstdpb1c/*/GET/simple-resource/{simpleResourceId}/child-resource/{childResourceId}",
+        methodArn:
+          "arn:aws:execute-api:eu-west-1:302477901552:atpstdpb1c/*/GET/simple-resource/{simpleResourceId}/child-resource/{childResourceId}",
         parsedArn: {
           method: "GET",
-          resourcePath: "/simple-resource/{simpleResourceId}/child-resource/{childResourceId}",
+          resourcePath:
+            "/simple-resource/{simpleResourceId}/child-resource/{childResourceId}",
           apiOptions: {
             region: "eu-west-1",
             restApiId: "atpstdpb1c",
@@ -47,14 +54,14 @@ describe("authorizer", () => {
           awsAccountId: "302477901552",
           apiVersion: "atpstdpb1c",
         },
-      }
+      },
     ];
     parseMethodArnTests.forEach((testSpec) => {
       test(`${testSpec.title}`, async () => {
         const authorizer = new PersonaAuthorizer(null, null);
-        expect(
-          authorizer.parseMethodArn(testSpec.methodArn)
-        ).toStrictEqual(testSpec.parsedArn);
+        expect(authorizer.parseMethodArn(testSpec.methodArn)).toStrictEqual(
+          testSpec.parsedArn,
+        );
       });
     });
   });
