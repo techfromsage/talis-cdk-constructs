@@ -104,6 +104,19 @@ jobs:
       - run:
           name: Build and deploy authenticated api example code
           command: cd examples/simple-authenticated-api && npm install && npm run build && npx cdk --require-approval never deploy
+  deploy-authenticated-rest-api:
+    executor: default_executor
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "ee:b4:00:e6:23:5b:55:bb:fd:07:bc:73:9e:f7:89:9c" # shared.aspire@talis.com 'talis-cdk-constructs Deploy Key'
+      - restore_root_build_number
+      - set_aws_prefix
+      - checkout
+      - node_install_packages
+      - run:
+          name: Build and deploy authenticated rest api example code
+          command: cd examples/simple-authenticated-rest-api && npm install && npm run build && npx cdk --require-approval never deploy
   deploy-cdn-site-hosting:
     executor: default_executor
     steps:
@@ -159,6 +172,19 @@ jobs:
       - run:
           name: Destroy authenticated api example code
           command: cd examples/simple-authenticated-api && npm install && npm run build && npx cdk --require-approval never destroy --force
+  destroy-authenticated-rest-api:
+    executor: default_executor
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "ee:b4:00:e6:23:5b:55:bb:fd:07:bc:73:9e:f7:89:9c" # shared.aspire@talis.com 'talis-cdk-constructs Deploy Key'
+      - restore_root_build_number
+      - set_aws_prefix
+      - checkout
+      - node_install_packages
+      - run:
+          name: Destroy authenticated rest api example code
+          command: cd examples/simple-authenticated-rest-api && npm install && npm run build && npx cdk --require-approval never destroy --force
   destroy-cdn-site-hosting:
     executor: default_executor
     steps:
@@ -223,6 +249,13 @@ workflows:
             - cdk-deploy-to-shared-aspire-20211202
             - aws-region-eu
             - talis-cdk-constructs-build
+      - deploy-authenticated-rest-api:
+          requires:
+            - build
+          context:
+            - cdk-deploy-to-shared-aspire-20211202
+            - aws-region-eu
+            - talis-cdk-constructs-build
       - deploy-cdn-site-hosting:
           requires:
             - build
@@ -234,6 +267,7 @@ workflows:
           requires:
             - deploy-lambda-worker
             - deploy-authenticated-api
+            - deploy-authenticated-rest-api
             - deploy-cdn-site-hosting
           context:
             - cdk-deploy-to-shared-aspire-20211202
@@ -253,6 +287,13 @@ workflows:
             - cdk-deploy-to-shared-aspire-20211202
             - aws-region-eu
             - talis-cdk-constructs-build
+      - destroy-authenticated-rest-api:
+          requires:
+            - test
+          context:
+            - cdk-deploy-to-shared-aspire-20211202
+            - aws-region-eu
+            - talis-cdk-constructs-build
       - destroy-cdn-site-hosting:
           requires:
             - test
@@ -264,6 +305,7 @@ workflows:
           requires:
             - destroy-lambda-worker
             - destroy-authenticated-api
+            - destroy-authenticated-rest-api
             - destroy-cdn-site-hosting
           context:
             - cdk-deploy-to-shared-aspire-20211202
