@@ -35,9 +35,9 @@ export class LambdaWorker extends Construct {
 
   // Expose a reference to the SQS queue that this LambdaWorker
   // Obtaining a reference to the queue using the ARN exposed above
-  // allows for an unmodifiable reference to the queue to be obtained using 
+  // allows for an unmodifiable reference to the queue to be obtained using
   // findByArn. Direct access to the queue is provided to allow modification
-  // of the queue, for example for EventBridge iam permissions. 
+  // of the queue, for example for EventBridge iam permissions.
   public readonly lambdaQueue: sqs.Queue;
 
   constructor(scope: Construct, id: string, props: LambdaWorkerProps) {
