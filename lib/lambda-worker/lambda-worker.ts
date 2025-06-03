@@ -33,6 +33,13 @@ export class LambdaWorker extends Construct {
   // messages to the queue at lambdaQueueUrl.
   public lambdaQueueUrl: string;
 
+  // Expose a reference to the SQS queue that this LambdaWorker
+  // Obtaining a reference to the queue using the ARN exposed above
+  // allows for an unmodifiable reference to the queue to be obtained using 
+  // findByArn. Direct access to the queue is provided to allow modification
+  // of the queue, for example for EventBridge iam permissions. 
+  public readonly lambdaQueue: sqs.Queue;
+
   constructor(scope: Construct, id: string, props: LambdaWorkerProps) {
     super(scope, id);
 
@@ -97,7 +104,7 @@ export class LambdaWorker extends Construct {
     if (fifo) {
       queueName = `${queueName}.fifo`;
     }
-    const lambdaQueue = new sqs.Queue(this, `${props.name}-queue`, {
+    this.lambdaQueue = new sqs.Queue(this, `${props.name}-queue`, {
       queueName,
       visibilityTimeout: queueTimeout,
       retentionPeriod: cdk.Duration.days(14),
@@ -108,8 +115,8 @@ export class LambdaWorker extends Construct {
           ? props.queueProps.contentBasedDeduplication
           : undefined,
     });
-    this.lambdaQueueUrl = lambdaQueue.queueUrl;
-    this.lambdaQueueArn = lambdaQueue.queueArn;
+    this.lambdaQueueUrl = this.lambdaQueue.queueUrl;
+    this.lambdaQueueArn = this.lambdaQueue.queueArn;
 
     // If we have specified a topic, then subscribe
     // the main queue to the topic.
@@ -121,7 +128,7 @@ export class LambdaWorker extends Construct {
       }
 
       props.subscription.topic.addSubscription(
-        new subs.SqsSubscription(lambdaQueue, subscriptionProps),
+        new subs.SqsSubscription(this.lambdaQueue, subscriptionProps),
       );
     }
 
@@ -138,7 +145,7 @@ export class LambdaWorker extends Construct {
     // Add main queue and DLQ as event sources to the lambda
     // By default, the main queue is enabled and the DLQ is disabled
     lambdaWorker.addEventSource(
-      new SqsEventSource(lambdaQueue, {
+      new SqsEventSource(this.lambdaQueue, {
         enabled: props.lambdaProps.enableQueue ?? true,
         batchSize: 1,
         maxConcurrency: props.lambdaProps.queueMaxConcurrency,
@@ -184,7 +191,7 @@ export class LambdaWorker extends Construct {
     dlqMessagesVisable.addOkAction(alarmAction);
 
     // Add an alarm for the age of the oldest message on the LambdaWorkers main trigger queue
-    const approximateAgeOfOldestMessageMetric = lambdaQueue
+    const approximateAgeOfOldestMessageMetric = this.lambdaQueue
       .metric("ApproximateAgeOfOldestMessage")
       .with({ statistic: "average", period: cdk.Duration.minutes(1) });
     const queueMessagesAge = new cloudwatch.Alarm(
