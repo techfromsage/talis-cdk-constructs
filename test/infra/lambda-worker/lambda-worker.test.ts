@@ -39,6 +39,7 @@ describe("LambdaWorker", () => {
                 resources: ["*"],
               }),
             ],
+            runtime: lambda.Runtime.NODEJS_22_X,
             timeout: cdk.Duration.minutes(5),
             vpc: vpc,
             vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
@@ -57,14 +58,14 @@ describe("LambdaWorker", () => {
             MemorySize: 2048,
             Timeout: 300,
             Handler: "index.testWorker",
-            Runtime: "nodejs18.x",
+            Runtime: "nodejs22.x",
             Environment: {
               Variables: {
                 AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1",
                 LAMBDA_EXECUTION_TIMEOUT: "300",
               },
             },
-          },
+          }
         );
       });
 
@@ -116,7 +117,7 @@ describe("LambdaWorker", () => {
             ScalingConfig: {
               MaximumConcurrency: 5,
             },
-          },
+          }
         );
 
         Template.fromStack(stack).hasResourceProperties(
@@ -127,7 +128,7 @@ describe("LambdaWorker", () => {
             ScalingConfig: {
               MaximumConcurrency: 5,
             },
-          },
+          }
         );
       });
 
@@ -161,7 +162,7 @@ describe("LambdaWorker", () => {
             ComparisonOperator: "GreaterThanOrEqualToThreshold",
             TreatMissingData: "ignore",
             OKActions: [{ Ref: "TestAlarm5A9EF6BD" }],
-          },
+          }
         );
       });
 
@@ -191,7 +192,7 @@ describe("LambdaWorker", () => {
             ComparisonOperator: "GreaterThanOrEqualToThreshold",
             TreatMissingData: "ignore",
             OKActions: [{ Ref: "TestAlarm5A9EF6BD" }],
-          },
+          }
         );
       });
 
@@ -221,7 +222,7 @@ describe("LambdaWorker", () => {
             ComparisonOperator: "GreaterThanOrEqualToThreshold",
             TreatMissingData: "ignore",
             OKActions: [{ Ref: "TestAlarm5A9EF6BD" }],
-          },
+          }
         );
       });
     });
@@ -250,6 +251,7 @@ describe("LambdaWorker", () => {
             timeout: cdk.Duration.minutes(5),
             vpc: vpc,
             vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
+            runtime: lambda.Runtime.NODEJS_22_X,
 
             // Optional
             description: "Test Description",
@@ -274,7 +276,7 @@ describe("LambdaWorker", () => {
             MemorySize: 2048,
             Timeout: 300,
             Handler: "index.testWorker",
-            Runtime: "nodejs18.x",
+            Runtime: "nodejs22.x",
             //Optional
             Description: "Test Description",
             Environment: {
@@ -287,7 +289,7 @@ describe("LambdaWorker", () => {
               Size: 1024,
             },
             ReservedConcurrentExecutions: 10,
-          },
+          }
         );
       });
     });
@@ -314,7 +316,7 @@ describe("LambdaWorker", () => {
             handler: "testWorker",
             projectRoot: path.resolve(
               __dirname,
-              "../../../examples/simple-lambda-worker",
+              "../../../examples/simple-lambda-worker"
             ),
             depsLockFilePath: "examples/simple-lambda-worker/package-lock.json",
             runtime: lambda.Runtime.NODEJS_20_X,
@@ -341,7 +343,7 @@ describe("LambdaWorker", () => {
             Handler: "index.testWorker",
             Runtime: "nodejs20.x",
             Environment: { Variables: { LAMBDA_EXECUTION_TIMEOUT: "300" } },
-          },
+          }
         );
       });
     });
@@ -370,6 +372,7 @@ describe("LambdaWorker", () => {
             entry: "examples/simple-lambda-worker/src/lambda/simple-worker.js",
             handler: "testWorker",
             memorySize: 2048,
+            runtime: lambda.Runtime.NODEJS_22_X,
             timeout: cdk.Duration.minutes(5),
             vpc: vpc,
             vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
@@ -398,7 +401,7 @@ describe("LambdaWorker", () => {
                 "Arn",
               ],
             },
-          },
+          }
         );
       });
     });
@@ -427,6 +430,7 @@ describe("LambdaWorker", () => {
             entry: "examples/simple-lambda-worker/src/lambda/simple-worker.js",
             handler: "testWorker",
             memorySize: 2048,
+            runtime: lambda.Runtime.NODEJS_22_X,
             timeout: cdk.Duration.minutes(5),
             enableQueue: false,
             vpc: vpc,
@@ -444,7 +448,7 @@ describe("LambdaWorker", () => {
         Template.fromStack(stack).resourceCountIs("AWS::Lambda::Function", 1);
         Template.fromStack(stack).resourceCountIs(
           "AWS::Lambda::EventSourceMapping",
-          2,
+          2
         );
 
         Template.fromStack(stack).hasResourceProperties(
@@ -460,7 +464,7 @@ describe("LambdaWorker", () => {
                 "Arn",
               ],
             },
-          },
+          }
         );
       });
     });
@@ -489,6 +493,7 @@ describe("LambdaWorker", () => {
             entry: "examples/simple-lambda-worker/src/lambda/simple-worker.js",
             handler: "testWorker",
             memorySize: 2048,
+            runtime: lambda.Runtime.NODEJS_22_X,
             timeout: cdk.Duration.minutes(5),
             vpc: vpc,
             vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
@@ -505,7 +510,7 @@ describe("LambdaWorker", () => {
         Template.fromStack(stack).resourceCountIs("AWS::Lambda::Function", 1);
         Template.fromStack(stack).resourceCountIs(
           "AWS::Lambda::EventSourceMapping",
-          2,
+          2
         );
 
         Template.fromStack(stack).hasResourceProperties(
@@ -524,7 +529,7 @@ describe("LambdaWorker", () => {
             ScalingConfig: {
               MaximumConcurrency: 5,
             },
-          },
+          }
         );
       });
     });
@@ -558,6 +563,7 @@ describe("LambdaWorker", () => {
               resources: ["*"],
             }),
           ],
+          runtime: lambda.Runtime.NODEJS_22_X,
           timeout: cdk.Duration.minutes(5),
           vpc: vpc,
           vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
@@ -665,7 +671,7 @@ describe("LambdaWorker", () => {
                 ],
               },
             },
-          },
+          }
         );
       });
 
@@ -736,7 +742,7 @@ describe("LambdaWorker", () => {
             ComparisonOperator: "GreaterThanOrEqualToThreshold",
             TreatMissingData: "ignore",
             OKActions: [{ Ref: "TestAlarm5A9EF6BD" }],
-          },
+          }
         );
       });
 
@@ -766,7 +772,7 @@ describe("LambdaWorker", () => {
             ComparisonOperator: "GreaterThanOrEqualToThreshold",
             TreatMissingData: "ignore",
             OKActions: [{ Ref: "TestAlarm5A9EF6BD" }],
-          },
+          }
         );
       });
 
@@ -796,7 +802,7 @@ describe("LambdaWorker", () => {
             ComparisonOperator: "GreaterThanOrEqualToThreshold",
             TreatMissingData: "ignore",
             OKActions: [{ Ref: "TestAlarm5A9EF6BD" }],
-          },
+          }
         );
       });
     });
@@ -870,7 +876,7 @@ describe("LambdaWorker", () => {
                 ],
               },
             },
-          },
+          }
         );
       });
     });
@@ -931,7 +937,7 @@ describe("LambdaWorker", () => {
                   "${AWS::AccountId}.dkr.ecr.${AWS::Region}.${AWS::URLSuffix}/cdk-hnb659fds-container-assets-${AWS::AccountId}-${AWS::Region}:4cf46eba6932d8b82d75ff231d64f6eb5c2c8a5b843e7100222cab515bd5e5f2",
               },
             },
-          },
+          }
         );
       });
 
@@ -971,7 +977,7 @@ describe("LambdaWorker", () => {
             ImageConfig: {
               Command: ["app.handler"],
             },
-          },
+          }
         );
       });
     });
@@ -997,6 +1003,7 @@ describe("LambdaWorker", () => {
             entry: "examples/simple-lambda-worker/src/lambda/simple-worker.js",
             handler: "testWorker",
             memorySize: 2048,
+            runtime: lambda.Runtime.NODEJS_22_X,
             timeout: cdk.Duration.seconds(5),
             vpc: vpc,
             vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
@@ -1028,6 +1035,7 @@ describe("LambdaWorker", () => {
             entry: "examples/simple-lambda-worker/src/lambda/simple-worker.js",
             handler: "testWorker",
             memorySize: 512,
+            runtime: lambda.Runtime.NODEJS_22_X,
             timeout: cdk.Duration.minutes(5),
             vpc: vpc,
             vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
@@ -1036,7 +1044,7 @@ describe("LambdaWorker", () => {
           alarmTopic: alarmTopic,
         });
       }).toThrow(
-        "Invalid lambdaProps.memorySize value of 512. Minimum value is 1024",
+        "Invalid lambdaProps.memorySize value of 512. Minimum value is 1024"
       );
     });
   });
@@ -1143,6 +1151,7 @@ describe("LambdaWorker", () => {
               ecrRepositoryArn: config.ecrRepositoryArn,
               ecrRepositoryName: config.ecrRepositoryName,
               memorySize: 2048,
+              runtime: lambda.Runtime.NODEJS_22_X,
               timeout: cdk.Duration.minutes(5),
               vpc: vpc,
               vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
@@ -1151,7 +1160,7 @@ describe("LambdaWorker", () => {
             alarmTopic: alarmTopic,
           });
         }).toThrow(
-          "Invalid lambdaProps only dockerImageTag/ecrRepositoryArn/ecrRepositoryName or handler/entry can be specified.",
+          "Invalid lambdaProps only dockerImageTag/ecrRepositoryArn/ecrRepositoryName or handler/entry can be specified."
         );
       });
     });

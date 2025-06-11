@@ -21,6 +21,7 @@ export interface FunctionLambdaProps
   entry: string;
   /** @default true */
   awsSdkConnectionReuse?: boolean;
+  runtime: lambda.Runtime;
 }
 
 export interface ContainerFromEcrLambdaProps {

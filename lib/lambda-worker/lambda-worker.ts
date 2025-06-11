@@ -46,7 +46,7 @@ export class LambdaWorker extends Construct {
     // Lambda settings
     if (props.lambdaProps.memorySize < MINIMUM_MEMORY_SIZE) {
       throw new Error(
-        `Invalid lambdaProps.memorySize value of ${props.lambdaProps.memorySize}. Minimum value is ${MINIMUM_MEMORY_SIZE}`,
+        `Invalid lambdaProps.memorySize value of ${props.lambdaProps.memorySize}. Minimum value is ${MINIMUM_MEMORY_SIZE}`
       );
     }
 
@@ -54,13 +54,13 @@ export class LambdaWorker extends Construct {
       props.lambdaProps.timeout.toSeconds() < MINIMUM_LAMBDA_TIMEOUT.toSeconds()
     ) {
       throw new Error(
-        `Invalid lambdaProps.timeout value of ${props.lambdaProps.timeout.toSeconds()}. Minimum value is ${MINIMUM_LAMBDA_TIMEOUT.toSeconds()}`,
+        `Invalid lambdaProps.timeout value of ${props.lambdaProps.timeout.toSeconds()}. Minimum value is ${MINIMUM_LAMBDA_TIMEOUT.toSeconds()}`
       );
     }
 
     if (!this.isContainerLambda(props) && !this.isFunctionLambda(props)) {
       throw new Error(
-        `Invalid lambdaProps only dockerImageTag/ecrRepositoryArn/ecrRepositoryName or handler/entry can be specified.`,
+        `Invalid lambdaProps only dockerImageTag/ecrRepositoryArn/ecrRepositoryName or handler/entry can be specified.`
       );
     }
 
@@ -71,7 +71,7 @@ export class LambdaWorker extends Construct {
         : DEFAULT_MAX_RECEIVE_COUNT;
 
     const queueTimeout = cdk.Duration.seconds(
-      maxReceiveCount * props.lambdaProps.timeout.toSeconds(),
+      maxReceiveCount * props.lambdaProps.timeout.toSeconds()
     );
 
     const approximateAgeOfOldestMessageThreshold =
@@ -128,7 +128,7 @@ export class LambdaWorker extends Construct {
       }
 
       props.subscription.topic.addSubscription(
-        new subs.SqsSubscription(this.lambdaQueue, subscriptionProps),
+        new subs.SqsSubscription(this.lambdaQueue, subscriptionProps)
       );
     }
 
@@ -149,14 +149,14 @@ export class LambdaWorker extends Construct {
         enabled: props.lambdaProps.enableQueue ?? true,
         batchSize: 1,
         maxConcurrency: props.lambdaProps.queueMaxConcurrency,
-      }),
+      })
     );
     lambdaWorker.addEventSource(
       new SqsEventSource(lambdaDLQ, {
         enabled: false,
         batchSize: 1,
         maxConcurrency: props.lambdaProps.queueMaxConcurrency,
-      }),
+      })
     );
 
     // Add alerting
@@ -185,7 +185,7 @@ export class LambdaWorker extends Construct {
         // Set treatMissingData to IGNORE
         // Stops alarms with minimal data having false alarms when they transition to this state
         treatMissingData: cloudwatch.TreatMissingData.IGNORE,
-      },
+      }
     );
     dlqMessagesVisable.addAlarmAction(alarmAction);
     dlqMessagesVisable.addOkAction(alarmAction);
@@ -209,7 +209,7 @@ export class LambdaWorker extends Construct {
         // Set treatMissingData to IGNORE
         // Stops alarms with minimal data having false alarms when they transition to this state
         treatMissingData: cloudwatch.TreatMissingData.IGNORE,
-      },
+      }
     );
     queueMessagesAge.addAlarmAction(alarmAction);
     queueMessagesAge.addOkAction(alarmAction);
@@ -230,7 +230,7 @@ export class LambdaWorker extends Construct {
         // Set treatMissingData to IGNORE
         // Stops alarms with minimal data having false alarms when they transition to this state
         treatMissingData: cloudwatch.TreatMissingData.IGNORE,
-      },
+      }
     );
     queueMessagesVisable.addAlarmAction(alarmAction);
     queueMessagesVisable.addOkAction(alarmAction);
@@ -268,7 +268,7 @@ export class LambdaWorker extends Construct {
       props.lambdaProps.imageAsset ||
         (props.lambdaProps.dockerImageTag &&
           props.lambdaProps.ecrRepositoryArn &&
-          props.lambdaProps.ecrRepositoryName),
+          props.lambdaProps.ecrRepositoryName)
     );
   }
 
@@ -277,7 +277,7 @@ export class LambdaWorker extends Construct {
   }
 
   private createNodejsLambdaFunction(
-    props: LambdaWorkerProps,
+    props: LambdaWorkerProps
   ): lambda.Function {
     return new lambdaNodeJs.NodejsFunction(this, props.name, {
       functionName: props.name,
@@ -303,7 +303,7 @@ export class LambdaWorker extends Construct {
       // NodejsFunction-only props
       entry: props.lambdaProps.entry,
       handler: props.lambdaProps.handler,
-      runtime: props.lambdaProps.runtime ?? lambda.Runtime.NODEJS_18_X,
+      runtime: props.lambdaProps.runtime,
       awsSdkConnectionReuse: props.lambdaProps.awsSdkConnectionReuse ?? true,
       depsLockFilePath: props.lambdaProps.depsLockFilePath,
       bundling: props.lambdaProps.bundling,
@@ -312,7 +312,7 @@ export class LambdaWorker extends Construct {
   }
 
   private createContainerLambdaFunction(
-    props: LambdaWorkerProps,
+    props: LambdaWorkerProps
   ): lambda.Function {
     return new lambda.DockerImageFunction(this, props.name, {
       code: this.getContainerLambdaCode(props),
@@ -336,12 +336,12 @@ export class LambdaWorker extends Construct {
   }
 
   private getContainerLambdaCode(
-    props: LambdaWorkerProps,
+    props: LambdaWorkerProps
   ): lambda.DockerImageCode {
     if (props.lambdaProps.imageAsset) {
       return lambda.DockerImageCode.fromImageAsset(
         props.lambdaProps.imageAsset.directory,
-        props.lambdaProps.imageAsset.props,
+        props.lambdaProps.imageAsset.props
       );
     }
 
