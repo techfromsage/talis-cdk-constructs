@@ -37,7 +37,7 @@
     "@types/node": "20.5.9",
     "@types/uuid": "^9.0.4",
     "@typescript-eslint/eslint-plugin": "^6.7.2",
-    "aws-cdk": "2.162.0",
+    "aws-cdk": "2.1018.0",
     "aws-sdk": "^2.1363.0",
     "axios": "^1.8.3",
     "constructs": "^10.0.0",
