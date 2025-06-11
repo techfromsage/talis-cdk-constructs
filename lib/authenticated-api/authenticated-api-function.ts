@@ -1,5 +1,4 @@
 import * as cdk from "aws-cdk-lib";
-import { aws_lambda as lambda } from "aws-cdk-lib";
 import { aws_lambda_nodejs as lambdaNode } from "aws-cdk-lib";
 import { Construct } from "constructs";
 
