@@ -33,7 +33,7 @@ export class AuthenticatedRestApi extends Construct {
       certificate: acm.Certificate.fromCertificateArn(
         this,
         "cert",
-        props.certificateArn,
+        props.certificateArn
       ),
     });
     const apiName = `${props.prefix}${props.name}`;
@@ -114,12 +114,12 @@ export class AuthenticatedRestApi extends Construct {
         }),
 
         awsSdkConnectionReuse: true,
-        runtime: lambda.Runtime.NODEJS_18_X,
+        runtime: lambda.Runtime.NODEJS_22_X,
         timeout: authLambdaTimeout,
         securityGroups: props.securityGroups,
         vpc: props.vpc,
         vpcSubnets: props.vpcSubnets,
-      },
+      }
     );
 
     const authorizer = new apigateway.TokenAuthorizer(
@@ -128,7 +128,7 @@ export class AuthenticatedRestApi extends Construct {
       {
         handler: authLambda,
         resultsCacheTtl: cdk.Duration.seconds(0),
-      },
+      }
     );
 
     if (props.resourceProps) {
@@ -160,7 +160,7 @@ export class AuthenticatedRestApi extends Construct {
         // Set treatMissingData to IGNORE
         // Stops alarms with minimal data having false alarms when they transition to this state
         treatMissingData: cloudwatch.TreatMissingData.IGNORE,
-      },
+      }
     );
     routeLatencyAlarm.addAlarmAction(this.alarmAction);
     routeLatencyAlarm.addOkAction(this.alarmAction);
@@ -170,16 +170,16 @@ export class AuthenticatedRestApi extends Construct {
     apiName: string,
     resourceProps: ResourceProps,
     authorizer: apigateway.IAuthorizer,
-    parent?: apigateway.Resource,
+    parent?: apigateway.Resource
   ) {
     const actualParent = parent ?? this.restApi.root;
 
     const resource: apigateway.Resource = actualParent.addResource(
-      resourceProps.name,
+      resourceProps.name
     );
     for (const method in resourceProps.methods) {
       const integration = new apigateway.LambdaIntegration(
-        resourceProps.methods[method].function,
+        resourceProps.methods[method].function
       );
       if (resourceProps.methods[method].isPublic === true) {
         resource.addMethod(method, integration, {
@@ -221,7 +221,7 @@ export class AuthenticatedRestApi extends Construct {
           // Set treatMissingData to IGNORE
           // Stops alarms with minimal data having false alarms when they transition to this state
           treatMissingData: cloudwatch.TreatMissingData.IGNORE,
-        },
+        }
       );
       durationAlarm.addAlarmAction(this.alarmAction);
       durationAlarm.addOkAction(this.alarmAction);
@@ -245,14 +245,14 @@ export class AuthenticatedRestApi extends Construct {
           // Set treatMissingData to IGNORE
           // Stops alarms with minimal data having false alarms when they transition to this state
           treatMissingData: cloudwatch.TreatMissingData.IGNORE,
-        },
+        }
       );
       errorsAlarm.addAlarmAction(this.alarmAction);
       errorsAlarm.addOkAction(this.alarmAction);
     }
 
     resourceProps.nestedResources?.map((nestedResource) =>
-      this.addResource(apiName, nestedResource, authorizer, resource),
+      this.addResource(apiName, nestedResource, authorizer, resource)
     );
   }
 }

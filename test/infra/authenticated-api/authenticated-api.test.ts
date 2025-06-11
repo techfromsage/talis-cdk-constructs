@@ -31,10 +31,11 @@ describe("AuthenticatedApi", () => {
           entry: `${path.resolve(__dirname)}/routes/route1.js`,
           environment: {},
           handler: "route",
+          runtime: lambda.Runtime.NODEJS_22_X,
           timeout: cdk.Duration.seconds(30),
           securityGroups: [],
           vpc: vpc,
-        },
+        }
       );
 
       const route2Handler = new AuthenticatedApiFunction(
@@ -57,7 +58,7 @@ describe("AuthenticatedApi", () => {
           bundling: {
             minify: true,
           },
-        },
+        }
       );
 
       new AuthenticatedApi(stack, "MyTestAuthenticatedApi", {
@@ -118,7 +119,7 @@ describe("AuthenticatedApi", () => {
               `https://test-simple-authenticated-api.talis.com`,
             ],
           },
-        },
+        }
       );
     });
 
@@ -130,14 +131,14 @@ describe("AuthenticatedApi", () => {
         {
           RouteKey: "GET /1/test-route-1",
           AuthorizationType: "CUSTOM",
-        },
+        }
       );
       Template.fromStack(stack).hasResourceProperties(
         "AWS::ApiGatewayV2::Route",
         {
           RouteKey: "GET /1/test-route-2",
           AuthorizationType: "NONE",
-        },
+        }
       );
     });
 
@@ -148,7 +149,7 @@ describe("AuthenticatedApi", () => {
         FunctionName: "test-MyTestAuthenticatedApi-authoriser",
         Timeout: 120,
         Handler: "index.validateToken",
-        Runtime: "nodejs18.x",
+        Runtime: "nodejs22.x",
         Environment: {
           Variables: {
             PERSONA_CLIENT_NAME: "test-MyTestAuthenticatedApi-authoriser",
@@ -169,7 +170,7 @@ describe("AuthenticatedApi", () => {
         FunctionName: "test-route1-handler",
         Timeout: 30,
         Handler: "index.route",
-        Runtime: "nodejs18.x",
+        Runtime: "nodejs22.x",
         Environment: {
           Variables: {
             LAMBDA_EXECUTION_TIMEOUT: "30",
@@ -217,7 +218,7 @@ describe("AuthenticatedApi", () => {
           ComparisonOperator: "GreaterThanOrEqualToThreshold",
           TreatMissingData: "ignore",
           OKActions: [{ Ref: "TestAlarm5A9EF6BD" }],
-        },
+        }
       );
     });
 
@@ -244,7 +245,7 @@ describe("AuthenticatedApi", () => {
           ComparisonOperator: "GreaterThanOrEqualToThreshold",
           TreatMissingData: "ignore",
           OKActions: [{ Ref: "TestAlarm5A9EF6BD" }],
-        },
+        }
       );
 
       Template.fromStack(stack).hasResourceProperties(
@@ -269,7 +270,7 @@ describe("AuthenticatedApi", () => {
           ComparisonOperator: "GreaterThanOrEqualToThreshold",
           TreatMissingData: "ignore",
           OKActions: [{ Ref: "TestAlarm5A9EF6BD" }],
-        },
+        }
       );
     });
 
@@ -296,7 +297,7 @@ describe("AuthenticatedApi", () => {
           ComparisonOperator: "GreaterThanOrEqualToThreshold",
           TreatMissingData: "ignore",
           OKActions: [{ Ref: "TestAlarm5A9EF6BD" }],
-        },
+        }
       );
 
       Template.fromStack(stack).hasResourceProperties(
@@ -321,7 +322,7 @@ describe("AuthenticatedApi", () => {
           ComparisonOperator: "GreaterThanOrEqualToThreshold",
           TreatMissingData: "ignore",
           OKActions: [{ Ref: "TestAlarm5A9EF6BD" }],
-        },
+        }
       );
     });
   });
@@ -387,14 +388,14 @@ describe("AuthenticatedApi", () => {
         {
           RouteKey: "GET /api/index.html",
           AuthorizationType: "NONE",
-        },
+        }
       );
       Template.fromStack(stack).hasResourceProperties(
         "AWS::ApiGatewayV2::Route",
         {
           RouteKey: "GET /docs/index.html",
           AuthorizationType: "NONE",
-        },
+        }
       );
     });
   });
@@ -462,10 +463,10 @@ describe("AuthenticatedApi", () => {
               ],
             },
             Format: Match.stringLikeRegexp(
-              '{\\"requestId":\\"\\$context.requestId\\",*',
+              '{\\"requestId":\\"\\$context.requestId\\",*'
             ),
           },
-        },
+        }
       );
     });
 
@@ -500,7 +501,7 @@ describe("AuthenticatedApi", () => {
             },
             Format: apacheLikeFormat,
           },
-        },
+        }
       );
     });
 

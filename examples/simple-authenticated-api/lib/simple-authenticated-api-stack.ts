@@ -2,6 +2,7 @@ import * as cdk from "aws-cdk-lib";
 // import { aws_ec2 as ec2 } from "aws-cdk-lib";
 import { aws_s3 as s3 } from "aws-cdk-lib";
 import { aws_sns as sns } from "aws-cdk-lib";
+import { aws_lambda as lambda } from "aws-cdk-lib";
 import * as apigatewayv2 from "aws-cdk-lib/aws-apigatewayv2";
 import { Construct } from "constructs";
 
@@ -28,7 +29,7 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
     const alarmTopic = new sns.Topic(
       this,
       `${prefix}simple-authenticated-api-alarm`,
-      { topicName: `${prefix}simple-authenticated-api-alarm` },
+      { topicName: `${prefix}simple-authenticated-api-alarm` }
     );
 
     // VPC is optional. To use one, you would look it up as follows:
@@ -67,12 +68,13 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
         environment: {},
         handler: "route",
         timeout: cdk.Duration.seconds(30),
+        runtime: lambda.Runtime.NODEJS_22_X,
         // A security group is optional. If you need to specify one, you would do so here:
         // securityGroups: lambdaSecurityGroups,
         // A VPC is optional. If you need to specify one, you would do so here:
         // vpc: vpc,
         // vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT },
-      },
+      }
     );
 
     const route2Handler = new AuthenticatedApiFunction(
@@ -84,12 +86,13 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
         environment: {},
         handler: "route",
         timeout: cdk.Duration.seconds(30),
+        runtime: lambda.Runtime.NODEJS_22_X,
         // A security group is optional. If you need to specify one, you would do so here:
         // securityGroups: lambdaSecurityGroups,
         // A VPC is optional. If you need to specify one, you would do so here:
         // vpc: vpc,
         // vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT },
-      },
+      }
     );
 
     const route3Handler = new AuthenticatedApiFunction(
@@ -101,9 +104,10 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
         environment: {},
         handler: "route",
         timeout: cdk.Duration.seconds(30),
+        runtime: lambda.Runtime.NODEJS_22_X,
         // A security group is optional. If you need to specify one, you would do so here:
         // securityGroups: lambdaSecurityGroups,
-      },
+      }
     );
 
     const route4Handler = new AuthenticatedApiFunction(
@@ -115,9 +119,10 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
         environment: {},
         handler: "route",
         timeout: cdk.Duration.seconds(30),
+        runtime: lambda.Runtime.NODEJS_22_X,
         // A security group is optional. If you need to specify one, you would do so here:
         // securityGroups: lambdaSecurityGroups,
-      },
+      }
     );
 
     const api = new AuthenticatedApi(
@@ -178,7 +183,7 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
             requiredScope: "analytics:admin",
           },
         ],
-      },
+      }
     );
 
     // It's common to want to route to static content, for example api documentation.
@@ -199,7 +204,7 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
         publicReadAccess: true,
         removalPolicy: cdk.RemovalPolicy.DESTROY,
         websiteIndexDocument: "index.html",
-      },
+      }
     );
 
     // Url Routes can be added in the initial props of the api construct, but they can also be
@@ -213,7 +218,7 @@ export class SimpleAuthenticatedApiStack extends cdk.Stack {
 
     console.log(`Regional domain name: ${api.domainName.regionalDomainName}`);
     console.log(
-      `Regional hosted zone id: ${api.domainName.regionalHostedZoneId}`,
+      `Regional hosted zone id: ${api.domainName.regionalHostedZoneId}`
     );
   }
 }

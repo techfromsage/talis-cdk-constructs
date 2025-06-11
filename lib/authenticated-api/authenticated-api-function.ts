@@ -12,11 +12,11 @@ export class AuthenticatedApiFunction extends lambdaNode.NodejsFunction {
   constructor(
     scope: Construct,
     id: string,
-    props: AuthenticatedApiFunctionProps,
+    props: AuthenticatedApiFunctionProps
   ) {
     if (props.memorySize && props.memorySize < MINIMUM_MEMORY_SIZE) {
       cdk.Annotations.of(scope).addError(
-        `lambda memory of ${props.memorySize} is less than the recommended size of ${MINIMUM_MEMORY_SIZE}`,
+        `lambda memory of ${props.memorySize} is less than the recommended size of ${MINIMUM_MEMORY_SIZE}`
       );
     }
 
@@ -35,7 +35,7 @@ export class AuthenticatedApiFunction extends lambdaNode.NodejsFunction {
       // NodejsFunction-only props
       entry: props.entry,
       handler: props.handler,
-      runtime: props.runtime ?? lambda.Runtime.NODEJS_18_X,
+      runtime: props.runtime,
       awsSdkConnectionReuse: props.awsSdkConnectionReuse ?? true,
       bundling: props.bundling,
       depsLockFilePath: props.depsLockFilePath,

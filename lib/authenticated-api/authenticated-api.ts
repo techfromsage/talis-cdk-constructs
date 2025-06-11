@@ -35,7 +35,7 @@ export class AuthenticatedApi extends Construct {
       (!props.domainName && props.certificateArn)
     ) {
       cdk.Annotations.of(scope).addError(
-        `To use a custom domain name both certificateArn and domainName must be specified`,
+        `To use a custom domain name both certificateArn and domainName must be specified`
       );
     }
     this.domainName = new apigatewayv2.DomainName(this, "domain-name", {
@@ -43,7 +43,7 @@ export class AuthenticatedApi extends Construct {
       certificate: acm.Certificate.fromCertificateArn(
         this,
         "cert",
-        props.certificateArn,
+        props.certificateArn
       ),
     });
     const apiName = `${props.prefix}${props.name}`;
@@ -175,12 +175,12 @@ export class AuthenticatedApi extends Construct {
         }),
 
         awsSdkConnectionReuse: true,
-        runtime: lambda.Runtime.NODEJS_18_X,
+        runtime: lambda.Runtime.NODEJS_22_X,
         timeout: authLambdaTimeout,
         securityGroups: props.securityGroups,
         vpc: props.vpc,
         vpcSubnets: props.vpcSubnets,
-      },
+      }
     );
 
     this.authorizer = new authorizers.HttpLambdaAuthorizer(
@@ -189,7 +189,7 @@ export class AuthenticatedApi extends Construct {
       {
         authorizerName: `${apiName}-http-lambda-authoriser`,
         responseTypes: [authorizers.HttpLambdaResponseType.SIMPLE], // Define if returns simple and/or iam response
-      },
+      }
     );
 
     if (props.urlRoutes) {
@@ -202,7 +202,7 @@ export class AuthenticatedApi extends Construct {
       for (const routeProps of props.lambdaRoutes) {
         const integration = new integrations.HttpLambdaIntegration(
           "http-lambda-integration",
-          routeProps.lambda,
+          routeProps.lambda
         );
 
         if (routeProps.isPublic === true) {
@@ -248,7 +248,7 @@ export class AuthenticatedApi extends Construct {
             // Set treatMissingData to IGNORE
             // Stops alarms with minimal data having false alarms when they transition to this state
             treatMissingData: cloudwatch.TreatMissingData.IGNORE,
-          },
+          }
         );
         durationAlarm.addAlarmAction(this.alarmAction);
         durationAlarm.addOkAction(this.alarmAction);
@@ -272,7 +272,7 @@ export class AuthenticatedApi extends Construct {
             // Set treatMissingData to IGNORE
             // Stops alarms with minimal data having false alarms when they transition to this state
             treatMissingData: cloudwatch.TreatMissingData.IGNORE,
-          },
+          }
         );
         errorsAlarm.addAlarmAction(this.alarmAction);
         errorsAlarm.addOkAction(this.alarmAction);
@@ -304,7 +304,7 @@ export class AuthenticatedApi extends Construct {
         // Set treatMissingData to IGNORE
         // Stops alarms with minimal data having false alarms when they transition to this state
         treatMissingData: cloudwatch.TreatMissingData.IGNORE,
-      },
+      }
     );
     routeLatencyAlarm.addAlarmAction(this.alarmAction);
     routeLatencyAlarm.addOkAction(this.alarmAction);
@@ -319,7 +319,7 @@ export class AuthenticatedApi extends Construct {
         routeProps.baseUrl,
         {
           method: routeProps.method,
-        },
+        }
       ),
     });
   }

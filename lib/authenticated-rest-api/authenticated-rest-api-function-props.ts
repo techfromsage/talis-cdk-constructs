@@ -13,4 +13,5 @@ export interface AuthenticatedRestApiFunctionProps {
   securityGroups?: Array<ec2.ISecurityGroup>;
   memorySize?: number;
   bundling?: BundlingOptions;
+  runtime: cdk.aws_lambda.Runtime;
 }
