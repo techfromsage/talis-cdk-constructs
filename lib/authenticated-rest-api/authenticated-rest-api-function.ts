@@ -1,5 +1,4 @@
 import * as cdk from "aws-cdk-lib";
-import { aws_lambda as lambda } from "aws-cdk-lib";
 import { aws_lambda_nodejs as lambdaNode } from "aws-cdk-lib";
 import { Construct } from "constructs";
 
@@ -32,7 +31,7 @@ export class AuthenticatedRestApiFunction extends lambdaNode.NodejsFunction {
 
       // Enforce the following properties
       awsSdkConnectionReuse: true,
-      runtime: lambda.Runtime.NODEJS_18_X,
+      runtime: props.runtime,
       timeout: props.timeout,
       securityGroups: props.securityGroups,
       vpc: props.vpc,

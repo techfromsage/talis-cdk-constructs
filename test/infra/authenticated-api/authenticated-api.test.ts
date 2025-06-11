@@ -31,6 +31,7 @@ describe("AuthenticatedApi", () => {
           entry: `${path.resolve(__dirname)}/routes/route1.js`,
           environment: {},
           handler: "route",
+          runtime: lambda.Runtime.NODEJS_22_X,
           timeout: cdk.Duration.seconds(30),
           securityGroups: [],
           vpc: vpc,
@@ -148,7 +149,7 @@ describe("AuthenticatedApi", () => {
         FunctionName: "test-MyTestAuthenticatedApi-authoriser",
         Timeout: 120,
         Handler: "index.validateToken",
-        Runtime: "nodejs18.x",
+        Runtime: "nodejs22.x",
         Environment: {
           Variables: {
             PERSONA_CLIENT_NAME: "test-MyTestAuthenticatedApi-authoriser",
@@ -169,7 +170,7 @@ describe("AuthenticatedApi", () => {
         FunctionName: "test-route1-handler",
         Timeout: 30,
         Handler: "index.route",
-        Runtime: "nodejs18.x",
+        Runtime: "nodejs22.x",
         Environment: {
           Variables: {
             LAMBDA_EXECUTION_TIMEOUT: "30",

@@ -273,7 +273,11 @@ export class LambdaWorker extends Construct {
   }
 
   private hasFunctionLambdaProps(props: LambdaWorkerProps): boolean {
-    return Boolean(props.lambdaProps.entry && props.lambdaProps.handler);
+    return Boolean(
+      props.lambdaProps.entry &&
+        props.lambdaProps.handler &&
+        props.lambdaProps.runtime,
+    );
   }
 
   private createNodejsLambdaFunction(
@@ -303,7 +307,7 @@ export class LambdaWorker extends Construct {
       // NodejsFunction-only props
       entry: props.lambdaProps.entry,
       handler: props.lambdaProps.handler,
-      runtime: props.lambdaProps.runtime ?? lambda.Runtime.NODEJS_18_X,
+      runtime: props.lambdaProps.runtime,
       awsSdkConnectionReuse: props.lambdaProps.awsSdkConnectionReuse ?? true,
       depsLockFilePath: props.lambdaProps.depsLockFilePath,
       bundling: props.lambdaProps.bundling,

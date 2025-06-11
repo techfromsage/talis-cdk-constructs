@@ -1,5 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import { aws_sns as sns } from "aws-cdk-lib";
+import { aws_lambda as lambda } from "aws-cdk-lib";
 import { Construct } from "constructs";
 
 import {
@@ -65,6 +66,7 @@ export class SimpleAuthenticatedRestApiStack extends cdk.Stack {
         environment: {},
         handler: "route",
         timeout: cdk.Duration.seconds(30),
+        runtime: lambda.Runtime.NODEJS_22_X,
         // A security group is optional. If you need to specify one, you would do so here:
         // securityGroups: lambdaSecurityGroups,
         // A VPC is optional. If you need to specify one, you would do so here:
@@ -82,6 +84,7 @@ export class SimpleAuthenticatedRestApiStack extends cdk.Stack {
         environment: {},
         handler: "route",
         timeout: cdk.Duration.seconds(30),
+        runtime: lambda.Runtime.NODEJS_22_X,
         // A security group is optional. If you need to specify one, you would do so here:
         // securityGroups: lambdaSecurityGroups,
         // A VPC is optional. If you need to specify one, you would do so here:
@@ -99,6 +102,7 @@ export class SimpleAuthenticatedRestApiStack extends cdk.Stack {
         environment: {},
         handler: "route",
         timeout: cdk.Duration.seconds(30),
+        runtime: lambda.Runtime.NODEJS_22_X,
         // A security group is optional. If you need to specify one, you would do so here:
         // securityGroups: lambdaSecurityGroups,
       },
@@ -113,6 +117,7 @@ export class SimpleAuthenticatedRestApiStack extends cdk.Stack {
         environment: {},
         handler: "route",
         timeout: cdk.Duration.seconds(30),
+        runtime: lambda.Runtime.NODEJS_22_X,
         // A security group is optional. If you need to specify one, you would do so here:
         // securityGroups: lambdaSecurityGroups,
       },

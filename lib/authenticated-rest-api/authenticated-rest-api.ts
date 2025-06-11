@@ -114,7 +114,7 @@ export class AuthenticatedRestApi extends Construct {
         }),
 
         awsSdkConnectionReuse: true,
-        runtime: lambda.Runtime.NODEJS_18_X,
+        runtime: lambda.Runtime.NODEJS_22_X,
         timeout: authLambdaTimeout,
         securityGroups: props.securityGroups,
         vpc: props.vpc,

@@ -24,4 +24,5 @@ export interface AuthenticatedApiFunctionProps
   memorySize?: number;
   /** @default true */
   awsSdkConnectionReuse?: boolean;
+  runtime: cdk.aws_lambda.Runtime;
 }

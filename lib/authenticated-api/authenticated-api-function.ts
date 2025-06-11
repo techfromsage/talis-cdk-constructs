@@ -1,5 +1,4 @@
 import * as cdk from "aws-cdk-lib";
-import { aws_lambda as lambda } from "aws-cdk-lib";
 import { aws_lambda_nodejs as lambdaNode } from "aws-cdk-lib";
 import { Construct } from "constructs";
 
@@ -35,7 +34,7 @@ export class AuthenticatedApiFunction extends lambdaNode.NodejsFunction {
       // NodejsFunction-only props
       entry: props.entry,
       handler: props.handler,
-      runtime: props.runtime ?? lambda.Runtime.NODEJS_18_X,
+      runtime: props.runtime,
       awsSdkConnectionReuse: props.awsSdkConnectionReuse ?? true,
       bundling: props.bundling,
       depsLockFilePath: props.depsLockFilePath,
