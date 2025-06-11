@@ -27,7 +27,7 @@ export class SimpleAuthenticatedRestApiStack extends cdk.Stack {
     const alarmTopic = new sns.Topic(
       this,
       `${prefix}simple-authenticated-rest-api-alarm`,
-      { topicName: `${prefix}simple-authenticated-rest-api-alarm` }
+      { topicName: `${prefix}simple-authenticated-rest-api-alarm` },
     );
 
     // VPC is optional. To use one, you would look it up as follows:
@@ -72,7 +72,7 @@ export class SimpleAuthenticatedRestApiStack extends cdk.Stack {
         // A VPC is optional. If you need to specify one, you would do so here:
         // vpc: vpc,
         // vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT },
-      }
+      },
     );
 
     const route2Handler = new AuthenticatedRestApiFunction(
@@ -90,7 +90,7 @@ export class SimpleAuthenticatedRestApiStack extends cdk.Stack {
         // A VPC is optional. If you need to specify one, you would do so here:
         // vpc: vpc,
         // vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT },
-      }
+      },
     );
 
     const route3Handler = new AuthenticatedRestApiFunction(
@@ -105,7 +105,7 @@ export class SimpleAuthenticatedRestApiStack extends cdk.Stack {
         runtime: lambda.Runtime.NODEJS_22_X,
         // A security group is optional. If you need to specify one, you would do so here:
         // securityGroups: lambdaSecurityGroups,
-      }
+      },
     );
 
     const route4Handler = new AuthenticatedRestApiFunction(
@@ -120,7 +120,7 @@ export class SimpleAuthenticatedRestApiStack extends cdk.Stack {
         runtime: lambda.Runtime.NODEJS_22_X,
         // A security group is optional. If you need to specify one, you would do so here:
         // securityGroups: lambdaSecurityGroups,
-      }
+      },
     );
 
     new AuthenticatedRestApi(this, `${prefix}simple-authenticated-rest-api`, {

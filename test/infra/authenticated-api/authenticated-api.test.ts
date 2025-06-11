@@ -35,7 +35,7 @@ describe("AuthenticatedApi", () => {
           timeout: cdk.Duration.seconds(30),
           securityGroups: [],
           vpc: vpc,
-        }
+        },
       );
 
       const route2Handler = new AuthenticatedApiFunction(
@@ -58,7 +58,7 @@ describe("AuthenticatedApi", () => {
           bundling: {
             minify: true,
           },
-        }
+        },
       );
 
       new AuthenticatedApi(stack, "MyTestAuthenticatedApi", {
@@ -119,7 +119,7 @@ describe("AuthenticatedApi", () => {
               `https://test-simple-authenticated-api.talis.com`,
             ],
           },
-        }
+        },
       );
     });
 
@@ -131,14 +131,14 @@ describe("AuthenticatedApi", () => {
         {
           RouteKey: "GET /1/test-route-1",
           AuthorizationType: "CUSTOM",
-        }
+        },
       );
       Template.fromStack(stack).hasResourceProperties(
         "AWS::ApiGatewayV2::Route",
         {
           RouteKey: "GET /1/test-route-2",
           AuthorizationType: "NONE",
-        }
+        },
       );
     });
 
@@ -218,7 +218,7 @@ describe("AuthenticatedApi", () => {
           ComparisonOperator: "GreaterThanOrEqualToThreshold",
           TreatMissingData: "ignore",
           OKActions: [{ Ref: "TestAlarm5A9EF6BD" }],
-        }
+        },
       );
     });
 
@@ -245,7 +245,7 @@ describe("AuthenticatedApi", () => {
           ComparisonOperator: "GreaterThanOrEqualToThreshold",
           TreatMissingData: "ignore",
           OKActions: [{ Ref: "TestAlarm5A9EF6BD" }],
-        }
+        },
       );
 
       Template.fromStack(stack).hasResourceProperties(
@@ -270,7 +270,7 @@ describe("AuthenticatedApi", () => {
           ComparisonOperator: "GreaterThanOrEqualToThreshold",
           TreatMissingData: "ignore",
           OKActions: [{ Ref: "TestAlarm5A9EF6BD" }],
-        }
+        },
       );
     });
 
@@ -297,7 +297,7 @@ describe("AuthenticatedApi", () => {
           ComparisonOperator: "GreaterThanOrEqualToThreshold",
           TreatMissingData: "ignore",
           OKActions: [{ Ref: "TestAlarm5A9EF6BD" }],
-        }
+        },
       );
 
       Template.fromStack(stack).hasResourceProperties(
@@ -322,7 +322,7 @@ describe("AuthenticatedApi", () => {
           ComparisonOperator: "GreaterThanOrEqualToThreshold",
           TreatMissingData: "ignore",
           OKActions: [{ Ref: "TestAlarm5A9EF6BD" }],
-        }
+        },
       );
     });
   });
@@ -388,14 +388,14 @@ describe("AuthenticatedApi", () => {
         {
           RouteKey: "GET /api/index.html",
           AuthorizationType: "NONE",
-        }
+        },
       );
       Template.fromStack(stack).hasResourceProperties(
         "AWS::ApiGatewayV2::Route",
         {
           RouteKey: "GET /docs/index.html",
           AuthorizationType: "NONE",
-        }
+        },
       );
     });
   });
@@ -463,10 +463,10 @@ describe("AuthenticatedApi", () => {
               ],
             },
             Format: Match.stringLikeRegexp(
-              '{\\"requestId":\\"\\$context.requestId\\",*'
+              '{\\"requestId":\\"\\$context.requestId\\",*',
             ),
           },
-        }
+        },
       );
     });
 
@@ -501,7 +501,7 @@ describe("AuthenticatedApi", () => {
             },
             Format: apacheLikeFormat,
           },
-        }
+        },
       );
     });
 
