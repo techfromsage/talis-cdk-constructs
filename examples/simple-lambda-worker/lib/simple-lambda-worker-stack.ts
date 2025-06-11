@@ -3,6 +3,7 @@ import * as cdk from "aws-cdk-lib";
 import { aws_iam as iam } from "aws-cdk-lib";
 import { aws_sns as sns } from "aws-cdk-lib";
 import { aws_sqs as sqs } from "aws-cdk-lib";
+import { aws_lambda as lambda } from "aws-cdk-lib";
 import { Construct } from "constructs";
 
 import { LambdaWorker } from "../../../lib";
@@ -36,7 +37,7 @@ export class SimpleLambdaWorkerStack extends cdk.Stack {
     const alarmTopic = new sns.Topic(
       this,
       `${prefix}simple-lambda-Worker-alarm`,
-      { topicName: `${prefix}simple-lambda-worker-alarm` },
+      { topicName: `${prefix}simple-lambda-worker-alarm` }
     );
 
     // VPC is optional. To use one, you would look it up as follows:
@@ -87,6 +88,7 @@ export class SimpleLambdaWorkerStack extends cdk.Stack {
           },
           entry: "src/lambda/simple-worker.js",
           handler: "simpleLambdaWorker",
+          runtime: lambda.Runtime.NODEJS_22_X,
           memorySize: 1024,
           // A security group is optional. If you need to specify one, you would do so here:
           // securityGroups: lambdaSecurityGroups,
@@ -129,7 +131,7 @@ export class SimpleLambdaWorkerStack extends cdk.Stack {
             }),
           },
         },
-      },
+      }
     );
   }
 }

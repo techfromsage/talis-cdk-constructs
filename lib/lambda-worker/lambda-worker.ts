@@ -273,7 +273,11 @@ export class LambdaWorker extends Construct {
   }
 
   private hasFunctionLambdaProps(props: LambdaWorkerProps): boolean {
-    return Boolean(props.lambdaProps.entry && props.lambdaProps.handler);
+    return Boolean(
+      props.lambdaProps.entry &&
+        props.lambdaProps.handler &&
+        props.lambdaProps.runtime
+    );
   }
 
   private createNodejsLambdaFunction(
