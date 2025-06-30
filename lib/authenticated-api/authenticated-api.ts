@@ -228,7 +228,7 @@ export class AuthenticatedApi extends Construct {
           : DEFAULT_LAMBDA_DURATION_THRESHOLD;
         const durationMetric = routeProps.lambda
           .metric("Duration")
-          .with({ period: cdk.Duration.minutes(1), statistic: "sum" });
+          .with({ period: cdk.Duration.minutes(1), statistic: "max" });
         const durationAlarm = new cloudwatch.Alarm(
           this,
           `${apiName}-${routeProps.name}-duration-alarm`,
