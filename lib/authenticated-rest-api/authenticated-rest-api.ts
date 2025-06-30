@@ -205,7 +205,7 @@ export class AuthenticatedRestApi extends Construct {
         : DEFAULT_LAMBDA_DURATION_THRESHOLD;
       const durationMetric = resourceProps.methods[method].function
         .metric("Duration")
-        .with({ period: cdk.Duration.minutes(1), statistic: "sum" });
+        .with({ period: cdk.Duration.minutes(1), statistic: "max" });
       const durationAlarm = new cloudwatch.Alarm(
         this,
         `${alarmNamePrefix}duration-alarm`,
