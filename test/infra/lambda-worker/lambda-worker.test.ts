@@ -260,6 +260,7 @@ describe("LambdaWorker", () => {
               TALIS_ENV_VAR: "some value",
             },
             reservedConcurrentExecutions: 10,
+            queueTimeout: cdk.Duration.seconds(90),
           },
           queueProps: {},
           alarmTopic: alarmTopic,
@@ -291,6 +292,20 @@ describe("LambdaWorker", () => {
             ReservedConcurrentExecutions: 10,
           },
         );
+      });
+
+      test("provisions a queue with the specified queueTimeout", () => {
+        Template.fromStack(stack).resourceCountIs("AWS::SQS::Queue", 2);
+
+        Template.fromStack(stack).hasResourceProperties("AWS::SQS::Queue", {
+          QueueName: "MyTestLambdaWorker-queue",
+          VisibilityTimeout: 90,
+        });
+
+        Template.fromStack(stack).hasResourceProperties("AWS::SQS::Queue", {
+          QueueName: "MyTestLambdaWorker-dlq",
+          VisibilityTimeout: 90,
+        });
       });
     });
 
