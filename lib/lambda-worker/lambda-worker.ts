@@ -70,9 +70,11 @@ export class LambdaWorker extends Construct {
         ? props.queueProps.maxReceiveCount
         : DEFAULT_MAX_RECEIVE_COUNT;
 
-    const queueTimeout = cdk.Duration.seconds(
-      maxReceiveCount * props.lambdaProps.timeout.toSeconds(),
-    );
+    const queueTimeout = props.lambdaProps.queueTimeout
+      ? props.lambdaProps.queueTimeout
+      : cdk.Duration.seconds(
+          maxReceiveCount * props.lambdaProps.timeout.toSeconds(),
+        );
 
     const approximateAgeOfOldestMessageThreshold =
       props.queueProps &&
