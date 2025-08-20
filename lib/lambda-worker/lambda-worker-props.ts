@@ -60,6 +60,7 @@ export interface LambdaWorkerProps {
     vpc?: ec2.IVpc;
     vpcSubnets?: ec2.SubnetSelection;
     queueMaxConcurrency: number;
+    queueTimeout?: cdk.Duration;
   } & Partial<FunctionLambdaProps> &
     Partial<ContainerFromEcrLambdaProps> &
     Partial<ContainerFromImageAssetLambdaProps>;
