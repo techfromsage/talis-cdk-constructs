@@ -90,7 +90,7 @@ jobs:
       - node_install_packages
       - run:
           name: Build and deploy lambda worker example code
-          command: cd examples/simple-lambda-worker && npm install && npm run build && npx cdk --require-approval never deploy
+          command: cd examples/simple-lambda-worker && npm ci && npm run build && npx cdk --require-approval never deploy
   deploy-authenticated-api:
     executor: default_executor
     steps:
@@ -103,7 +103,7 @@ jobs:
       - node_install_packages
       - run:
           name: Build and deploy authenticated api example code
-          command: cd examples/simple-authenticated-api && npm install && npm run build && npx cdk --require-approval never deploy
+          command: cd examples/simple-authenticated-api && npm ci && npm run build && npx cdk --require-approval never deploy
   deploy-authenticated-rest-api:
     executor: default_executor
     steps:
@@ -116,7 +116,7 @@ jobs:
       - node_install_packages
       - run:
           name: Build and deploy authenticated rest api example code
-          command: cd examples/simple-authenticated-rest-api && npm install && npm run build && npx cdk --require-approval never deploy
+          command: cd examples/simple-authenticated-rest-api && npm ci && npm run build && npx cdk --require-approval never deploy
   deploy-cdn-site-hosting:
     executor: default_executor
     steps:
@@ -129,7 +129,7 @@ jobs:
       - node_install_packages
       - run:
           name: Build and deploy cdn site hosting example code
-          command: cd examples/simple-cdn-site-hosting-construct && npm install && npm run build && npx cdk --require-approval never deploy
+          command: cd examples/simple-cdn-site-hosting-construct && npm ci && npm run build && npx cdk --require-approval never deploy
   test:
     executor: default_executor
     steps:
@@ -158,7 +158,7 @@ jobs:
       - node_install_packages
       - run:
           name: Destroy lambda worker example code
-          command: cd examples/simple-lambda-worker && npm install && npm run build && npx cdk --require-approval never destroy --force
+          command: cd examples/simple-lambda-worker && npm ci && npm run build && npx cdk --require-approval never destroy --force
   destroy-authenticated-api:
     executor: default_executor
     steps:
@@ -171,7 +171,7 @@ jobs:
       - node_install_packages
       - run:
           name: Destroy authenticated api example code
-          command: cd examples/simple-authenticated-api && npm install && npm run build && npx cdk --require-approval never destroy --force
+          command: cd examples/simple-authenticated-api && npm ci && npm run build && npx cdk --require-approval never destroy --force
   destroy-authenticated-rest-api:
     executor: default_executor
     steps:
@@ -184,7 +184,7 @@ jobs:
       - node_install_packages
       - run:
           name: Destroy authenticated rest api example code
-          command: cd examples/simple-authenticated-rest-api && npm install && npm run build && npx cdk --require-approval never destroy --force
+          command: cd examples/simple-authenticated-rest-api && npm ci && npm run build && npx cdk --require-approval never destroy --force
   destroy-cdn-site-hosting:
     executor: default_executor
     steps:
@@ -197,7 +197,7 @@ jobs:
       - node_install_packages
       - run:
           name: Destroy cdn site hosting example code
-          command: cd examples/simple-cdn-site-hosting-construct && npm install && npm run build && npx cdk --require-approval never destroy --force
+          command: cd examples/simple-cdn-site-hosting-construct && npm ci && npm run build && npx cdk --require-approval never destroy --force
   semantic-release:
     executor: default_executor
     steps:
