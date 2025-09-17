@@ -12,24 +12,20 @@ Builds are conducted by CircleCI, and upon successful build of the `main` branch
 ## Available constructs
 
 - CDN Site Hosting constructs
-
   - `CdnSiteHostingConstruct` for static-site or single-page application hosting in S3 via CloudFront.
   - `CdnSiteHostingWithDnsConstruct` for static-site or single-page application hosting in S3 via CloudFront, with DNS record provisioning
 
 - `LambdaWorker`
-
   - A serverless background job.
   - Possible replacement for Resque Workers / Jobs
   - Details [here](/examples/simple-lambda-worker/README.md).
 
 - `AuthenticatedApi`(http api)
-
   - An API Gateway (v2)
   - Built in optional Persona authentication on routes
   - Details [here](/examples/simple-authenticated-api/README.md).
 
 - `AuthenticatedRestApi`(rest api)
-
   - An API Gateway Rest API
   - Built in optional Persona authentication on routes
     - Note: token validation is implemented, but scope validation is not
@@ -42,7 +38,6 @@ Builds are conducted by CircleCI, and upon successful build of the `main` branch
 ## Available Constants
 
 - `TalisRegion`
-
   - Aliases of AWS regions to the regions we deploy applications
   - Details [here](/lib/talis-cdk-stack/README.md)
 
@@ -53,7 +48,6 @@ Builds are conducted by CircleCI, and upon successful build of the `main` branch
 ## Available Aspects
 
 - `ResourcePrefixer`
-
   - Prefixs all AWS resources with the given prefix
   - Details [here](/lib/aspects/README.md)
 
