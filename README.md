@@ -53,7 +53,6 @@ Builds are conducted by CircleCI, and upon successful build of the `main` branch
 ## Available Aspects
 
 - `ResourcePrefixer`
-
   - Prefixs all AWS resources with the given prefix
   - Details [here](/lib/aspects/README.md)
 
