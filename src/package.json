@@ -5,6 +5,6 @@
     "talis-node": "github:talis/talis-node#v0.2.1"
   },
   "devDependencies": {
-    "esbuild": "^0.19.12"
+    "esbuild": "^0.25.0"
   }
 }
