@@ -32,6 +32,12 @@
     {
       "groupName": "ESLint",
       "matchPackageNames": ["/^typescript-eslint/", "/^eslint/"]
+    },
+    {
+      "matchPackageNames": ["node", "cimg/node"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "node non-major dependencies",
+      "groupSlug": "node-all-minor-patch"
     }
   ],
   "rebaseWhen": "behind-base-branch",
