@@ -219,14 +219,14 @@ workflows:
             branches:
               ignore:
                 - main
-                - /^dependabot-.*$/
+                - /^renovate\/.*/
       - be_kind_to_your_colleagues:
           type: approval
           filters:
             branches:
               ignore:
                 - main
-                - /^dependabot-.*$/
+                - /^renovate\/.*/
       - build:
           requires:
             - fan_out
