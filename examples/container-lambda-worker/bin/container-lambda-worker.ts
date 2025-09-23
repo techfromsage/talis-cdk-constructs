@@ -5,7 +5,7 @@ import { ContainerLambdaWorkerStack } from "../lib/container-lambda-worker-stack
 import { TalisDeploymentEnvironment } from "../../../lib";
 
 const buildStackTtl = Math.floor(
-  (Date.now() + cdk.Duration.days(3).toMilliseconds()) / 1000
+  (Date.now() + cdk.Duration.days(3).toMilliseconds()) / 1000,
 ).toString();
 
 const app = new cdk.App();
@@ -23,5 +23,5 @@ new ContainerLambdaWorkerStack(
         ? { env: TalisDeploymentEnvironment.BUILD, ttl: buildStackTtl }
         : undefined),
     },
-  }
+  },
 );
