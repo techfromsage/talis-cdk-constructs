@@ -2,9 +2,10 @@
 import "source-map-support/register";
 import * as cdk from "aws-cdk-lib";
 import { ContainerLambdaWorkerStack } from "../lib/container-lambda-worker-stack";
+import { TalisDeploymentEnvironment } from "../../../lib";
 
 const buildStackTtl = Math.floor(
-  (Date.now() + cdk.Duration.days(3).toMilliseconds()) / 1000,
+  (Date.now() + cdk.Duration.days(3).toMilliseconds()) / 1000
 ).toString();
 
 const app = new cdk.App();
@@ -18,7 +19,9 @@ new ContainerLambdaWorkerStack(
     },
     tags: {
       // Auto-expire this stack if created by a build system
-      ...(process.env.CI ? { ttl: buildStackTtl } : undefined),
+      ...(process.env.CI
+        ? { env: TalisDeploymentEnvironment.BUILD, ttl: buildStackTtl }
+        : undefined),
     },
-  },
+  }
 );
