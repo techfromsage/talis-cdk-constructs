@@ -36,7 +36,7 @@ executors:
   default_executor:
     working_directory: ~/talis-cdk-constructs
     docker:
-      - image: cimg/node:22.18.0
+      - image: cimg/node:22.20.0
         auth:
           username: $DOCKER_USERNAME
           password: $DOCKER_PASSWORD
