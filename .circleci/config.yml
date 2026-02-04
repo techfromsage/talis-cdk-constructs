@@ -1,40 +1,13 @@
 version: 2.1
 
 orbs:
-  node: circleci/node@5.3.0
-
-commands:
-  save_root_build_number:
-    steps:
-      - run:
-          name: "Caching root build number for workflow"
-          command: echo ${CIRCLE_BUILD_NUM} > /tmp/root-build-number
-      - save_cache:
-          key: v1-root-build-number-{{ .Revision }}
-          paths:
-            - /tmp/root-build-number
-  restore_root_build_number:
-    steps:
-      - restore_cache:
-          name: Restore cached /tmp/root-build-number file
-          keys:
-            - v1-root-build-number-{{ .Revision }}
-  set_aws_prefix:
-    steps:
-      - run:
-          name: Set the AWS_PREFIX
-          command: |
-            echo "export AWS_PREFIX=build-$(cat /tmp/root-build-number)-" >> $BASH_ENV
-  node_install_packages:
-    steps:
-      - run:
-          name: Configure git to use https instead of git protocol
-          command: git config --global url."https://".insteadOf git://
-      - node/install-packages
+  node: circleci/node@7.2.1
 
 executors:
   default_executor:
     working_directory: ~/talis-cdk-constructs
+    environment:
+      AWS_PREFIX: build-<< pipeline.number >>-
     docker:
       - image: cimg/node:22.20.0
         auth:
@@ -43,100 +16,69 @@ executors:
 
 jobs:
   fan_out:
-    executor: default_executor
-    steps:
-      - run:
-          command: echo "starting build"
-      - save_root_build_number
-  commit-lint-branch:
-    executor: default_executor
-    steps:
-      - add_ssh_keys:
-          fingerprints:
-            - "ee:b4:00:e6:23:5b:55:bb:fd:07:bc:73:9e:f7:89:9c" # shared.aspire@talis.com 'talis-cdk-constructs Deploy Key'
-      - checkout
-      - node_install_packages
-      - run:
-          name: Lint all commits on the branch
-          command: |
-            FIRST_COMMIT=$(git merge-base main $CIRCLE_BRANCH)
-            LAST_COMMIT=$(git rev-parse HEAD)
-            echo "FIRST COMMIT: $FIRST_COMMIT"
-            echo "LAST COMMIT : $LAST_COMMIT"
-            # npx commitlint --from $FIRST_COMMIT --to $LAST_COMMIT --verbose
+    type: no-op
+
   build:
     executor: default_executor
     steps:
-      - add_ssh_keys:
-          fingerprints:
-            - "ee:b4:00:e6:23:5b:55:bb:fd:07:bc:73:9e:f7:89:9c" # shared.aspire@talis.com 'talis-cdk-constructs Deploy Key'
       - checkout
-      - node_install_packages
+      - node/install-packages
       - run:
-          name: Lint code before building, to lint only source files
+          name: Lint
           command: npm run lint
-      - run:
-          name: Build code
-          command: npm run build
+      - persist_to_workspace:
+          root: ~/talis-cdk-constructs
+          paths:
+            - node_modules
+            - lib
+            - src
+
   deploy-lambda-worker:
     executor: default_executor
     steps:
-      - add_ssh_keys:
-          fingerprints:
-            - "ee:b4:00:e6:23:5b:55:bb:fd:07:bc:73:9e:f7:89:9c" # shared.aspire@talis.com 'talis-cdk-constructs Deploy Key'
-      - restore_root_build_number
-      - set_aws_prefix
       - checkout
-      - node_install_packages
+      - attach_workspace:
+          at: ~/talis-cdk-constructs
       - run:
           name: Build and deploy lambda worker example code
           command: cd examples/simple-lambda-worker && npm install && npm run build && npx cdk --require-approval never deploy
+
   deploy-authenticated-api:
     executor: default_executor
     steps:
-      - add_ssh_keys:
-          fingerprints:
-            - "ee:b4:00:e6:23:5b:55:bb:fd:07:bc:73:9e:f7:89:9c" # shared.aspire@talis.com 'talis-cdk-constructs Deploy Key'
-      - restore_root_build_number
-      - set_aws_prefix
       - checkout
-      - node_install_packages
+      - attach_workspace:
+          at: ~/talis-cdk-constructs
       - run:
           name: Build and deploy authenticated api example code
           command: cd examples/simple-authenticated-api && npm install && npm run build && npx cdk --require-approval never deploy
+
   deploy-authenticated-rest-api:
     executor: default_executor
     steps:
-      - add_ssh_keys:
-          fingerprints:
-            - "ee:b4:00:e6:23:5b:55:bb:fd:07:bc:73:9e:f7:89:9c" # shared.aspire@talis.com 'talis-cdk-constructs Deploy Key'
-      - restore_root_build_number
-      - set_aws_prefix
       - checkout
-      - node_install_packages
+      - attach_workspace:
+          at: ~/talis-cdk-constructs
       - run:
           name: Build and deploy authenticated rest api example code
           command: cd examples/simple-authenticated-rest-api && npm install && npm run build && npx cdk --require-approval never deploy
+
   deploy-cdn-site-hosting:
     executor: default_executor
     steps:
-      - add_ssh_keys:
-          fingerprints:
-            - "ee:b4:00:e6:23:5b:55:bb:fd:07:bc:73:9e:f7:89:9c" # shared.aspire@talis.com 'talis-cdk-constructs Deploy Key'
-      - restore_root_build_number
-      - set_aws_prefix
       - checkout
-      - node_install_packages
+      - attach_workspace:
+          at: ~/talis-cdk-constructs
       - run:
           name: Build and deploy cdn site hosting example code
           command: cd examples/simple-cdn-site-hosting-construct && npm install && npm run build && npx cdk --require-approval never deploy
+
   test:
     executor: default_executor
     steps:
-      - restore_root_build_number
-      - set_aws_prefix
       - checkout
-      - node_install_packages
+      - attach_workspace:
+          at: ~/talis-cdk-constructs
       - run:
           name: Run unit tests
           command: npm run jest-unit-test -- --ci --maxWorkers=2
@@ -145,64 +87,54 @@ jobs:
           command: npm run jest-infra-test -- --ci --maxWorkers=2
       - run:
           name: Run integration tests
-          command: npm run jest-integration-test -- --ci --maxWorkers=2
+          command: npm run jest-integration-test -- --ci --runInBand
+
   destroy-lambda-worker:
     executor: default_executor
     steps:
-      - add_ssh_keys:
-          fingerprints:
-            - "ee:b4:00:e6:23:5b:55:bb:fd:07:bc:73:9e:f7:89:9c" # shared.aspire@talis.com 'talis-cdk-constructs Deploy Key'
-      - restore_root_build_number
-      - set_aws_prefix
       - checkout
-      - node_install_packages
+      - attach_workspace:
+          at: ~/talis-cdk-constructs
       - run:
           name: Destroy lambda worker example code
           command: cd examples/simple-lambda-worker && npm install && npm run build && npx cdk --require-approval never destroy --force
+
   destroy-authenticated-api:
     executor: default_executor
     steps:
-      - add_ssh_keys:
-          fingerprints:
-            - "ee:b4:00:e6:23:5b:55:bb:fd:07:bc:73:9e:f7:89:9c" # shared.aspire@talis.com 'talis-cdk-constructs Deploy Key'
-      - restore_root_build_number
-      - set_aws_prefix
       - checkout
-      - node_install_packages
+      - attach_workspace:
+          at: ~/talis-cdk-constructs
       - run:
           name: Destroy authenticated api example code
           command: cd examples/simple-authenticated-api && npm install && npm run build && npx cdk --require-approval never destroy --force
+
   destroy-authenticated-rest-api:
     executor: default_executor
     steps:
-      - add_ssh_keys:
-          fingerprints:
-            - "ee:b4:00:e6:23:5b:55:bb:fd:07:bc:73:9e:f7:89:9c" # shared.aspire@talis.com 'talis-cdk-constructs Deploy Key'
-      - restore_root_build_number
-      - set_aws_prefix
       - checkout
-      - node_install_packages
+      - attach_workspace:
+          at: ~/talis-cdk-constructs
       - run:
           name: Destroy authenticated rest api example code
           command: cd examples/simple-authenticated-rest-api && npm install && npm run build && npx cdk --require-approval never destroy --force
+
   destroy-cdn-site-hosting:
     executor: default_executor
     steps:
-      - add_ssh_keys:
-          fingerprints:
-            - "ee:b4:00:e6:23:5b:55:bb:fd:07:bc:73:9e:f7:89:9c" # shared.aspire@talis.com 'talis-cdk-constructs Deploy Key'
-      - restore_root_build_number
-      - set_aws_prefix
       - checkout
-      - node_install_packages
+      - attach_workspace:
+          at: ~/talis-cdk-constructs
       - run:
           name: Destroy cdn site hosting example code
           command: cd examples/simple-cdn-site-hosting-construct && npm install && npm run build && npx cdk --require-approval never destroy --force
+
   semantic-release:
     executor: default_executor
     steps:
       - checkout
-      - node_install_packages
+      - attach_workspace:
+          at: ~/talis-cdk-constructs
       - run:
           name: Build code
           command: npm run build
@@ -214,12 +146,6 @@ workflows:
   build:
     jobs:
       - fan_out
-      - commit-lint-branch:
-          filters:
-            branches:
-              ignore:
-                - main
-                - /^renovate\/.*/
       - be_kind_to_your_colleagues:
           type: approval
           filters:
