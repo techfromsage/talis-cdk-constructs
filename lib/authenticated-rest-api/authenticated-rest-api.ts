@@ -77,6 +77,8 @@ export class AuthenticatedRestApi extends Construct {
 
     const authLambdaTimeout = cdk.Duration.minutes(2);
 
+    const libPath = path.resolve(__dirname, "../../");
+
     // Auth Lambda
     const authLambda = new lambdaNodeJs.NodejsFunction(
       this,
@@ -84,10 +86,18 @@ export class AuthenticatedRestApi extends Construct {
       {
         functionName: `${apiName}-authoriser`,
 
-        entry: `${path.resolve(__dirname)}/../../src/lambda/rest-api/authorizer.js`,
+        depsLockFilePath: path.resolve(libPath, "src/npm-shrinkwrap.json"),
+        entry: path.resolve(libPath, "src/lambda/rest-api/authorizer.js"),
         handler: "validateToken",
 
         bundling: {
+          commandHooks: {
+            beforeBundling: () => {
+              return ["npm ci"];
+            },
+            beforeInstall: () => [],
+            afterBundling: () => [],
+          },
           externalModules: [
             "aws-sdk",
 
