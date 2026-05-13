@@ -71,7 +71,7 @@ describe("AuthenticatedApi", () => {
         vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
         domainName: `test-simple-authenticated-api.talis.com`,
         certificateArn:
-          "arn:aws:acm:eu-west-1:302477901552:certificate/46e0fb43-bba8-4aa7-bf98-a3b2038cf760",
+          "arn:aws:acm:eu-west-1:302477901552:certificate/564e2081-81f3-4250-a2a9-d2b88916483a",
         corsDomain: [
           "http://localhost:4200",
           `https://test-simple-authenticated-api.talis.com`,
@@ -350,7 +350,7 @@ describe("AuthenticatedApi", () => {
         vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
         domainName: `test-simple-authenticated-api.talis.com`,
         certificateArn:
-          "arn:aws:acm:eu-west-1:302477901552:certificate/46e0fb43-bba8-4aa7-bf98-a3b2038cf760",
+          "arn:aws:acm:eu-west-1:302477901552:certificate/564e2081-81f3-4250-a2a9-d2b88916483a",
         corsDomain: [
           "http://localhost:4200",
           `https://test-simple-authenticated-api.talis.com`,
